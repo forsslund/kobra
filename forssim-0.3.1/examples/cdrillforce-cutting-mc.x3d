@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+unu head segmentID.nrrd 
+type: unsigned char
+dimension: 3
+sizes: 100 100 100
+spacings: 0.0005 0.0005 0.0005
+encoding: raw
+
+
+
+cylinder.nrrd has values (number of voxes with each value):
+0 	485740
+64 	114280
+128 	114280
+192 	114280
+255 	171420
+Sum 	1000000
+
+cylinder_expert.nrrd has values (number of voxes with each value):
+0 	985128
+1 	3863
+2 	2555
+3 	4034
+4 	645
+5 	1707
+6 	2068
+Sum 	1000000
+
+timeStampsEmpty.nrrd has values (number of voxes with each value):
+0 	1000000
+Sum 	1000000
+
+segmentID.nrrd has values (number of voxes with each value):
+0 	485740
+1 	114280
+2 	114280
+3 	114280
+4 	171420
+Sum 	1000000
+
+
+
+-->
+<X3D profile='H3DAPI' version='2.1'>
+<head />
+<Scene>
+<Collision enabled="FALSE"> <!-- NEVER EVER FORGET THIS ONE - Graphics will run slow -->
+<!-- Import libraries, Windows -->
+<ImportLibrary library="forssim.dll" />
+
+<!-- Import libraries, GNU/Linux -->
+<ImportLibrary library="libMedX3D.so" />
+<ImportLibrary library="libforssim.so" />
+
+<Viewpoint position="0 0 0.35" fieldOfView="0.895040"/>
+<NavigationInfo type="ANY" visibilityLimit="10" nearVisibilityLimit="0.01"/>
+<StereoInfo focalDistance="0.45" />
+
+
+
+<DeviceInfo>
+<AnyDevice DEF="HDEV" followViewpoint="false">
+
+<!-- The stylus that the user interacts with -->
+<Group containerField='stylus'>
+
+
+</Group>
+</AnyDevice>
+</DeviceInfo>
+
+<Transform DEF='proxy'>
+<Transform scale="0.08 0.08 0.08" rotation="1 0 0 1.57">
+<Inline url="meshes/drill.x3d" />
+</Transform>
+<Shape>
+<Appearance>
+<Material DEF="DrillColor" diffuseColor='0.5 0.5 0.5' shininess='1.0' specularColor='0.2 0.2 0.2' />
+</Appearance>
+<Sphere radius="0.004"/>
+</Shape>
+
+</Transform>
+<ROUTE fromNode="HDEV" fromField="trackerPosition" toNode="proxy" toField="translation"/>
+<ROUTE fromNode="HDEV" fromField="trackerOrientation" toNode="proxy" toField="rotation"/>
+
+
+
+
+
+<Transform translation="-0.05 0 0" rotation="0 0 1 1.17" DEF='proxyTransform' >
+<Transform scale="0.08 0.08 0.08" rotation="1 0 0 1.57">
+<Inline url="meshes/drill.x3d" />
+</Transform>
+<Shape>
+<Appearance>
+<Material DEF="DrillColor" diffuseColor='0 0.5 0' shininess='1.0' specularColor='0.2 0.2 0.2' />
+</Appearance>
+<Sphere radius="0.004"/>
+</Shape>
+
+</Transform>
+
+
+
+
+
+
+
+
+
+<Transform rotation="0.9 0.2 0.3 1.1" translation="0.05 0 0.05">
+
+
+<!-- This stuff is needed, and needed before MaterialSegmentationModel -->
+<SmoothingMask DEF="SmoothMask" maskRadius="2" smoothFunc="Gauss" smoothFuncParam="1.0" />
+
+
+
+<!-- Specifies the material segments we have and their hardness (=1/time needed to carve into material) 
+The values are automatically set to 0, 1, 2, ... for each segment. The segments are specified in 
+a .nrrd file. Segments are non-overlapping. The number of values in segmentNameField needs to match
+that of segmentHardnessField. MaxValueField is required for MCWithRange -->
+<MaterialSegmentationModel DEF='SM'
+segmentNameField='"Air" "Pulp" "Jawbone" "Dentin" "Enamel"'
+segmentHardnessField = '0.0 2.0 0.5 0.3 0.015'
+segmentMaxValueField = '0 64 128 192 255'>
+</MaterialSegmentationModel>
+
+
+
+<!-- PartitionModel enables you to specify different parts of the model with a .nnrd file matching the
+values in partitionIdField. You can also name your partitions for clarity. Partitions are non-overlapping.
+Note that each partition can contain any number of segments from MaterialSegmentationModel, and vice versa.
+The number of values in partitionIDField needs to match the number of values in partitionNameField. -->
+<PartitionModel DEF='PM'
+partitionIdField = '1 2'
+partitionNameField ='"Top" "Bottom"'>
+</PartitionModel>
+
+<!-- Can be used to specify parts of the volume that you are not allowed to drill in.
+Sort of an anti-expert. Needs at least one segment even if it is not used. -->
+<ForbiddenSegmentationModel DEF='FM'
+segmentIdField = '1'
+segmentNameField='"Air" '>
+</ForbiddenSegmentationModel>
+
+
+<!-- Our main model, it contains data for the visual model + material segment + partition + expert steps and
+combines them all together. For more information see the comments above each corresponding node. -->
+<VolumeModel DEF='VM'
+materialSegmentationField='cylinder/segmentID.nrrd' 
+partitionField='cylinder/partitions.nrrd'
+expertDrillingStepsField='cylinder/cylinder_expert.nrrd'
+forbiddenSegmentationField='cylinder/empty.nrrd' >
+
+<Image3DTexture containerField="imageField" url="cylinder/cylinder.nrrd" DEF="visuals" />
+<MaterialSegmentationModel containerField="materialSegmentationModelField" USE="SM" /> 
+<PartitionModel containerField="partitionModelField" USE="PM" />
+<ForbiddenSegmentationModel containerField="forbiddenSegmentationModelField" USE="FM" />
+
+</VolumeModel>
+
+
+<!-- Is used to create a number of steps the user has to go through in order to complete the exercise.
+Checks the expertDrillingStepsField in VolumeModel and creates as many steps as the highest value 
+in the experts .nnrd-file. The use of the word expert comes from the assumption of letting an 
+expert go through the exercise and record in which order different parts are drilled. -->
+<DrillingStepsNode DEF='DS'>
+<MaterialSegmentationModel containerField="materialSegmentationModelField" USE="SM" /> 
+<ForbiddenSegmentationModel containerField="forbiddenSegmentationModelField" USE="FM" />
+<VolumeModel containerField="volumeModelField" USE="VM" /> 
+</DrillingStepsNode>
+
+
+
+<CDrillForce DEF='DF' bitRadius='0.003' springConstant='300'>
+<VolumeModel containerField="volumeModel" USE="VM" />
+<Transform containerField="proxyTransform" USE='proxyTransform' />
+</CDrillForce>
+
+
+<ADrillableNode DEF='DNBONE' cutRadius='0.004' drillSpeed='20' hasPedal='false' usesMarchingCubes='false' volumeDistribution=' 0.0 0.0 0.0 0.0 0.0'>
+<VolumeModel containerField="volumeModel" USE="VM" />
+<MaterialSegmentationModel containerField="materialSegmentationModel" USE="SM" />
+<DrillingStepsNode containerField="drillingStepsField" USE="DS" />
+</ADrillableNode>
+<ROUTE fromNode="DF" fromField="cutPosition" toNode="DNBONE" toField="position" />
+
+
+
+
+
+
+
+
+
+
+<Shape>
+<Appearance>
+<Material ambientIntensity='0.156' diffuseColor='0.8 0.0 0.0' emissiveColor='0.2 0.2 0.2' shininess='0.156' specularColor='0.2 0.2 0.2' transparency='0' DEF="BoneMaterial" />
+</Appearance>
+
+<MCWithRange DEF='MC1' isoStart='0.125' segEnd='1'> <!--  ((s*m-(m/2))/255   m=255/noSegments=4 s=segno (1,2,3) -->
+<Image3DTexture USE='visuals' containerField='voxels'/>                   
+<MaterialSegmentationModel USE='SM' containerField='materialSegmentationModel'/>
+<SmoothingMask USE='SmoothMask' containerField='smoothingMask'/>                  
+</MCWithRange>  
+</Shape>
+
+
+
+<Shape>
+<Appearance>
+<Material ambientIntensity='0.156' diffuseColor='0.0 0.9 0.0' emissiveColor='0.2 0.2 0.2' shininess='0.156' specularColor='0.2 0.2 0.2' transparency='0' DEF="BoneMaterial" />
+</Appearance>
+
+<MCWithRange DEF='MC2' isoStart='0.375' segEnd='2'> <!--  ((s*m-(m/2))/255 -->
+<Image3DTexture USE='visuals' containerField='voxels'/>                   
+<MaterialSegmentationModel USE='SM' containerField='materialSegmentationModel'/>
+<SmoothingMask USE='SmoothMask' containerField='smoothingMask'/>                  
+</MCWithRange>  
+</Shape>
+
+
+<Shape>
+<Appearance>
+<Material ambientIntensity='0.156' diffuseColor='0.0 0.0 0.9' emissiveColor='0.2 0.2 0.2' shininess='0.156' specularColor='0.2 0.2 0.2' transparency='0' DEF="BoneMaterial" />
+</Appearance>
+
+<MCWithRange DEF='MC3' isoStart='0.625' segEnd='3'> <!--  ((s*m-(m/2))/255 -->
+<Image3DTexture USE='visuals' containerField='voxels'/>                   
+<MaterialSegmentationModel USE='SM' containerField='materialSegmentationModel'/>
+<SmoothingMask USE='SmoothMask' containerField='smoothingMask'/>                  
+</MCWithRange>  
+</Shape>
+
+<Shape>
+<Appearance>
+<Material ambientIntensity='0.156' diffuseColor='0.8 0.8 0.7' emissiveColor='0.2 0.2 0.2' shininess='0.156' specularColor='0.2 0.2 0.2' transparency='0' DEF="BoneMaterial" />
+</Appearance>
+
+<MCWithRange DEF='MC4' isoStart='0.875' segEnd='4'> <!--  ((s*m-(m/2))/255 -->
+<Image3DTexture USE='visuals' containerField='voxels'/>                   
+<MaterialSegmentationModel USE='SM' containerField='materialSegmentationModel'/>
+<SmoothingMask USE='SmoothMask' containerField='smoothingMask'/>                  
+</MCWithRange>  
+</Shape>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</Transform>
+</Collision>
+</Scene>
+</X3D>
+

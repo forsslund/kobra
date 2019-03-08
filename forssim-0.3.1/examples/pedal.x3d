@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version='2.1'>
+  <head />
+  <Scene>
+
+    <!-- Import libraries, Windows -->
+    <ImportLibrary library="forssim.dll" />
+
+    <!-- Import libraries, GNU/Linux -->
+    <ImportLibrary library="../build/libforssim.so" />
+    <ImportLibrary library="../build/qtcreator-build/libforssim.so" />
+
+    <Viewpoint position="0 0 0.25" fieldOfView="0.895040"/>
+
+
+    <ToggleGroup DEF="a">
+    <Transform translation="-0.05 0 0">
+	<Shape>
+	  <Appearance>
+	    <Material ambientIntensity='0.156' diffuseColor='0.8 0.8 0.7' emissiveColor='0.2 0.2 0.2' shininess='0.156' specularColor='0.2 0.2 0.2' />
+	  </Appearance>
+          <Sphere radius="0.03"/>
+	</Shape>
+    </Transform>
+    </ToggleGroup>
+
+    <ToggleGroup DEF="b">
+    <Transform translation="0 0 0">
+	<Shape>
+	  <Appearance>
+	    <Material ambientIntensity='0.156' diffuseColor='0.8 0.8 0.7' emissiveColor='0.2 0.2 0.2' shininess='0.156' specularColor='0.2 0.2 0.2' />
+	  </Appearance>
+          <Sphere radius="0.03"/>
+	</Shape>
+    </Transform>
+    </ToggleGroup>
+
+    <ToggleGroup DEF="c">
+    <Transform translation="0.05 0 0">
+	<Shape>
+	  <Appearance>
+	    <Material ambientIntensity='0.156' diffuseColor='0.8 0.8 0.7' emissiveColor='0.2 0.2 0.2' shininess='0.156' specularColor='0.2 0.2 0.2' />
+	  </Appearance>
+          <Sphere radius="0.03"/>
+	</Shape>
+    </Transform>
+    </ToggleGroup>
+
+    <PedalNode DEF="pedal"/>
+    <ROUTE fromNode="pedal" fromField="pedal_0" toNode="a" toField="graphicsOn"/>
+    <ROUTE fromNode="pedal" fromField="pedal_1" toNode="b" toField="graphicsOn"/>
+    <ROUTE fromNode="pedal" fromField="pedal_2" toNode="c" toField="graphicsOn"/>
+
+    
+
+  </Scene>
+</X3D>
+

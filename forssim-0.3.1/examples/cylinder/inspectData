@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# First, we clean up
+rm -fr slices/
+mkdir slices
+
+# unu minmax cylinder.nrrd 
+# gives min: 0, max 255, so we just dice it
+unu dice -i cylinder.nrrd -a 2 -o slices/cylinder
+
+# unu minmax cylinder_expert.nrrd
+# gives min: 0, max: 6, so we do following:
+#
+unu 2op x 40 cylinder_expert.nrrd | unu dice -i - -a 2 -o slices/cylinder_expert
+
+# unu minmax timeStampsEmpty.nrrd
+# gives min: 10000, max: 10000, so we just dont bother
+# (all values in volume is 10000, the file is just needed as placeholder)
+# only requirment of timeStampsEmpty.nrrd is that it has same size as 
+# the other models
+
+
+# What numbers have we stored in the models? We can make a histogram by:
+# unu histo -b 256 -i cylinder.nrrd -o histogram.txt
+# but it does not look too nice. Therefore we have a little python script in forssim/util
+#
+python ../../util/nrrdValues.py cylinder.nrrd
+python ../../util/nrrdValues.py cylinder_expert.nrrd
+python ../../util/nrrdValues.py timeStampsEmpty.nrrd
+python ../../util/nrrdValues.py segmentID.nrrd
+
+

@@ -1,0 +1,2 @@
+KERNEL=="hiddev*", ATTRS{idVendor}=="05f3", ATTRS{idProduct}=="00ff", SYMLINK="infinity-in-usb-2", MODE="664"
+

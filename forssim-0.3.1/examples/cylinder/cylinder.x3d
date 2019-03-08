@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version='2.1'>
+  <head />
+  <Scene>
+
+    <!-- Import libraries, Windows -->
+    <ImportLibrary library="forssim.dll" />
+
+    <!-- Import libraries, GNU/Linux -->
+    <ImportLibrary library="libMedX3D.so" />
+    <ImportLibrary library="../../build/libforssim.so" />
+    <ImportLibrary library="../../build/qtcreator-build/libforssim.so" />
+
+    <Viewpoint position="0 0 0.25" fieldOfView="0.895040"/>
+    <Transform rotation="0.9 0.2 0.3 1.1">
+
+      <!-- Specifies the material segments we have and their hardness (=1/time needed to carve into material) 
+           The values are automatically set to 0, 1, 2, ... for each segment. The segments are specified in 
+           a .nrrd file. Segments are non-overlapping. The number of values in segmentNameField needs to match
+           that of segmentHardnessField. -->
+      <MaterialSegmentationModel DEF='SM'
+        segmentNameField ='"Air" "Soft" "Medium" "Hard" "Diamond"'
+        segmentHardnessField = '0.0 2.0 0.5 0.3 0.015'>
+      </MaterialSegmentationModel>
+
+
+
+      <!-- PartitionModel enables you to specify different parts of the model with a .nnrd file matching the
+           values in partitionIdField. You can also name your partitions for clarity. Partitions are non-overlapping.
+           Note that each partition can contain any number of segments from MaterialSegmentationModel, and vice versa.
+           The number of values in partitionIDField needs to match the number of values in partitionNameField. -->
+      <PartitionModel DEF='PM'
+        partitionIdField = '1 2'
+        partitionNameField ='"Top" "Bottom"'>
+      </PartitionModel>
+
+      <!-- Can be used to specify parts of the volume that you are not allowed to drill in.
+           Sort of an anti-expert. Needs at least one segment even if it is not used. -->
+      <ForbiddenSegmentationModel DEF='FM'
+	segmentIdField = '1'
+        segmentNameField ='IsNotUsed'>
+      </ForbiddenSegmentationModel>
+
+
+      <!-- LoggingNode is used to generate a log of previous drilling. It records the time of removal
+           for each voxel that is removed and saves that as a .nrrd-file.
+           The functionality is not used in this example, but VolumeModel requires the node. -->
+      <LoggingNode DEF='LN'></LoggingNode>
+
+      <!-- Our main model, it contains data for the visual model + material segment + partition + expert steps and
+           combines them all together. For more information see the comments above each corresponding node. -->
+      <VolumeModel DEF='VM'
+        materialSegmentationField='segmentID.nrrd' 
+        partitionField='partitions.nrrd'
+        expertDrillingStepsField='cylinder_expert.nrrd'
+        forbiddenSegmentationField='empty.nrrd' >
+        
+        <Image3DTexture containerField="imageField" url="cylinder.nrrd" DEF="visuals" />
+        <MaterialSegmentationModel containerField="materialSegmentationModelField" USE="SM" /> 
+        <PartitionModel containerField="partitionModelField" USE="PM" />
+        <ForbiddenSegmentationModel containerField="forbiddenSegmentationModelField" USE="FM" />
+        <LoggingNode containerField="loggingNodeField" USE="LN" />
+
+      </VolumeModel>
+
+
+      <!-- Is used to create a number of steps the user has to go through in order to complete the exercise.
+           Checks the expertDrillingStepsField in VolumeModel and creates as many steps as the highest value 
+           in the experts .nnrd-file. The use of the word expert comes from the assumption of letting an 
+           expert go through the exercise and record in which order different parts are drilled. -->
+      <DrillingStepsNode DEF='DS'>
+        <MaterialSegmentationModel containerField="materialSegmentationModelField" USE="SM" /> 
+        <ForbiddenSegmentationModel containerField="forbiddenSegmentationModelField" USE="FM" />
+        <VolumeModel containerField="volumeModelField" USE="VM" /> 
+      </DrillingStepsNode>
+
+
+      <!--Volume rendering segment-->
+      <!-- The lower the rayStep, the more detailed (and thus more computationally expensive) rendering -->
+      <VolumeData DEF="visualVolumeRendering"
+        rayStep="0.01"
+        useSlicing="false">
+        <!-- We select the volume to be rendered here. We want to use the same as specified in our VolumeModel, hence USE="visuals"-->
+        <Image3DTexture containerField="voxels"  USE="visuals">
+          <!-- All values are clamped so they won't repeat -->
+          <TextureProperties boundaryModeT="CLAMP" boundaryModeR="CLAMP" boundaryModeS="CLAMP"/>
+        </Image3DTexture>
+        <!-- Here you can select different rendering styles. OpacityMapVolumeStyle linearly maps a 2d (or in this case 1d) texture 
+             to the values of the voxels in the volume. Our texture is 256x1 pixels and our volume contains voxels
+             with values 0, 64, 128, 192 and 255. Thus it's the color at pixel 0, 64, 128, 192 and 255 that is used
+             to color the cylinder. (There seems to be some interpolation of nearby values though which is the reason
+             we keep them separated so far apart.) -->
+        <OpacityMapVolumeStyle>
+          <ImageTexture containerField='transferFunction' url="segmented_texture.png">
+            <TextureProperties boundaryModeT="CLAMP" boundaryModeR="CLAMP" boundaryModeS="CLAMP"/>
+          </ImageTexture>
+        </OpacityMapVolumeStyle>
+      </VolumeData>
+      <ROUTE fromNode="VM" fromField="dimensionsField" toNode="visualVolumeRendering" toField="dimensions"/>
+
+
+    </Transform>
+  </Scene>
+</X3D>
+
