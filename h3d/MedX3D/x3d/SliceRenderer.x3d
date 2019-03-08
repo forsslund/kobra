@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='MedX3D' version='1.0'>
+  <head>
+    <meta name='title' content='MedX3D example'/>
+    <meta name='description' content='MedX3D example showing the MIPRenderStyle. Generated with MedX3DDemo program from SenseGraphics AB, http://www.sensegraphics.com'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+    <meta name='generator' content='MedX3DDemo, http://www.h3d.org'/>
+  </head>
+  <Scene>
+    <Group>
+      <!-- Use the ImportLibrary to load the MedX3D dynamic library if needed -->
+      <ImportLibrary url='"../bin32/MedX3D" "../../bin32/MedX3D" "../bin64/MedX3D" "../../bin64/MedX3D" "libh3dmedx3d.so" "libh3dmedx3d.dylib"' />
+      
+      <Viewpoint DEF="VP" position='0 0 0.6'  />
+      <Background DEF="BG"  />
+      <Transform scale="0.117188 0.117188 0.117188">
+        <VolumeData dimensions='1.28 1.28 1.28' >
+          <SliceRenderer containerField="renderer" />
+          <ImageTexture3D containerField="voxels" url='"../data/foot.nrrd"' >
+            <TextureProperties boundaryModeR='CLAMP_TO_EDGE' boundaryModeS='CLAMP_TO_EDGE' boundaryModeT='CLAMP_TO_EDGE' magnificationFilter='AVG_PIXEL' minificationFilter='AVG_PIXEL'  />
+          </ImageTexture3D>
+        </VolumeData>
+      </Transform>
+    </Group>
+  </Scene>
+</X3D>

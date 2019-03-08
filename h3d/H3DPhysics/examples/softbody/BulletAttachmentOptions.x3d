@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version='2.3'>
+  <head>
+    <meta name='title' content='BulletAttachmentOptions.x3d'/>
+    <meta name='description' content='A SoftBody physics example showing BulletAttachmentOptions.'/>
+    <meta name='author' content='SenseGraphics AB, 2014-2019'/>
+  </head>
+
+  <Scene>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+
+    <GlobalSettings>
+      <!-- These options are required to keep the frame rate up when changing the geometry -->
+      <HapticsOptions useBoundTree='false'
+              maxDistance='0.005'
+              lookAheadFactor='0.01' />
+    </GlobalSettings>
+
+    <!-- Python script to set up ruspini renderer and other options -->
+    <!-- The Ruspini renderer is required to help prevent fall through on changing geometries -->
+    <PythonScript DEF='PS' url='SoftBody.py' />
+
+    <IMPORT inlineDEF='H3D_EXPORTS' exportedDEF='HDEV' AS='HDEV' />
+    <Viewpoint DEF='V' position='0 0 0.6' />
+
+    <Transform DEF='T1'>
+      <Shape DEF='S1'>
+        <Appearance>
+          <Material diffuseColor='0.5 0.1 0' />
+          <FrictionalSurface stiffness='0.1' />
+        </Appearance>
+        <Box DEF='G1' size='0.15 0.05 0.05' />
+      </Shape>
+    </Transform>
+
+    <Shape>
+      <Appearance>
+        <Material DEF='ClothMat' diffuseColor='0.5 0.9 0.9' />
+        <FrictionalSurface stiffness='0.1' />
+        <ImageTexture url='cloth.jpg'/>
+      </Appearance>
+      <IndexedTriangleSet solid='false' DEF='ClothGeom'>
+        <Coordinate />
+        <TextureCoordinate />
+      </IndexedTriangleSet>
+    </Shape>
+
+    <PhysicsBodyCollection DEF='RBC' physicsEngine='Bullet' gravity='0 -1 0'>
+
+      <!-- Geometries for collision detection -->
+      <CollisionCollection containerField='collider'>
+        <CollidableShape DEF='C1' containerField='collidables'>
+          <Shape USE='S1' containerField='shape' />
+        </CollidableShape>
+      </CollisionCollection>
+
+      <!-- Rigid bodies for physics simulation -->
+      <RigidBody DEF='R1' autoDamp='true' linearDampingFactor='1' angularDampingFactor='0.001' mass='3' position='0 0.01 0' orientation="0 1 0 1.57" fixed='false'>
+        <CollidableShape USE='C1' containerField='geometry' />
+        <Box USE='G1' containerField='massDensityModel' />
+      </RigidBody>
+
+      <!-- Soft bodies -->
+      <Cloth DEF='Cloth'>
+
+        <MassSpringPhysicsMaterial>
+
+          <UniformMass mass="1.0" />
+          <UniformStiffness stiffness="0.1" />
+          <UniformDamping damping="0.01" />
+          <UniformFriction friction="0.0" />
+
+        </MassSpringPhysicsMaterial>
+        <IndexedTriangleSet USE='ClothGeom' />
+      </Cloth>
+
+      <FunctionSoftBodyModifier>
+        <SoftBody USE='Cloth' containerField='body1' />
+        <GaussianFunction amplitude='0.01' width='0.05' containerField='distanceToForce' />
+      </FunctionSoftBodyModifier>
+
+      <RigidBodyAttachment DEF='Attachment'>
+        <SoftBody USE='Cloth' containerField='body1' />
+        <RigidBody USE='R1' containerField='body2' />
+        <BulletAttachmentOptions DEF="ATTACHMENT_OPTION" collide="true" />
+      </RigidBodyAttachment>
+
+    </PhysicsBodyCollection>
+
+    <PythonScript url='GetTransforms.py' moduleName='GetTransforms' />
+    <PythonScript url='BulletAttachmentOptions.py'>
+      <Cloth USE='Cloth' containerField='references' />
+      <PhysicsBodyCollection USE='RBC' containerField='references' />
+      <RigidBodyAttachment USE='Attachment' containerField='references' />
+      <BulletAttachmentOptions USE="ATTACHMENT_OPTION" containerField='references'  />
+    </PythonScript>
+
+    <ROUTE fromNode='R1' fromField='position' toNode='T1' toField='translation' />
+    <ROUTE fromNode='R1' fromField='orientation' toNode='T1' toField='rotation' />
+    
+    <Transform translation="-0.17 0.08 0" >
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='0 1 1' />
+        </Appearance>
+        <Text DEF='TX' string='"Press Space to toggle BulletAttachment collision field."' length='' maxExtent='' solid='true'>
+          <FontStyle
+                     leftToRight='true' size='0.02' spacing='1.0' 
+                     style='ITALIC' topToBottom='true' renderType='TEXTURE' />
+        </Text>
+      </Shape>
+    </Transform>
+  </Scene>
+</X3D>

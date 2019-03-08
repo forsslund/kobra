@@ -1,0 +1,40 @@
+\documentclass{manual}
+
+\usepackage[english]{babel}
+\usepackage[pdftex]{graphicx}
+
+\usepackage{color}
+
+\usepackage{courier}
+\usepackage{pslatex}
+
+\usepackage{standalone}
+
+\input{highlight_theme.tex}
+
+\title{HAPI Manual}
+\author{SenseGraphics AB }
+
+% set some style factors
+\setlength{\parindent}{0pt}  % Text indentation.
+\addtolength{\parskip}{6pt}  % Space between paragraphs 
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\input{introduction}
+
+\input{overview}
+\input{devicehandling}
+\input{renderers}
+\input{geometries}
+\input{forceeffects}
+\input{threads}
+
+\bibliographystyle{plain}	% (uses file "plain.bst")
+\bibliography{references}	% expects file "references.bib"
+
+\end{document}

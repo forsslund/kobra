@@ -1,0 +1,136 @@
+/*
+
+iSpinner license text:
+
+Copyright (c) 2015 Jianqiu Xiao <swordray@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Source: https://github.com/swordray/ispinner
+
+This file has been modified to include the above license and link.
+
+*/
+
+.ispinner {
+  position: relative;
+  width: 20px;
+  height: 20px; }
+  .ispinner .ispinner-blade {
+    position: absolute;
+    left: 44.5%;
+    top: 37%;
+    width: 10%;
+    height: 25%;
+    border-radius: 50%/20%;
+    -webkit-animation: ispinner-fade 1s linear infinite;
+    animation: ispinner-fade 1s linear infinite;
+    -webkit-animation-play-state: paused;
+    animation-play-state: paused; }
+    .ispinner .ispinner-blade:nth-child(1) {
+      -webkit-animation-delay: -1.66667s;
+      animation-delay: -1.66667s;
+      -webkit-transform: rotate(30deg) translate(0, -150%);
+      transform: rotate(30deg) translate(0, -150%); }
+    .ispinner .ispinner-blade:nth-child(2) {
+      -webkit-animation-delay: -1.58333s;
+      animation-delay: -1.58333s;
+      -webkit-transform: rotate(60deg) translate(0, -150%);
+      transform: rotate(60deg) translate(0, -150%); }
+    .ispinner .ispinner-blade:nth-child(3) {
+      -webkit-animation-delay: -1.5s;
+      animation-delay: -1.5s;
+      -webkit-transform: rotate(90deg) translate(0, -150%);
+      transform: rotate(90deg) translate(0, -150%); }
+    .ispinner .ispinner-blade:nth-child(4) {
+      -webkit-animation-delay: -1.41667s;
+      animation-delay: -1.41667s;
+      -webkit-transform: rotate(120deg) translate(0, -150%);
+      transform: rotate(120deg) translate(0, -150%); }
+    .ispinner .ispinner-blade:nth-child(5) {
+      -webkit-animation-delay: -1.33333s;
+      animation-delay: -1.33333s;
+      -webkit-transform: rotate(150deg) translate(0, -150%);
+      transform: rotate(150deg) translate(0, -150%); }
+    .ispinner .ispinner-blade:nth-child(6) {
+      -webkit-animation-delay: -1.25s;
+      animation-delay: -1.25s;
+      -webkit-transform: rotate(180deg) translate(0, -150%);
+      transform: rotate(180deg) translate(0, -150%); }
+    .ispinner .ispinner-blade:nth-child(7) {
+      -webkit-animation-delay: -1.16667s;
+      animation-delay: -1.16667s;
+      -webkit-transform: rotate(210deg) translate(0, -150%);
+      transform: rotate(210deg) translate(0, -150%); }
+    .ispinner .ispinner-blade:nth-child(8) {
+      -webkit-animation-delay: -1.08333s;
+      animation-delay: -1.08333s;
+      -webkit-transform: rotate(240deg) translate(0, -150%);
+      transform: rotate(240deg) translate(0, -150%); }
+    .ispinner .ispinner-blade:nth-child(9) {
+      -webkit-animation-delay: -1s;
+      animation-delay: -1s;
+      -webkit-transform: rotate(270deg) translate(0, -150%);
+      transform: rotate(270deg) translate(0, -150%); }
+    .ispinner .ispinner-blade:nth-child(10) {
+      -webkit-animation-delay: -0.91667s;
+      animation-delay: -0.91667s;
+      -webkit-transform: rotate(300deg) translate(0, -150%);
+      transform: rotate(300deg) translate(0, -150%); }
+    .ispinner .ispinner-blade:nth-child(11) {
+      -webkit-animation-delay: -0.83333s;
+      animation-delay: -0.83333s;
+      -webkit-transform: rotate(330deg) translate(0, -150%);
+      transform: rotate(330deg) translate(0, -150%); }
+    .ispinner .ispinner-blade:nth-child(12) {
+      -webkit-animation-delay: -0.75s;
+      animation-delay: -0.75s;
+      -webkit-transform: rotate(360deg) translate(0, -150%);
+      transform: rotate(360deg) translate(0, -150%); }
+  .ispinner.animating .ispinner-blade {
+    -webkit-animation-play-state: running;
+    animation-play-state: running; }
+  .ispinner.white .ispinner-blade {
+    background-color: white; }
+  .ispinner.black .ispinner-blade {
+    background-color: #000000; }
+  .ispinner.gray .ispinner-blade {
+    background-color: #8C8C8C; }
+  .ispinner.large {
+    width: 35px;
+    height: 35px; }
+    .ispinner.large .ispinner-blade {
+      width: 8.57143%;
+      height: 25.71429%;
+      border-radius: 50%/16.67%; }
+
+@-webkit-keyframes ispinner-fade {
+  0% {
+    opacity: 0.85; }
+  50% {
+    opacity: 0.25; }
+  100% {
+    opacity: 0.25; } }
+@keyframes ispinner-fade {
+  0% {
+    opacity: 0.85; }
+  50% {
+    opacity: 0.25; }
+  100% {
+    opacity: 0.25; } }

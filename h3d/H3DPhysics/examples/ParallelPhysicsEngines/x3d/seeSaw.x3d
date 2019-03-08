@@ -1,0 +1,143 @@
+<Group>
+
+    <Transform DEF='BOXBOTTOM-T'>
+        <Shape DEF='BOXBOTTOM-S'>
+            <Appearance DEF='A'>
+                <Material diffuseColor='0.180 0.565 0.173' />
+                <FrictionalSurface />
+                <ComposedShader language="GLSL" >
+                    <ShaderPart type="FRAGMENT" url="shaders/phong.frag" />
+                    <ShaderPart type="VERTEX" url="shaders/phong.vert" />
+                    <field name="texture"  type="SFNode" accessType="inputOutput">
+                        <ImageTexture DEF='BOXBOTTOM-IMG' url='images/floor.jpg' />
+                    </field>
+                </ComposedShader>
+            </Appearance>
+            <Box DEF='BOXBOTTOM-G' size='0.5 0.01 0.1' />
+        </Shape>
+    </Transform>
+
+    <Transform DEF='BOXLEFT-T'>
+        <Shape DEF='BOXLEFT-S'>
+            <Appearance>
+                <!-- <Material diffuseColor='1 0 0' /> -->
+                <ComposedShader language="GLSL" >
+                    <ShaderPart type="FRAGMENT" url="shaders/phong.frag" />
+                    <ShaderPart type="VERTEX" url="shaders/phong.vert" />
+                    <field name="texture" type="SFNode" accessType="inputOutput">
+                        <ImageTexture url='images/steel.jpg' />
+                    </field>
+                </ComposedShader>
+            </Appearance>
+            <Box DEF='BOXLEFT-G' size='0.05 0.05 0.05' />
+        </Shape>
+    </Transform>
+
+    <Transform DEF='BOXRIGHT-T'>
+        <Shape DEF='BOXRIGHT-S'>
+            <Appearance>
+                <!-- <Material diffuseColor='0 0 1' /> -->
+                <ComposedShader language="GLSL" >
+                    <ShaderPart type="FRAGMENT" url="shaders/phong.frag" />
+                    <ShaderPart type="VERTEX" url="shaders/phong.vert" />
+                    <field name="texture" type="SFNode" accessType="inputOutput">
+                        <ImageTexture url='images/steel.jpg' />
+                    </field>
+                </ComposedShader>
+            </Appearance>
+            <Box DEF='BOXRIGHT-G' size='0.05 0.05 0.05' />
+        </Shape>
+    </Transform>
+
+    <Transform DEF='BALLBOTTOM-T'>
+        <Shape DEF='BALLBOTTOM-S'>
+            <Appearance>
+                <Material diffuseColor='0 1 1' />
+            </Appearance>
+            <Sphere DEF='BALLBOTTOM-G' radius='0.01' />
+        </Shape>
+    </Transform>
+
+    <Transform DEF='GROUND-T' >
+        <Shape DEF='GROUND-S'>
+            <Appearance>
+                <ComposedShader language="GLSL" >
+                    <ShaderPart type="FRAGMENT" url="shaders/phong.frag" />
+                    <ShaderPart type="VERTEX" url="shaders/phong.vert" />
+                    <field name="texture" type="SFNode" accessType="inputOutput">
+                        <ImageTexture DEF="GROUND-IMG" url='images/sand.jpg' />
+                    </field>
+                </ComposedShader>
+            </Appearance>
+            <Box DEF='GROUND-G' size='1 0.001 0.3' />
+        </Shape>
+    </Transform>
+    <RigidBodyCollection DEF='RBC' enabled='true' physicsEngine='Bullet' gravity='0 -1 0'>
+        <CollisionCollection containerField='collider' bounce='0'>
+            <CollidableShape DEF='BOXLEFT-C' containerField='collidables'>
+                <Shape USE='BOXLEFT-S' containerField='shape' />
+            </CollidableShape>
+            <CollidableShape DEF='BOXRIGHT-C' containerField='collidables'>
+                <Shape USE='BOXRIGHT-S' containerField='shape' />
+            </CollidableShape>
+            <CollidableShape DEF='BOXBOTTOM-C' containerField='collidables'>
+                <Shape USE='BOXBOTTOM-S' containerField='shape' />
+            </CollidableShape>
+            <CollidableShape DEF='BALLBOTTOM-C' enabled='false' containerField='collidables'>
+                <Shape USE='BALLBOTTOM-S' containerField='shape' />
+            </CollidableShape>
+            <CollidableShape DEF='GROUND-C' containerField='collidables'>
+                <Shape USE='GROUND-S' containerField='shape' />
+            </CollidableShape>
+        </CollisionCollection>
+
+        <RigidBody DEF='BOXLEFT-R' fixed='false' mass='0.3' orientation='0 1 0 0.5' position = '-0.2 0.2 0'>
+            <Geometry USE='BOXLEFT-C' containerField='geometry' />
+            <Box USE='BOXLEFT-G' containerField='massDensityModel' />
+        </RigidBody>
+        <RigidBody DEF='BOXRIGHT-R' fixed='false' mass='1' orientation = '0 1 0 0' position = '0.2 0.2 0'>
+            <Geometry USE='BOXRIGHT-C' containerField='geometry' />
+            <Box USE='BOXRIGHT-G' containerField='massDensityModel' />
+        </RigidBody>
+        <RigidBody DEF='BOXBOTTOM-R' fixed='false' mass='1' orientation = '0 1 0 0' position = '0 0 0'>
+            <Geometry USE='BOXBOTTOM-C' containerField='geometry' />
+            <Box USE='BOXBOTTOM-G' containerField='massDensityModel' />
+        </RigidBody>
+        <RigidBody DEF='BALLBOTTOM-R' fixed='true' mass='1' orientation = '0 1 0 0' position = '0 -0.01 0'>
+            <Geometry USE='BALLBOTTOM-C' containerField='geometry' />
+            <Box USE='BALLBOTTOM-G' containerField='massDensityModel' />
+        </RigidBody>
+        <RigidBody DEF='GROUND-R' fixed='TRUE' mass='1' orientation = '0 1 0 0' position = '0 -0.07 0'>
+            <Geometry USE='GROUND-C' containerField='geometry' />
+            <Box USE='GROUND-G' containerField='massDensityModel' />
+        </RigidBody>
+
+        <SingleAxisHingeJoint anchorPoint='0.0 0 0.0' forceOutput="angle" axis='0 0 1' stopBounce="0.5" DEF='Joint1'>
+            <RigidBody USE='BOXBOTTOM-R' containerField='body1'/>
+        </SingleAxisHingeJoint>
+
+    </RigidBodyCollection>
+
+    <ROUTE fromNode='BOXLEFT-R' fromField='position' toNode='BOXLEFT-T' toField='translation' />
+    <ROUTE fromNode='BOXLEFT-R' fromField='orientation' toNode='BOXLEFT-T' toField='rotation' />
+
+    <ROUTE fromNode='BOXRIGHT-R' fromField='position' toNode='BOXRIGHT-T' toField='translation' />
+    <ROUTE fromNode='BOXRIGHT-R' fromField='orientation' toNode='BOXRIGHT-T' toField='rotation' />
+
+    <ROUTE fromNode='BOXBOTTOM-R' fromField='position' toNode='BOXBOTTOM-T' toField='translation' />
+    <ROUTE fromNode='BOXBOTTOM-R' fromField='orientation' toNode='BOXBOTTOM-T' toField='rotation' />
+
+    <ROUTE fromNode='BALLBOTTOM-R' fromField='position' toNode='BALLBOTTOM-T' toField='translation' />
+    <ROUTE fromNode='BALLBOTTOM-R' fromField='orientation' toNode='BALLBOTTOM-T' toField='rotation' />
+
+    <ROUTE fromNode='GROUND-R' fromField='position' toNode='GROUND-T' toField='translation' />
+    <ROUTE fromNode='GROUND-R' fromField='orientation' toNode='GROUND-T' toField='rotation' />
+    
+    <PROGRAM_SETTING node="BOXBOTTOM-IMG" field="url" name="BoxBottomTextureUrl" section="texture" />
+    <PROGRAM_SETTING node="GROUND-IMG" field="url" name="GroundTextureUrl" section="texture" />
+    <!-- <PROGRAM_SETTING node="RBC" field="constantForceMix" name="constantForceMix" section="RBC Parameters IO" />
+    <PROGRAM_SETTING node="RBC" field="physicsEngine" name="physicsEngineName" section="RBC Parameters Output Only" />
+    <PROGRAM_SETTING node="RBC" field="iterations" name="iterations" section="RBC Parameters IO" />
+    <PROGRAM_SETTING node="RBC" field="errorCorrection" name="errorCorrection" section="RBC Parameters IO" /> -->
+
+</Group>

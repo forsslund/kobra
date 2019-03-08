@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version="3.2">
+  <head>
+    <!-- Declare components required to run -->
+    <component name="H3DPhysics"/>
+
+    <meta name='title' content='PhysX3CollidableOptions_Letters.x3d'/>
+    <meta name='description' content='A demonstration of PhysX3CollidableOptions from the H3DPhysics component.'/>
+    <meta name='author' content='SenseGraphics AB, 2013-2019'/>
+  </head>
+  <Scene>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+    
+    <Viewpoint position='0.0 0.3 0.8' orientation='1 0 0 -0.1'/>
+
+    <Inline url='models/letters.x3d' importMode='AUTO' />
+
+    <Transform DEF="TFloor">
+      <Shape DEF='SFloor'>
+        <Appearance>
+          <Material diffuseColor="1 1 1"/>
+        </Appearance>
+        <Box size="1.0 0.01 1.0"/>
+      </Shape>
+    </Transform>
+
+    <RigidBodyCollection DEF='RBC' physicsEngine="PhysX3" gravity='0 -1 0'>
+      <CollisionCollection containerField='collider'  frictionCoefficients='0.5 0.5' bounce='0'>
+
+        <CollidableShape DEF="CSFloor" containerField='collidables'>
+          <Shape containerField='shape' USE='SFloor'/>
+        </CollidableShape>
+
+
+        <CollidableShape DEF="CSLetterA" containerField='collidables' scale='0.3 0.3 0.3'>
+          <Shape containerField='shape' USE='letter_a_SHAPE' />
+          <PhysX3CollidableOptions 
+            convex='false'
+            convexDecomposition='true'
+            cookedFilename='models/letterA.cooked'
+            saveConvexDecomposition='models/letterA.wrl'
+
+            volumeWeight='150.0'
+            concavity='30.0'
+            />
+        </CollidableShape>
+
+        <CollidableShape DEF="CSLetterB" containerField='collidables' scale='0.3 0.3 0.3'>
+          <Shape containerField='shape' USE='letter_b_SHAPE' />
+          <PhysX3CollidableOptions 
+            convex='false'
+            convexDecomposition='true'
+            cookedFilename='models/letterB.cooked'
+            saveConvexDecomposition='models/letterB.wrl'
+
+            volumeWeight='150.0'
+            concavity='30.0'
+            />
+        </CollidableShape>
+
+        <CollidableShape DEF="CSLetterC" containerField='collidables' scale='0.3 0.3 0.3'>
+          <Shape containerField='shape' USE='letter_c_SHAPE' />
+          <PhysX3CollidableOptions 
+            convex='false'
+            convexDecomposition='true'
+            cookedFilename='models/letterC.cooked'
+            saveConvexDecomposition='models/letterC.wrl'
+
+            volumeWeight='150.0'
+            concavity='30.0'
+            />
+        </CollidableShape>
+
+        <CollidableShape DEF="CSLetterD" containerField='collidables' scale='0.3 0.3 0.3'>
+          <Shape containerField='shape' USE='letter_d_SHAPE' />
+          <PhysX3CollidableOptions 
+            convex='false'
+            convexDecomposition='true'
+            cookedFilename='models/letterD.cooked'
+            saveConvexDecomposition='models/letterD.wrl'
+
+            volumeWeight='150.0'
+            concavity='30.0'
+            />
+        </CollidableShape>
+
+      </CollisionCollection>
+
+
+      <RigidBody DEF='RBFloor' position='0.0 0 0.0' mass='0.5' useGlobalGravity='true' fixed='true'>
+        <Geometry USE='CSFloor' containerField='geometry'/>
+      </RigidBody>
+
+      <RigidBody DEF='RBLetterA'  position='-0.1 0.6 0.0' mass='0.5'>
+        <CollidableShape USE='CSLetterA' containerField='geometry'/>
+        <IndexedTriangleSet USE="letter_a_ITS" containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='RBLetterB'  position='-0.05 0.8 0.0' mass='0.5'>
+        <CollidableShape USE='CSLetterB' containerField='geometry'/>
+        <IndexedTriangleSet USE="letter_b_ITS" containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='RBLetterC'  position='0.05 1 0.0' mass='0.5'>
+        <CollidableShape USE='CSLetterC' containerField='geometry'/>
+        <IndexedTriangleSet USE="letter_c_ITS" containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='RBLetterD'  position='0.1 1.2 0.0' mass='0.5'>
+        <CollidableShape USE='CSLetterD' containerField='geometry'/>
+        <IndexedTriangleSet USE="letter_d_ITS" containerField='massDensityModel' />
+      </RigidBody>
+
+    </RigidBodyCollection>
+
+    <ROUTE fromNode='RBFloor' fromField='position' toNode='TFloor' toField='translation'/>
+    <ROUTE fromNode='RBFloor' fromField='orientation' toNode='TFloor' toField='rotation'/>
+    <ROUTE fromNode='RBLetterA' fromField='position' toNode='letter_a_TRANSFORM' toField='translation'/>
+    <ROUTE fromNode='RBLetterA' fromField='orientation' toNode='letter_a_TRANSFORM' toField='rotation'/>
+    <ROUTE fromNode='RBLetterB' fromField='position' toNode='letter_b_TRANSFORM' toField='translation'/>
+    <ROUTE fromNode='RBLetterB' fromField='orientation' toNode='letter_b_TRANSFORM' toField='rotation'/>
+    <ROUTE fromNode='RBLetterC' fromField='position' toNode='letter_c_TRANSFORM' toField='translation'/>
+    <ROUTE fromNode='RBLetterC' fromField='orientation' toNode='letter_c_TRANSFORM' toField='rotation'/>
+    <ROUTE fromNode='RBLetterD' fromField='position' toNode='letter_d_TRANSFORM' toField='translation'/>
+    <ROUTE fromNode='RBLetterD' fromField='orientation' toNode='letter_d_TRANSFORM' toField='rotation'/>
+  </Scene>
+</X3D>

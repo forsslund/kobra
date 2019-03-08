@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version='1.4'>
+  <head>
+    <meta name='title' content='HapticMasterDevice.x3d'/>
+    <meta name='description' content='H3DAPI HapticMasterDevice example.
+      This example uses H3DAPI node(s) and runs on H3DAPI-supported 
+      browsers only. Visit http://www.h3d.org for more information and 
+      to download an H3DAPI-compatible browser.
+      This example will initialize a device and let the user know if it succeeded or not.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+  
+  <Scene>
+    <Viewpoint position='0 0 0.6' />
+    <DeviceInfo>
+      <HapticMasterDevice DEF="HAPTICS_DEVICE" >
+        <GodObjectRenderer/>
+      </HapticMasterDevice>
+    </DeviceInfo>
+
+    <ExternProtoDeclare name='Text' url='"./Prototype.x3d#Text"'>
+      <field accessType='inputOutput' name='offset' type='SFVec3f'/>
+      <field accessType='inputOutput' name='string' type='MFString'/>
+    </ExternProtoDeclare>
+
+    <ProtoInstance DEF="PI_TEXT" name='Text'>
+    </ProtoInstance>
+
+    <PythonScript DEF="P" url="script.py" />
+    <ROUTE
+      fromNode='HAPTICS_DEVICE' fromField='initialized'
+      toNode='P' toField='deviceInitializedText' />
+    <ROUTE
+      fromNode='P' fromField='deviceInitializedText'
+      toNode='PI_TEXT' toField='string' />
+  </Scene>
+</X3D>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='SizeJustifiedText.x3d'/>
+    <meta name='description' content='UI example for SizeJustifiedText node.'/>
+    <meta name='author' content='SenseGraphics AB, 2012-2019'/>
+  </head>
+  <Scene>
+    <NavigationInfo type="NONE" />
+    <Viewpoint position="0 0 10" />
+    <!-- Use the ImportLibrary to load the UI dynamic library if needed.-->
+    <ImportLibrary url='"../bin32/UI" "../../bin32/UI" "../bin64/UI" "../../bin64/UI" "libh3dui.so" "libh3dui.dylib"' />
+
+    <Transform>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor="1 1 1" />
+        </Appearance>
+        <SizeJustifiedText string='"Example for" "SJT"' length="3 3">
+          <FontStyle justify='"MIDDLE" "MIDDLE"' family='"Verdana" "FreeSerif"' />
+        </SizeJustifiedText>
+      </Shape>
+    </Transform>
+  </Scene>
+</X3D>

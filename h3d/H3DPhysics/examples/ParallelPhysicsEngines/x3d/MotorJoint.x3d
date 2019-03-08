@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version="3.2">
+  <head>
+    <!-- Declare components required to run -->
+    <component name="H3DPhysics"/>
+
+    <meta name='title' content='MotorJoint.x3d'/>
+    <meta name='description' content='A demonstration the MotorJoint joint type from the H3DPhysics component.'/>
+    <meta name='author' content='SenseGraphics AB, 2010-2019'/>
+  </head>
+  <Scene>
+
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+  
+    <IMPORT inlineDEF='H3D_EXPORTS' exportedDEF='HDEV' AS='HDEV' />
+    <Viewpoint DEF='V' position='0 0 0.6'/>
+    <Background skyColor='0.045 0.065 0.17, 0.77 0.87 0.99' skyAngle='1.57' />
+    <DirectionalLight direction='1 -1 0' />
+    
+    <Group DEF='Root'>
+
+      <Transform DEF='T'>
+        <Shape DEF='S'>
+          <Appearance DEF='A'>
+            <Material diffuseColor='0.4 0.4 0.7' />
+            <FrictionalSurface stiffness='0.35' damping='0.2'/>
+          </Appearance>
+          <Box DEF='G' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T1'>
+        <Shape DEF='S1'>
+          <Appearance USE='A' />
+          <Box DEF='G1' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T2'>
+        <Shape DEF='S2'>
+          <Appearance USE='A' />
+          <Box DEF='G2' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T3'>
+        <Shape DEF='S3'>
+          <Appearance USE='A' />
+          <Box DEF='G3' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+    </Group>
+
+    <RigidBodyCollection DEF='RBC' gravity='0 0 0' physicsEngine='Bullet'>
+    
+      <CollisionCollection containerField='collider'>
+        <CollidableShape DEF='C' containerField='collidables' enabled='false'>
+          <Shape USE='S' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C1' containerField='collidables'>
+          <Shape USE='S1' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C2' containerField='collidables'>
+          <Shape USE='S2' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C3' containerField='collidables'>
+          <Shape USE='S3' containerField='shape' />
+        </CollidableShape>
+      </CollisionCollection>
+
+      <RigidBody DEF='R' autoDamp='true' linearDampingFactor='1' angularDampingFactor='0.001' mass='1' position='-0.1 0 0'>
+        <CollidableShape USE='C' containerField='geometry' />
+        <Box USE='G' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R1' autoDamp='true' linearDampingFactor='1' angularDampingFactor='0.001' mass='1' position='-0.1 -0.1 0'>
+        <CollidableShape USE='C1' containerField='geometry' />
+        <Box USE='G1' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R2' autoDamp='true' linearDampingFactor='1' angularDampingFactor='0.001' mass='1' position='0.1 0 0'>
+        <CollidableShape USE='C2' containerField='geometry' />
+        <Box USE='G2' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R3' autoDamp='true' linearDampingFactor='1' angularDampingFactor='0.001' mass='1' position='0.1 -0.1 0'>
+        <CollidableShape USE='C3' containerField='geometry' />
+        <Box USE='G3' containerField='massDensityModel' />
+      </RigidBody>
+
+      <BallJoint anchorPoint='-0.1 0.05 0'>
+        <RigidBody USE='R' containerField='body1' />
+      </BallJoint>
+
+      <MotorJoint enabledAxes='1' axis1Torque='0.01' motor1Axis='0 0 1'>
+        <RigidBody USE='R' containerField='body1' />
+        <RigidBody USE='R1' containerField='body2' />
+      </MotorJoint>
+
+      <SingleAxisHingeJoint anchorPoint='-0.1 -0.05 0' axis='0 0 1'>
+        <RigidBody USE='R' containerField='body1' />
+        <RigidBody USE='R1' containerField='body2' />
+      </SingleAxisHingeJoint>
+
+      <SingleAxisHingeJoint anchorPoint='0.1 0.05 0' axis='1 0 0' minAngle='-1.57' maxAngle='1.57'>
+        <RigidBody USE='R2' containerField='body1' />
+      </SingleAxisHingeJoint>
+
+      <SingleAxisHingeJoint anchorPoint='0.1 -0.05 0' axis='0 1 0'>
+        <RigidBody USE='R2' containerField='body1' />
+        <RigidBody USE='R3' containerField='body2' />
+      </SingleAxisHingeJoint>
+
+      <MotorJoint enabledAxes='2' axis2Torque='0.01' motor2Axis='0 1 0'>
+        <RigidBody USE='R2' containerField='body1' />
+        <RigidBody USE='R3' containerField='body2' />
+      </MotorJoint>
+
+    </RigidBodyCollection>
+
+    <ROUTE fromNode='R' fromField='position' toNode='T' toField='translation' />
+    <ROUTE fromNode='R' fromField='orientation' toNode='T' toField='rotation' />
+    <ROUTE fromNode='R1' fromField='position' toNode='T1' toField='translation' />
+    <ROUTE fromNode='R1' fromField='orientation' toNode='T1' toField='rotation' />
+    <ROUTE fromNode='R2' fromField='position' toNode='T2' toField='translation' />
+    <ROUTE fromNode='R2' fromField='orientation' toNode='T2' toField='rotation' />
+    <ROUTE fromNode='R3' fromField='position' toNode='T3' toField='translation' />
+    <ROUTE fromNode='R3' fromField='orientation' toNode='T3' toField='rotation' />
+
+    <PythonScript DEF='PS' url='python/jointVisuals.py'>
+      <Group USE='Root' containerField='references' />
+    </PythonScript>
+
+    <ROUTE fromNode='RBC' fromField='joints' toNode='PS' toField='joints' />
+
+    <KeySensor DEF='KS' />
+    <ROUTE fromNode='KS' fromField='keyPress' toNode='PS' toField='toggleDetails' />
+
+    <!-- Update title text message position -->
+    <ROUTE fromNode="V" fromField="totalPosition" toNode="PS" toField="textPos" />
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="PS" toField="textPos" />
+    <!-- <ROUTE fromNode="PS" fromField="textPos" toNode="Nr" toField="translation" /> -->
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="Nr" toField="rotation" />
+    
+  </Scene>
+</X3D>

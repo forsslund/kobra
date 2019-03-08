@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='IndexedHexaSet.x3d'/>
+    <meta name='description' content='Example of an IndexedHexaSet.'/>
+    <meta name='author' content='SenseGraphics AB, 2014-2019'/>
+  </head>
+
+  <Scene>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+
+    <Shape>
+      <Appearance>
+        <Material />
+      </Appearance>
+      <IndexedHexaSet index="0 1 2 3 4 5 6 7 1 8 9 2 5 10 11 6" normalPerVertex="false" >
+        <Coordinate point="-0.15 -0.1 0.1, -0.05 -0.1 0.1, -0.05 0.1 0.1, -0.15 0.1 0.1, -0.15 -0.1 -0.1, -0.05 -0.1 -0.1, -0.05 0.1 -0.1, -0.15 0.1 -0.1, 0.05 0.05 0.05, 0.06 0.1 0.06, 0.05 0.04 -0.05, 0.05 0.11 -0.05" />
+        <Color color="1 0 0, 0.84 0 0, 0.84 0 0, 1 0 0, 1 0 0, 0.84 0 0, 0.84 0 0, 1 0 0, 0.68 0.6 0, 0.68 0.6 0, 0.68 0.6 0, 0.68 0.6 0" />
+      </IndexedHexaSet>
+    </Shape>
+    
+  </Scene>
+</X3D>

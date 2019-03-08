@@ -1,0 +1,456 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='Super_UI_Demo.x3d'/>
+    <meta name='description' content='UI example for most of UI nodes.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+  <Scene>
+    <KeySensor DEF="KS" />
+    <!-- Use the ImportLibrary to load the UI dynamic library if needed.-->
+    <ImportLibrary url='"../bin32/UI" "../../bin32/UI" "../bin64/UI" "../../bin64/UI" "libh3dui.so" "libh3dui.dylib"' />
+
+
+    <NavigationInfo type="NONE"/>
+
+    <!--Default supershape. Togglegroup will have hapticsOn set to 
+        false from the start-->
+    <ToggleGroup DEF="TG">
+      <Collision enabled="false">
+        <Transform DEF="SS_TRANSFORM"  scale="0.1 0.1 0.1">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor="0.7 1 0.7"/>
+              <SmoothSurface />
+            </Appearance>
+            <SuperShape DEF="SS" resolution="64" />
+          </Shape>
+        </Transform>
+      </Collision>
+    </ToggleGroup>
+
+    <!--TransformInfo and MatrixTransform is used to keep the UI in the same
+        place when the user rotate the view using arrow keys.-->
+    <Viewpoint position="0.1 0 0.6"/>
+
+    <!--Help text in case things go bad-->
+    <Transform translation="0.1 -0.15 0.22">
+      <Shape>
+        <Appearance>
+          <Material diffuseColor="1 1 1" />
+        </Appearance>
+        <Text string="Pressing 'r' resets the supershape to the default shape.
+   Use arrow keys to rotate the shape" >
+          <FontStyle DEF="FS" justify='"MIDDLE" "MIDDLE"' size="0.01" 
+                     family='"Verdana" "FreeSerif"' />
+        </Text>
+      </Shape>
+    </Transform>
+
+    <!--Rotate the UI to minimize screen real estate consumption-->
+    <Transform rotation="0 1 0 -0.6">
+
+      <Transform translation="0.215 0.21 -0.2">
+        <Label desiredSize="0.18 0.08 0.003">
+          <FontStyle USE="FS"/>
+          <ImageTexture url="textures/formula.png" />
+          <GridInfo columnSpan="3" row="0" padding="0 0.001" sticky="W+E+N+S"/>
+        </Label>
+      </Transform>
+
+      <!--Button to disable/enable haptics rendering of the Supershape -->
+      <Transform translation="0.195 0.16 -0.2">
+        <TouchButton DEF="SSHaptics"  desiredSize="0.12 0.02 0.003" 
+                     buttonMode="TOGGLE_PRESS" >
+          <FontStyle USE="FS" />
+          <ImageTexture DEF="ButtonTexture" url="textures/button.png" />
+        </TouchButton>
+      </Transform>
+
+      <!--Sliders-->
+      <Transform translation="0.215 0.06 -0.2" >
+        <Frame DEF="SliderFrame" desiredSize="0.16 0.18 0.003">
+
+          <Label text="ss1_m">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="0" padding="0.0001 0.001"
+                      sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss1_m"  valueRange="0 100" value="4" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="0" 
+                      padding="0.0001 0.001" sticky="W+E+N+S"/>
+            <ImageTexture DEF="SliderTexture" url="textures/slider.png" />
+          </SliderBar>
+          <Label DEF="L_ss1_m">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13" row="0" 
+                      padding="0.0009 0.001" sticky="W+E+N+S"/>
+          </Label>
+
+          <Label text="ss1_a">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="1" padding="0 0.001" sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss1_a"  valueRange="0.01 1" value="1" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="1" padding="0 0.001" 
+                      sticky="W+E+N+S"/>
+            <ImageTexture USE="SliderTexture" />
+          </SliderBar>
+          <Label DEF="L_ss1_a">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13" row="1" sticky="W+E+N+S"
+                      padding="0.0009 0.001"/>
+          </Label>
+
+          <Label text="ss1_b">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="2" padding="0 0.001" 
+                      sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss1_b"  valueRange="0.01 1" value="1" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="2" padding="0 0.001" 
+                      sticky="W+E+N+S"/>
+            <ImageTexture USE="SliderTexture" />
+          </SliderBar>
+          <Label DEF="L_ss1_b">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13" row="2" 
+                      padding="0.0009 0.001" sticky="W+E+N+S"/>
+          </Label>
+
+          <Label text="ss1_n1">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="3" padding="0 0.001" 
+                      sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss1_n1"  valueRange="0.01 100" value="100" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="3" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+            <ImageTexture USE="SliderTexture" />
+          </SliderBar>
+          <Label DEF="L_ss1_n1">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13" row="3" 
+                      padding="0.0009 0.001" sticky="W+E+N+S"/>
+          </Label>
+
+          <Label text="ss1_n2">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="4" padding="0 0.001" sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss1_n2"  valueRange="0 100" value="100" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="4" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+            <ImageTexture USE="SliderTexture" />
+          </SliderBar>
+          <Label DEF="L_ss1_n2">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13" row="4" 
+                      padding="0.0009 0.001" sticky="W+E+N+S"/>
+          </Label>
+
+          <Label text="ss1_n3">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="5" padding="0 0.001" 
+                      sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss1_n3"  valueRange="0 100" value="100" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="5" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+            <ImageTexture USE="SliderTexture" />
+          </SliderBar>
+          <Label DEF="L_ss1_n3">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13" row="5" 
+                      padding="0.0009 0.001" sticky="W+E+N+S"/>
+          </Label>
+
+          <Label text="ss2_m">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="6" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss2_m"  valueRange="0 100" value="4" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="6" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+            <ImageTexture USE="SliderTexture" />
+          </SliderBar>
+          <Label DEF="L_ss2_m">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13"  row="6" 
+                      padding="0.0009 0.001" sticky="W+E+N+S"/>
+          </Label>
+
+          <Label text="ss2_a">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="7" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss2_a"  valueRange="0.01 1" value="1" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="7" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+            <ImageTexture USE="SliderTexture" />
+          </SliderBar>
+          <Label DEF="L_ss2_a">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13"  row="7" 
+                      padding="0.0009 0.001" sticky="W+E+N+S"/>
+          </Label>
+
+          <Label text="ss2_b">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="8" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss2_b"  valueRange="0.01 1" value="1" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="8" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+            <ImageTexture USE="SliderTexture" />
+          </SliderBar>
+          <Label DEF="L_ss2_b">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13" row="8" 
+                      padding="0.0009 0.001" sticky="W+E+N+S"/>
+          </Label>
+
+          <Label text="ss2_n1">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="9" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss2_n1"  valueRange="0.01 100" value="100" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="9" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+            <ImageTexture USE="SliderTexture" />
+          </SliderBar>
+          <Label DEF="L_ss2_n1">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13"  row="9" 
+                      padding="0.0009 0.001" sticky="W+E+N+S"/>
+          </Label>
+
+          <Label text="ss2_n2">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="10" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss2_n2"  valueRange="0 100" value="100" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="10" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+            <ImageTexture USE="SliderTexture" />
+          </SliderBar>
+          <Label DEF="L_ss2_n2">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13"  row="10" 
+                      padding="0.0009 0.001" sticky="W+E+N+S"/>
+          </Label>
+
+          <Label text="ss2_n3">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="11" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+          </Label>
+          <SliderBar DEF="SB_ss2_n3"  valueRange="0 100" value="100" 
+                     stepLength="0.01" markerColor="1 0 0">
+            <GridInfo columnSpan="10" column = "3" row="11" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+            <ImageTexture USE="SliderTexture" />
+          </SliderBar>
+          <Label DEF="L_ss2_n3">
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" column="13"  row="11" 
+                      padding="0.0009 0.001" sticky="W+E+N+S"/>
+          </Label>
+        </Frame>
+      </Transform>
+      <!--End sliders-->
+
+      <!--Radio buttons for preset shapes-->
+      <Transform translation="0.195 -0.055 -0.2">
+        <Frame desiredSize="0.12 0.04 0.003">
+          <Label text="Preset shapes" desiredSize="0.12 0.02 0.003">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo columnSpan="3" row="0" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+          </Label>
+          <TouchButton DEF="radio_1" desiredSize="0.04 0.02 0.003" 
+                       text="Spaceship" buttonMode="RADIO_TOGGLE_PRESS">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo row="1" padding="0 0.001" sticky="W+E+N+S"/>
+          </TouchButton>
+          <TouchButton DEF="radio_2" desiredSize="0.04 0.02 0.003" 
+                       text="Starfish" buttonMode="RADIO_TOGGLE_PRESS">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo row="1" column="1" padding="0.002 0.001"
+                      sticky="W+E+N+S"/>
+          </TouchButton>
+          <TouchButton DEF="radio_3" desiredSize="0.04 0.02 0.003" 
+                       text="Diamond" buttonMode="RADIO_TOGGLE_PRESS">
+            <FontStyle USE="FS"/>
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo row="1" column="2" padding="0 0.001"
+                      sticky="W+E+N+S"/>
+          </TouchButton>
+        </Frame>
+      </Transform>
+
+    </Transform>
+    <!--End UI-->
+
+    <PythonScript DEF="PS" url="Super_UI_Demo.py">
+      <Frame USE="SliderFrame" containerField="references" />
+    </PythonScript>
+
+    <!--Haptic of supershape toggle on and off-->
+    <ROUTE fromNode="SSHaptics" fromField="state"
+           toNode="TG" toField="hapticsOn" />
+    <ROUTE fromNode="SSHaptics" fromField="state"
+           toNode="PS" toField="hapticsOnOff" />
+    <ROUTE fromNode="PS" fromField="hapticsOnOff"
+           toNode="SSHaptics" toField="text" />
+
+    <!--To know which preset button is used-->
+    <ROUTE fromNode="radio_1" fromField="state"
+           toNode="PS" toField="choosePreset" />
+    <ROUTE fromNode="radio_2" fromField="state"
+           toNode="PS" toField="choosePreset" />
+    <ROUTE fromNode="radio_3" fromField="state"
+           toNode="PS" toField="choosePreset" />
+
+    <!--Resetting to default shape if 'r' is pressed-->
+    <ROUTE fromNode="KS" fromField="keyPress"
+           toNode="PS" toField="resetShape" />
+
+    <!--Rotating the SuperShape if arrow keys are pressed-->
+    <ROUTE fromNode="KS" fromField="actionKeyPress"
+           toNode="PS"   toField="rotateSS"/>
+
+    <ROUTE fromNode="PS" fromField="rotateSS"
+           toNode="SS_TRANSFORM" toField="rotation" />
+
+    <!--Routing to update the SS fields and the value of the slider labels-->
+    <ROUTE fromNode="SB_ss1_m" fromField="value" 
+           toNode="SS" toField="ss1_m" />
+    <ROUTE fromNode="SB_ss1_m" fromField="value"
+           toNode="PS" toField="PS_ss1_m"/>
+    <ROUTE fromNode="PS" fromField="PS_ss1_m" 
+           toNode="L_ss1_m" toField="text" />
+
+    <ROUTE fromNode="SB_ss1_a" fromField="value" 
+           toNode="SS" toField="ss1_a" />
+    <ROUTE fromNode="SB_ss1_a" fromField="value"
+           toNode="PS" toField="PS_ss1_a" />
+    <ROUTE fromNode="PS" fromField="PS_ss1_a" 
+           toNode="L_ss1_a" toField="text" />
+
+    <ROUTE fromNode="SB_ss1_b" fromField="value" 
+           toNode="SS" toField="ss1_b" />
+    <ROUTE fromNode="SB_ss1_b" fromField="value"
+           toNode="PS" toField="PS_ss1_b" />
+    <ROUTE fromNode="PS" fromField="PS_ss1_b" 
+           toNode="L_ss1_b" toField="text" />
+
+    <ROUTE fromNode="SB_ss1_n1" fromField="value" 
+           toNode="SS" toField="ss1_n1" />
+    <ROUTE fromNode="SB_ss1_n1" fromField="value"
+           toNode="PS" toField="PS_ss1_n1" />
+    <ROUTE fromNode="PS" fromField="PS_ss1_n1" 
+           toNode="L_ss1_n1" toField="text" />
+
+    <ROUTE fromNode="SB_ss1_n2" fromField="value" 
+           toNode="SS" toField="ss1_n2" />
+    <ROUTE fromNode="SB_ss1_n2" fromField="value"
+           toNode="PS" toField="PS_ss1_n2" />
+    <ROUTE fromNode="PS" fromField="PS_ss1_n2" 
+           toNode="L_ss1_n2" toField="text" />
+
+    <ROUTE fromNode="SB_ss1_n3" fromField="value" 
+           toNode="SS" toField="ss1_n3" />
+    <ROUTE fromNode="SB_ss1_n3" fromField="value"
+           toNode="PS" toField="PS_ss1_n3" />
+    <ROUTE fromNode="PS" fromField="PS_ss1_n3" 
+           toNode="L_ss1_n3" toField="text" />
+
+    <ROUTE fromNode="SB_ss2_m" fromField="value" 
+           toNode="SS" toField="ss2_m" />
+    <ROUTE fromNode="SB_ss2_m" fromField="value"
+           toNode="PS" toField="PS_ss2_m" />
+    <ROUTE fromNode="PS" fromField="PS_ss2_m" 
+           toNode="L_ss2_m" toField="text" />
+
+    <ROUTE fromNode="SB_ss2_a" fromField="value" 
+           toNode="SS" toField="ss2_a" />
+    <ROUTE fromNode="SB_ss2_a" fromField="value"
+           toNode="PS" toField="PS_ss2_a" />
+    <ROUTE fromNode="PS" fromField="PS_ss2_a" 
+           toNode="L_ss2_a" toField="text" />
+
+    <ROUTE fromNode="SB_ss2_b" fromField="value" 
+           toNode="SS" toField="ss2_b" />
+    <ROUTE fromNode="SB_ss2_b" fromField="value"
+           toNode="PS" toField="PS_ss2_b" />
+    <ROUTE fromNode="PS" fromField="PS_ss2_b" 
+           toNode="L_ss2_b" toField="text" />
+
+    <ROUTE fromNode="SB_ss2_n1" fromField="value" 
+           toNode="SS" toField="ss2_n1" />
+    <ROUTE fromNode="SB_ss2_n1" fromField="value"
+           toNode="PS" toField="PS_ss2_n1" />
+    <ROUTE fromNode="PS" fromField="PS_ss2_n1" 
+           toNode="L_ss2_n1" toField="text" />
+
+    <ROUTE fromNode="SB_ss2_n2" fromField="value" 
+           toNode="SS" toField="ss2_n2" />
+    <ROUTE fromNode="SB_ss2_n2" fromField="value"
+           toNode="PS" toField="PS_ss2_n2" />
+    <ROUTE fromNode="PS" fromField="PS_ss2_n2" 
+           toNode="L_ss2_n2" toField="text" />
+
+    <ROUTE fromNode="SB_ss2_n3" fromField="value" 
+           toNode="SS" toField="ss2_n3" />
+    <ROUTE fromNode="SB_ss2_n3" fromField="value"
+           toNode="PS" toField="PS_ss2_n3" />
+    <ROUTE fromNode="PS" fromField="PS_ss2_n3" 
+           toNode="L_ss2_n3" toField="text" />
+    <!--End routing for sliders-->
+
+  </Scene>
+</X3D>

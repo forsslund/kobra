@@ -1,0 +1,53 @@
+\chapter{Force effects}
+There are two ways to generate forces in HAPI. One is the one
+previously described, by specifying shapes and surfaces and letting
+a haptics rendering algorithm determine forces when colliding with the
+shapes. Another way to generate forces is by using force effects. A
+force effect is a global force function which calculates what force to
+generate at any given moment. It can, among other things, be used to simulate
+viscosity and springs. 
+
+\section{Available force effects}
+The force effects available in HAPI are:
+
+\begin{itemize}
+\item HapticForceField
+\item HapticPositionFunctionEffect
+\item HapticShapeConstraint
+\item HapticSpring
+\item HapticTimeFunctionEffect 
+\item HapticViscosity
+\end{itemize}
+
+\section{Interpolation}
+A force effect does not have an internal property to decide whether it
+should be interpolated between frames. If this is needed it is assumed
+that this is taken care of by the force calculation itself. However,
+when adding or removing a force effect from a haptics device there
+is a parameter to make the force effect fade in or out smoothly. See section
+\ref{ssHapticsRenderingFunctions} for details.
+
+\section{Creating new force effects}
+A user can easily create their own force effects by subclassing from
+HAPIForceEffect and implementing the calculateForces() method. The
+method takes the struct EffectInput as input. This struct contains:
+
+\begin{itemize}
+\item hd - A pointer to the HAPIHapticsDevice on which the force is rendered.
+Through this pointer the force effect can access device values such as
+the current position, velocity and orientation of the HAPIHapticsDevice.
+\item deltaT - The time difference from the last haptic frame to the current
+haptic frame.
+\end{itemize}
+The output of the calculateForces() method is an EffectOutput structure.
+It contains:
+
+\begin{itemize}
+\item force - The force calculated by the calculateForces() function.
+\item torque - The torque calculated by the calculateForces() function.
+\end{itemize}
+
+The force and torque outputed should always be given in global coordinates.
+Here follows an example of a very simple class that generates a constant force.
+
+\input{examples/HapticForceField}

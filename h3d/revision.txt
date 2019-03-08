@@ -1,0 +1,4 @@
+From  https://h3dapi.org:8090/H3DAPI/metarepos/H3DWithToolkitsWin/trunk/H3D
+revision 5222
+imported 2019-03-08 and applied patch from haptikfabrikenapi-0.1,
+and removed the External/ folder.

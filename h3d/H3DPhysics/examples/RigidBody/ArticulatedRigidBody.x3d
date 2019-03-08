@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version='2.3'>
+  <head>
+    <!-- Declare components required to run -->
+    <component name="H3DPhysics"/>
+    <meta name='title' content='ArticulatedRigidBody.x3d'/>
+    <meta name='description' content='A demonstration of ArticulatedRigidBody from the H3DPhysics component.'/>
+    <meta name='author' content='SenseGraphics AB, 2014-2019'/>
+  </head>
+  <Scene>
+    <!-- This scene will crash with PhysX since CollidableOffset support is not implemented yet.-->
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+
+    <Viewpoint position="0 0 0.6" />
+
+    <DirectionalLight direction='0 -1 0' intensity='0.3' />
+
+    <Transform translation='-0.2 0.15 0'>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='1 1 1' />
+        </Appearance>
+        <Text DEF='Text' string='""'>
+          <FontStyle size='0.02' />
+        </Text>
+      </Shape>
+    </Transform>
+
+    <Transform DEF='Floor0_T'>
+      <Shape DEF='Floor0_S'>
+        <Appearance>
+          <Material diffuseColor='0.7 0.2 0.4' />
+          <SmoothSurface />
+        </Appearance>
+        <Box DEF='Floor0_G' size='0.2 0.004 0.2' />
+      </Shape>
+    </Transform>
+
+    <Transform DEF='Floor1_T'>
+      <Shape DEF='Floor1_S'>
+        <Appearance>
+          <Material diffuseColor='0.7 0.2 0.4' />
+          <SmoothSurface />
+        </Appearance>
+        <Box DEF='Floor1_G' size='0.2 0.004 0.2' />
+      </Shape>
+    </Transform>
+
+    <Transform DEF='Wall0_T'>
+      <Shape DEF='Wall0_S'>
+        <Appearance>
+          <Material transparency="0.4" diffuseColor='0.7 0.2 0.4' />
+          <SmoothSurface />
+        </Appearance>
+        <Box DEF='Wall0_G' size='0.4 0.1 0.004' />
+      </Shape>
+    </Transform>
+
+    <Transform DEF='Wall1_T'>
+      <Shape DEF='Wall1_S'>
+        <Appearance>
+          <Material diffuseColor='0.7 0.2 0.4' />
+          <SmoothSurface />
+        </Appearance>
+        <Box DEF='Wall1_G' size='0.4 0.1 0.004' />
+      </Shape>
+    </Transform>
+
+    <Transform DEF='Body0_T'>
+      <Shape DEF='Body0_BoxS'>
+        <Appearance>
+          <Material diffuseColor='1 0 0'/>
+          <SmoothSurface />
+        </Appearance>
+        <Box DEF='Body0_BoxG' size='0.04 0.025 0.025' />
+      </Shape>
+    </Transform>
+
+    <Transform DEF='Body1_T'>
+      <Shape DEF='Body1_BoxS'>
+        <Appearance>
+          <Material />
+          <SmoothSurface />
+        </Appearance>
+        <Box DEF='Body1_BoxG' size='0.04 0.025 0.025' />
+      </Shape>
+    </Transform>
+
+    <Transform DEF="Body2_T" translation="0 0.06 0">
+      <Shape DEF='Body2_BoxS'>
+        <Appearance>
+          <Material diffuseColor='0 1 0'/>
+          <SmoothSurface />
+        </Appearance>
+        <Box DEF='Body2_BoxG' size='0.04 0.025 0.025' />
+      </Shape>
+    </Transform>
+
+    <Transform DEF='Body3_T'>
+      <Shape DEF='Body3_BoxS'>
+        <Appearance>
+          <Material diffuseColor="0.1 0.4 0" />
+          <SmoothSurface />
+        </Appearance>
+        <Box DEF='Body3_BoxG' size='0.04 0.025 0.025' />
+      </Shape>
+    </Transform>
+
+    <RigidBodyCollection DEF="RBC" physicsEngine='PhysX3' gravity='0 -0.5 0' renderCollidables="false">
+      <CollisionCollection DEF='CC' containerField='collider' bounce='0'>
+        <CollidableShape DEF='Floor0_C' containerField='collidables'>
+          <Shape USE='Floor0_S' containerField='shape' />
+        </CollidableShape>
+
+        <CollidableShape DEF='Floor1_C' containerField='collidables'>
+          <Shape USE='Floor1_S' containerField='shape' />
+        </CollidableShape>
+
+        <CollidableShape DEF='Wall0_C' containerField='collidables'>
+          <Shape USE='Wall0_S' containerField='shape' />
+        </CollidableShape>
+
+        <CollidableShape DEF='Wall1_C' containerField='collidables'>
+          <Shape USE='Wall1_S' containerField='shape' />
+        </CollidableShape>
+
+        <CollidableShape DEF='Body0_BoxC' containerField='collidables'>
+          <Shape USE='Body0_BoxS' containerField='shape' />
+        </CollidableShape>
+
+        <CollidableShape DEF='Body1_BoxC' containerField='collidables'>
+          <Shape USE='Body1_BoxS' containerField='shape' />
+        </CollidableShape>
+
+        <CollidableShape DEF='Body2_BoxC' containerField='collidables'>
+          <Shape USE='Body2_BoxS' containerField='shape' />
+        </CollidableShape>
+
+        <CollidableShape DEF='Body3_BoxC' containerField='collidables'>
+          <Shape USE='Body3_BoxS' containerField='shape' />
+        </CollidableShape>
+      </CollisionCollection>
+
+      <RigidBody  DEF='Floor0' fixed='true' position='-0.095 -0.1 0' orientation="0 0 1 -0.3">
+        <CollidableShape USE='Floor0_C' containerField='geometry' />
+        <Box USE='Floor0_G' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody  DEF='Floor1' fixed='true' position='0.095 -0.1 0' orientation="0 0 1 0.3">
+        <CollidableShape USE='Floor1_C' containerField='geometry' />
+        <Box USE='Floor1_G' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody  DEF='Wall0' fixed='true' position='0 -0.1 0.1'>
+        <CollidableShape USE='Wall0_C' containerField='geometry' />
+        <Box USE='Wall0_G' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody  DEF='Wall1' fixed='true' position='0 -0.1 -0.1'>
+        <CollidableShape USE='Wall1_C' containerField='geometry' />
+        <Box USE='Wall1_G' containerField='massDensityModel' />
+      </RigidBody>
+      
+      <ArticulatedRigidBody DEF="ArticulatedBody" positions="-0.075 0.1 0, -0.025 0.1 0, 0.025 0.1 0, 0.075 0.1 0" orientations="0 0 1 0, 0 0 1 0, 0 0 1 0, 0 0 1 0" swingLimit="1.57 1.57, 1.57 1.57, 1.57 1.57" twistLimit="-0.1 0.1, -0.1 0.1, -0.1 0.1">
+        <CollidableShape USE='Body0_BoxC' containerField='geometry' />
+        <CollidableShape USE='Body1_BoxC' containerField='geometry' />
+        <CollidableShape USE='Body2_BoxC' containerField='geometry' />
+        <CollidableShape USE='Body3_BoxC' containerField='geometry' />
+        <Box size="0.04 0.025 0.025" containerField='massDensityModel' />
+        <PhysX3RigidBodyOptions solverPositionIterations="20" />
+        <PhysX3Joint6DOFLimitOptions/>
+      </ArticulatedRigidBody>
+
+    </RigidBodyCollection>
+    
+    <PythonScript DEF="PS" >
+<![CDATA[python:
+from H3DInterface import *
+
+# This pythonscript is only here to translate the positions and orientations fields
+# to route to transforms above for displaying the rigidbodies that are created by
+# ArticulatedRigidBody. Another approach would be to get the positions/orientations
+# from the fake RigidBodies in the proxyBodies field instead.
+def MFieldSelector( MFieldBase, SFieldBase, index, default_value ):
+  class MFieldSelectorClass( TypedField(SFieldBase, MFieldBase) ):
+    def __init__(self, index, default_value):
+      TypedField(SFieldBase, MFieldBase).__init__(self)
+      self.index = index
+      self.default_value = default_value
+    
+    def update( self, event ):
+      event_value = event.getValue()
+      if self.index < len( event_value ):
+        return event_value[self.index]
+      return self.default_value
+  return MFieldSelectorClass( index, default_value )
+
+position0 = MFieldSelector(MFVec3f, SFVec3f, 0, Vec3f(0,0,0))
+orientation0 = MFieldSelector(MFRotation, SFRotation, 0, Rotation(0,0,1,0))
+
+position1 = MFieldSelector(MFVec3f, SFVec3f, 1, Vec3f(0,0,0))
+orientation1 = MFieldSelector(MFRotation, SFRotation, 1, Rotation(0,0,1,0))
+
+position2 = MFieldSelector(MFVec3f, SFVec3f, 2, Vec3f(0,0,0))
+orientation2 = MFieldSelector(MFRotation, SFRotation, 2, Rotation(0,0,1,0))
+
+position3 = MFieldSelector(MFVec3f, SFVec3f, 3, Vec3f(0,0,0))
+orientation3 = MFieldSelector(MFRotation, SFRotation, 3, Rotation(0,0,1,0))
+
+]]>
+    </PythonScript>
+    <ROUTE fromNode='Floor0' fromField='position' toNode='Floor0_T' toField='translation' />
+    <ROUTE fromNode='Floor0' fromField='orientation' toNode='Floor0_T' toField='rotation' />
+    <ROUTE fromNode='Floor1' fromField='position' toNode='Floor1_T' toField='translation' />
+    <ROUTE fromNode='Floor1' fromField='orientation' toNode='Floor1_T' toField='rotation' />
+
+    <ROUTE fromNode='Wall0' fromField='position' toNode='Wall0_T' toField='translation' />
+    <ROUTE fromNode='Wall0' fromField='orientation' toNode='Wall0_T' toField='rotation' />
+    <ROUTE fromNode='Wall1' fromField='position' toNode='Wall1_T' toField='translation' />
+    <ROUTE fromNode='Wall1' fromField='orientation' toNode='Wall1_T' toField='rotation' />
+    
+    <ROUTE fromNode='ArticulatedBody' fromField='positions' toNode='PS' toField='position0' />
+    <ROUTE fromNode='ArticulatedBody' fromField='orientations' toNode='PS' toField='orientation0' />
+    <ROUTE fromNode='PS' fromField='position0' toNode='Body0_T' toField='translation' />
+    <ROUTE fromNode='PS' fromField='orientation0' toNode='Body0_T' toField='rotation' />
+
+    <ROUTE fromNode='ArticulatedBody' fromField='positions' toNode='PS' toField='position1' />
+    <ROUTE fromNode='ArticulatedBody' fromField='orientations' toNode='PS' toField='orientation1' />
+    <ROUTE fromNode='PS' fromField='position1' toNode='Body1_T' toField='translation' />
+    <ROUTE fromNode='PS' fromField='orientation1' toNode='Body1_T' toField='rotation' />
+    
+    <ROUTE fromNode='ArticulatedBody' fromField='positions' toNode='PS' toField='position2' />
+    <ROUTE fromNode='ArticulatedBody' fromField='orientations' toNode='PS' toField='orientation2' />
+    <ROUTE fromNode='PS' fromField='position2' toNode='Body2_T' toField='translation' />
+    <ROUTE fromNode='PS' fromField='orientation2' toNode='Body2_T' toField='rotation' />
+    
+    <ROUTE fromNode='ArticulatedBody' fromField='positions' toNode='PS' toField='position3' />
+    <ROUTE fromNode='ArticulatedBody' fromField='orientations' toNode='PS' toField='orientation3' />
+    <ROUTE fromNode='PS' fromField='position3' toNode='Body3_T' toField='translation' />
+    <ROUTE fromNode='PS' fromField='orientation3' toNode='Body3_T' toField='rotation' />
+  </Scene>
+</X3D>

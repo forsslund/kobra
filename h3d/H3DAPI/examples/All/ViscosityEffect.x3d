@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version='1.4'>
+  <head>
+    <meta name='title' content='ViscosityEffect.x3d'/>
+    <meta name='description' content='H3DAPI ViscosityEffect.
+      This example uses H3DAPI node(s) and runs on H3DAPI-supported 
+      browsers only. Visit http://www.h3d.org for more information and 
+      to download an H3DAPI-compatible browser.
+      To feel the haptics in this example, an installed and active 
+      haptics device is needed.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+  
+  <Scene>
+    <Viewpoint position='0 0 0.6' />
+    <ViscosityEffect
+        enabled='true'
+        viscosity='0.01'
+        radius='0.0025'
+        dampingFactor='0.5'
+        deviceIndex='0' />
+
+    <ExternProtoDeclare name='Text' url='"./Prototype.x3d#Text"'>
+      <field accessType='inputOutput' name='offset' type='SFVec3f'/>
+      <field accessType='inputOutput' name='string' type='MFString'/>
+    </ExternProtoDeclare>
+
+    <ProtoInstance name='Text'>
+      <fieldValue name='offset' value='0 0 0' />
+      <fieldValue name='string' value='"If a haptics device is connected and initialized""then when moving the device there should be a bit of resistance."' />
+    </ProtoInstance>
+  </Scene>
+</X3D>

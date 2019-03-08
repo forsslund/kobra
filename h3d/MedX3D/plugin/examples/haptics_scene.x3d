@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Test file for H3DPlugin -->
+<Group>
+  <Background skyColor="1 0 0 "/>
+  <NavigationInfo type='"EXAMINE" "WALK" "ANY"'/>
+  <Viewpoint description="first" position="0 0 0.6"/>
+  <Viewpoint description="second" position="0 0 2"/>
+  <Shape>
+    <Appearance> <Material /> </Appearance>
+    <Box size="0.1 0.1 0.01" />
+  </Shape>
+
+  <Inline url="/Users/Knok/H3D/H3DAPI/examples/x3dmodels/berk/berk.x3d" />
+
+  <DeviceInfo>
+    <AnyDevice positionCalibration="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1">
+      <Group containerField="stylus">
+        <Transform>
+          <Shape>
+            <Appearance>
+              <Material />
+            </Appearance>
+            <Sphere radius="0.0025" />
+          </Shape>
+        </Transform>
+      </Group>
+      <GodObjectRenderer />
+    </AnyDevice>
+  </DeviceInfo>
+
+  <!--Transform translation="-0.1 0 0">
+    <Inline url='"springs.x3d" "http://www.h3dapi.org/uploads/H3DPluginExamples/springs.x3d"'/>
+  </Transform-->
+
+  <Transform translation="0.5 0 -0.5">
+    <Inline url='"berk.x3d" "http://www.h3dapi.org/uploads/H3DPluginExamples/berk.x3d"'/>
+  </Transform>
+
+  <!--Transform translation="-0.5 0 -1">
+    <Inline url='"depthMappedITS.x3d" "http://www.h3dapi.org/uploads/H3DPluginExamples/depthMappedITS.x3d"'/>
+  </Transform-->
+</Group>

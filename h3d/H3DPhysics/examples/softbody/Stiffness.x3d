@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='Stiffness.x3d'/>
+    <meta name='description' content='Test setting soft body stiffnesses per edge. Edges in the center are softer
+                                      than those around the outside. Press s key to change the stiffness of links 
+                                      in a random spherical volume.
+                                      
+                                      Keys: 1 - Create a new region of softer links
+                                            2 - Clear the edgeStiffness field (use linearStiffness field instead)
+                                            3 - Single value in edgeStiffness field (use as uniform stiffness)
+                                      
+                                      NOTE: bendingContraintDistance in the BulletSoftBodyOptions node must be 0,
+                                      otherwise the body will become unstable when the stiffnesses are changed.'/>
+    <meta name='author' content='SenseGraphics AB, 2011-2019'/>
+  </head>
+
+  <Scene>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+
+    <Viewpoint position='0 0.05 0.6' orientation='1 0 0 -0.1'/>
+    <GlobalSettings>
+      <CollisionOptions avatarCollision='false' />
+    </GlobalSettings>
+
+    <PhysicsBodyCollection DEF='SBC' physicsEngine='Bullet' gravity='0 -1 0' desiredUpdateRate='100'>
+      <!-- Geometries for collision detection -->
+      <CollisionCollection DEF='CC' containerField='collider' frictionCoefficients='0.8 0.8' bounce='0' />
+
+    </PhysicsBodyCollection>
+
+    <Transform>
+      <Shape DEF='S'>
+        <Appearance>
+          <Material />
+        </Appearance>
+      </Shape>
+    </Transform>
+
+    <KeySensor DEF='KS' />
+
+    <PythonScript url='SoftBodyUtility.py' moduleName='SoftBodyUtility' />
+    <PythonScript url='Stiffness.py' />
+
+  </Scene>
+</X3D>

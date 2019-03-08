@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='IndexedElementSet.x3d'/>
+    <meta name='description' content='Example of an IndexedElementSet.'/>
+    <meta name='author' content='SenseGraphics AB, 2014-2019'/>
+  </head>
+
+  <Scene>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+
+    <Shape>
+      <Appearance>
+        <Material />
+      </Appearance>
+      <IndexedElementSet index="0 1 2 3 4 5 6 7 -1 5 1 6 8 -1 9 -1 0 7 3 10" normalPerVertex="false" >
+        <Coordinate point="-0.15 -0.1 0.1, -0.05 -0.1 0.1, -0.05 0.1 0.1, -0.15 0.1 0.1, -0.15 -0.1 -0.1, -0.05 -0.1 -0.1, -0.05 0.1 -0.1, -0.15 0.1 -0.1, 0.05 0 0, 0.1 0.1 -0.1, -0.2 0 0" />
+        <Color color="0.5 0.8 0, 0.5 0.8 0, 0.5 0.8 0, 0.5 0.8 0, 0.5 0.8 0, 0.5 0.8 0, 0.5 0.8 0, 0.5 0.8 0, 0 0 1, 1 0 0, 0 0 1" />
+      </IndexedElementSet>
+    </Shape>
+    
+  </Scene>
+</X3D>

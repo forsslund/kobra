@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='MedX3D' version='1.0'>
+  <head>
+    <meta name='title' content='MedX3D example'/>
+    <meta name='description' content='MedX3D example showing the OcttreeNode. Close up there should be two
+        geometries but if the avatar navigates away from the shapes they should
+        switch to only one box.'/>
+    <meta name='author' content='SenseGraphics AB, 2007-2019'/>
+    <meta name='generator' content='MedX3DDemo, http://www.h3d.org'/>
+  </head>
+  <Scene>
+    <NavigationInfo  type='"WALK" "EXAMINE"' avatarSize='0.1'/>
+    <!-- Use the ImportLibrary to load the MedX3D dynamic library if needed -->
+    <ImportLibrary url='"../bin32/MedX3D" "../../bin32/MedX3D" "../bin64/MedX3D" "../../bin64/MedX3D" "libh3dmedx3d.so" "libh3dmedx3d.dylib"' />
+
+    <Transform translation="-0.25 0.15 0" scale="0.03 0.03 0.03" >
+      <Shape>
+        <Appearance>
+          <Material diffuseColor="1 1 1"/>
+        </Appearance>
+        <Text string='"This is a file to test the OctreeNode."
+                      "Close up there should be two geometries"
+                      "but when navigating away from the shapes"
+                      "they should switch to only one box."'>
+          <FontStyle />
+        </Text>
+      </Shape>
+    </Transform>
+
+    <OctTree range = '1'>
+
+      <Shape DEF='lowResShape' containerField = 'lowRes'>
+        <Appearance>
+          <Material diffuseColor='1 0 0'/>
+        </Appearance>
+        <Box size = '0.05 0.05 0.05'/>
+      </Shape>
+
+      <Transform translation='-0.1 0 0' containerField = 'highRes'>
+        <Shape DEF='highResShape1'>
+          <Appearance>
+            <Material diffuseColor = '0 1 0'/>
+          </Appearance>
+          <Sphere radius="0.04" />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T' translation='0.1 0 0' containerField = 'highRes'>
+        <Shape DEF='highResShape2'>
+          <Box size = '0.05 0.05 0.05'/>
+          <Appearance>
+            <Material diffuseColor = '1 0 1'/>
+          </Appearance>
+        </Shape>
+      </Transform>
+    </OctTree>
+
+  </Scene>
+</X3D>

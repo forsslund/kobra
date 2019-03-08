@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version="3.2">
+  <head>
+    <!-- Declare components required to run -->
+    <component name="PhysicsContainer"/>
+
+    <meta name='title' content='PhysicsContainerHelp.x3d'/>
+    <meta name='description' content='A demonstration the PhysicsContainer type from the H3DPhysics component.'/>
+    <meta name='author' content='SenseGraphics AB, 2014-2019'/>
+  </head>
+  <Scene>
+
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+    
+    <Transform DEF='Floor_T'>
+      <Shape DEF='Floor_S'>
+        <Appearance>
+          <Material diffuseColor='0.7 0.2 0.4' />
+          <FrictionalSurface />
+        </Appearance>
+        <Box DEF='Floor_G' size='0.4 0.004 0.4' />
+      </Shape>
+    </Transform>
+
+    <Transform DEF='Body1_T'>
+    
+      <Shape DEF='Body1_BoxS'>
+        <Appearance>
+          <Material diffuseColor='1 0 0'/>
+          <FrictionalSurface />
+        </Appearance>
+        <Box DEF='Body1_BoxG' size='0.025 0.025 0.025' />
+      </Shape>
+    
+    </Transform>
+  
+    <PhysicsContainer>
+      <CollidableShape DEF='Floor_C' containerField='collidables'>
+        <Shape USE='Floor_S' containerField='shape' />
+      </CollidableShape>
+
+      <CollidableShape DEF='Body1_BoxC' containerField='collidables'>
+        <Shape USE='Body1_BoxS' containerField='shape' />
+      </CollidableShape>
+      
+      <RigidBody  DEF='Floor' fixed='true' position='0 -0.15 0'>
+        <CollidableShape USE='Floor_C' containerField='geometry' />
+        <Box USE='Floor_G' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='Body1' position='0 0 0' >
+        <CollidableShape USE='Body1_BoxC' containerField='geometry' />
+      </RigidBody>
+    </PhysicsContainer>
+  </Scene>
+</X3D>

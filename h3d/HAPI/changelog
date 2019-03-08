@@ -1,0 +1,220 @@
+Changes for version 1.4.0:
+- Updates to minimize the sync time for transfer of new haptics data.
+- Fixes to some collision functions.
+- Renamed many CMake cache variables and added functions to make it easier
+  to setup H3D projects in similar fashions.
+- Added CMake functionality for handling external checkouts that contain
+  subdirectories built for different visual studio versions.
+- Improved DeviceLog and PlaybackHapticsDevice in many ways.
+- Fixes to compile for visual studio 2015 and 2017.
+- Fixed many compile warnings.
+- HLThread updates to fix potential OpenHaptics crashes.
+- std namespace is not included into global namespace in HAPI anymore
+- Added possibility for user to make force effect instance
+  creation/destruction thread safe.
+- Added functions to ForceDimensionDevice to enable/disable force as
+  well as setting vibration.
+- Fixes to OpenHapticsRenderer matrix push/pop.
+- Corrections to correctly handle rotation for different devices from
+  ForceDimension.
+- Fixes to use drd lib instead of dhd lib for ForceDimension
+  if that is desired.
+- Added support for precompiled headers.
+- Updates to handle torque better.
+- Added support for handling several buttons for ForceDimensionDevice.
+- CMake fixes to support fastbuild.
+- Now exposing encoder values for PhantomHapticsDevice.
+- Added force scaling to devices.
+- Made it possible to get and set minimum distance used between proxy
+  and surface in GodObjectRenderer.
+- Added option to include secondary collision pass in GodObjectRenderer
+  to fix certain fall through issues.
+- Added autocalibration feature to ForceDimensionDevice.
+- Added a way to set communication thread frequency between HAPI and
+  ForceDimensionDevice. Or to simply disable it and do communication
+  directly in the haptics thread.
+- It is now possible to check if a phantom device is in the inkwell.
+- Added dof7_angle and dof7_force to HAPIHapticsDevice. For
+  ForceDimensionDevice this would correspond to a gripper for those
+  devices that have this.
+
+New classes:
+- ClutchedHapticsDevice
+
+Compability issues:
+- The close function of DeviceLog is now meant to be called outside the
+  haptics thread.
+- std namespace is not included into global namespace in HAPI anymore
+- Deprecated H3D_USE_DEPENDENCIES_ONLY used in CMake configuration. Replace
+  by checking existing targets.
+- Many CMake cache variables are now deprecated. Warnings should give
+  instructions on what to do about them.
+
+
+Changes for version 1.3.0:
+- Generated header is moved to CMake build directory and can only be found
+ in HAPI/include after INSTALL project has been built.
+- Speed optimizations that could affect some compilers.
+- Updates to CMake build system to build properly when TortoiseSVN is installed
+ but the current H3D build is not a TortoiseSVN checkout.
+- Added profiling of haptic thread.
+- Moved fparser to be included as stand alone library.
+- Added a InstallHAPIAndExternals.cmake package file which can be used by
+ applications to package up needed files by the current HAPI build.
+- Improved thread safety of GodObjectRenderer and RuspiniRenderer.
+- Fixed crashes on Windows caused by trying to use PhantomHapticsDevice
+ on a system without OpenHaptics.
+
+New classes:
+- PlaybackHapticsDevice
+
+Changes for version 1.2.0:
+- Able to build HAPIDemo with wxWidget 2.8 and 2.9
+- Updates to configure build for MinGW build toolchain.
+- Updates to make a proper debian package.
+- Updates to ErrorHandler system for haptics devices.
+- Many CMake updates for building using a top CMakeLists.txt.
+- Fixed thread bugs with FalconHapticsDevice.
+- Added alwayFollowSurface option to RuspiniRenderer.
+- Added force and torque limits to haptics devices.
+- Support for 64 bit dhd (forcedimension).
+- Added torque to HapticForceField.
+- Added HapticRotationalSpring
+- Added damping and position_interpolation to HapticSpring
+- Added HaptionHapticsDevice, support for devices from Haption.
+- Added MLHIHapticsDevice, support for the Butterfly haptics magnetic 
+levitation haptics device.
+- Added EntactHapticsDevice, support for haptics devices from Entact Robotics.
+- Updates to Chai3DRenderer to use new Chai3D version.
+- Fixed a bug in SensableHapticsDevice that sent on torques in Nm instead of 
+Nmm which is expected by the driver.
+- Update CMake system to work with new 64-bit windows external libraries.
+-Added rotation to HapticMasterDevice
+
+New classes:
+- HapticRotationalSpring
+- HaptionHapticsDevice
+- MLHIHapticsDevice
+- EntactHapticsDevice
+	
+Changes for version 1.1.1:
+- CMake support for OpenHaptics 3.0.
+- Memory leak fixes.
+- Various bug fixes in the renderers.
+- Updates to compile for Visual Studio 2010 and gcc 3.1.1.
+- PhantomHapticsDevice now reports usable work space in meters.
+- CMake build updates. Variables that points to include directories and
+libraries are now grouped together for each external library.
+
+Changes for version 1.1:
+
+- Improved OSX support for FeedbackBufferCollector.
+- OpenHapticRenderer updates to make it thread safe.
+- Added support for Falcon in linux. Patch provided by KJ. Extra fixes provided by qDot.
+- Can now use index to specify Falcon haptics device when using multiple Falcons.
+- Bug corrections to the collision handling functions.
+- Updates to CMake build system and additional options in order to build
+HAPI libraries and examples from one build file. Each file belonging to a
+project is now listed explicitly.
+- Fixes to compile on recent versions of gcc.
+- Added Cylinder and AABox collision primitives.
+- Improvements to haptic rendering in order to handle moving haptic objects.
+- Improvements to haptic threads.
+- Fixes for compiling on Windows 64 bit.
+- Corrections to DepthMapSurface for low and high texture coordinate values.
+- Documentation updates.
+
+New Classes:
+AABox (collision primitive)
+Cylinder (collision primitive)
+DeviceLog
+HapticTexturesSurface
+
+
+
+Changes for version 1.0:
+
+- Use double versions of Rotations and Quaternions.
+- Added base classes for surfaces.
+- Corrections to CMake build system and additions for compiling against static
+ libraries.
+- Doxygen updates.
+- Fixed bugs reported on www.h3d.org.
+- Correct initialization sequence for PhantomHapticsDevice.
+- Corrections of reporting of device values for different devices.
+- Corrections to collision detection algorithms.
+- Updates to manual.
+
+New Classes:
+HAPIFrictionSurface
+
+
+
+Changes for version 1.0 beta 1:
+
+- Build files for different systems are no longer provided. They should be
+generated through CMake. www.cmake.org. The CMakeLists.txt used for this
+can be found in the build folder.
+- Surfaces can be specified to use stiffness relative to the maximum force that
+the device can handle.
+- Support for multiple falcon devices. Requires latest version of HDAL.
+- Added function movingSphereIntersect which is like the old one but returns
+information about closest intersection.
+- Standardized render functions of CollisionObjects.
+- When initializing a haptics device a desired haptic rate can be given. The
+actual values that can be used depends on the haptics device.
+- Added and updated examples.
+- HAPIForceEffects no longer have the interpolate member. Interpolation (if desired)
+are done when adding/removing forces to/from the haptics device. Need to call
+transferObjects function for HAPIForceEffects now.
+- Header files moved to separate directory to make it into the standard
+way for include files.
+- A couple of HAPIHapticsShape classes are merged into one class called
+HapticPrimitive. One or two of these classes are removed.
+- Velocity calculated for devices. Damping property added to surfaces.
+- Reference counting are now thread safe, this can be shut off for custom made
+classes if desired.
+- Fixed compile issues with linux.
+- HAPI now uses m instead of mm.
+- Added virtual function getTangentSpaceMatrix for GeometryPrimitive and
+HAPIHapticsShape. Can be used to get transformation from coordinate space to
+texture space.
+- All haptics device and haptics renderers classes now report correct values.
+- Fixed a number of bugs in GodObjectRenderer and RuspiniRenderer.
+- Separated proxy movement and force generation calculations for surfaces.
+- Fixed a couple of major bugs with OpenHapticsRenderer and
+PhantomHapticsDevice.
+- Optimized code in various places.
+- Fixed bugs with surfaces that caused really bad surface generation in
+the alpha release.
+- Fixed a lot of minor bugs. See svn changelog at www.h3d.org:8080 for details.
+
+New Classes:
+DepthMapSurface
+HAPIVariableDepthSurface
+HapticPrimitive
+ImageInterfaceObject
+
+Compability issues:
+- OnConctact function in HAPISurfaceObject is split into two functions
+called getProxyMovement and getForces.
+- Units in m now. Used to be mm.
+- namespace HAPI::Bounds renamed to HAPI::Collision.
+- HapticBox, HapticPlane, HapticSphere and HapticTriangle removed since
+HapticPrimitive can be used instead.
+- HapticCone and HapticCylinder removed.
+- Renamed HapticBinaryTreePrimitive to HapticPrimitiveTree.
+- Header files moved to include/HAPI. Include them with HAPI/ prefix. Note that
+file for OpenHapticsRenderer are in OpenHapticsRenderer/include/HAPI and files
+for Chai3DRenderer are in Chai3DRenderer are in Chai3DRenderer/include/HAPI.
+H3DUtil files should have the H3DUtil/ prefix when including.
+- The transferObjects function must be called to transfer HAPIForceEffects to
+the haptics loop, as it was intended earlier to, but not needed.
+- The render function in BinaryBoundTree and BBPrimitiveTree now render the 
+primitives in the tree. Outlines are rendered in renderBounds function.
+- calculateForces takes an EffectInput struct as argument instead of several
+arguments. Note, this will only be a problem when upgrading from alpha to beta.
+H3D API 1.5 had this struct.
+- On Windows, some external libraries are moved around. This might cause
+problem with old project files but will not cause problems for project
+generated through CMake.

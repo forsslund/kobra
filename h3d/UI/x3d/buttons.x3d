@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='buttons.x3d'/>
+    <meta name='description' content='UI example for TouchButton node.'/>
+    <meta name='author' content='SenseGraphics AB, 2005-2019'/>
+  </head>
+  <Scene>
+    <NavigationInfo type="NONE" />
+    <!-- Use the ImportLibrary to load the UI dynamic library if needed.-->
+    <ImportLibrary url='"../bin32/UI" "../../bin32/UI" "../bin64/UI" "../../bin64/UI" "libh3dui.so" "libh3dui.dylib"' />
+
+    <Viewpoint position="0 0 0.6"/>
+    <Frame DEF="FRAME" desiredSize="0.1 0.2 0.001">
+      <TouchButton buttonMode="NORMAL" text="Normal">
+        <FontStyle DEF="FS" size="0.014" justify='"MIDDLE", "MIDDLE"' />
+        <ImageTexture DEF="ButtonTexture" url="textures/button.png" />
+        <GridInfo DEF="GI" sticky="W+E+N+S" padding="0.001 0.001"/>
+      </TouchButton>
+      <TouchButton buttonMode="TOGGLE_PRESS" text="Toggle press" >
+        <FontStyle USE="FS" />
+        <ImageTexture USE="ButtonTexture" />
+        <GridInfo USE="GI"/>
+      </TouchButton>
+      <TouchButton buttonMode="TOGGLE_RELEASE" text="Toggle release" >
+        <FontStyle USE="FS" />
+        <ImageTexture USE="ButtonTexture" />
+        <GridInfo USE="GI"/>
+      </TouchButton>
+      <TouchButton buttonMode="NORMAL" text="No Texture">
+        <FontStyle DEF="FS" size="0.014" justify='"MIDDLE", "MIDDLE"' />
+        <GridInfo DEF="GI" sticky="W+E+N+S" padding="0.001 0.001"/>
+      </TouchButton>
+    </Frame>
+  </Scene>
+</X3D>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='WorldInfo.x3d'/>
+    <meta name='description' content='X3D WorldInfo node example.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+  <Scene>
+    <Viewpoint position='0 0 0.6' />
+    <WorldInfo DEF="WORLD_INFO"
+        title='My World Info'
+        info='"(c) SenseGraphics AB""2006-2019"'/>
+
+    <ExternProtoDeclare name='Text' url='"./Prototype.x3d#Text"'>
+      <field accessType='inputOutput' name='offset' type='SFVec3f'/>
+      <field accessType='inputOutput' name='string' type='MFString'/>
+    </ExternProtoDeclare>
+
+    <ProtoInstance DEF="PI_TEXT" name='Text'>
+    </ProtoInstance>
+
+    <PythonScript DEF="P" url="script.py" moduleName="ExampleScripts" />
+
+    <PythonScript>
+          <![CDATA[python:from H3DInterface import *
+import ExampleScripts
+
+global_settings = getNamedNode("WORLD_INFO")
+fields_to_handle, field_classes = ExampleScripts.getFieldsForMultipleFieldValue2StringList( global_settings, [0] )
+
+printValuesField = ExampleScripts.MultipleFieldValue2StringList(field_classes)
+for f in fields_to_handle:
+  f.route( printValuesField )
+
+text_node = getNamedNode("PI_TEXT")
+printValuesField.route( text_node.string )
+]]>
+    </PythonScript>
+  </Scene>
+</X3D>

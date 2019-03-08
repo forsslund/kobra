@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version="3.2">
+  <head>
+    <!-- Declare components required to run -->
+    <component name="H3DPhysics"/>
+
+    <meta name='title' content='single_axis_hinge_1_body.x3d'/>
+    <meta name='description' content='A demonstration of SingleAxisHingeJoint from the H3DPhysics component.'/>
+    <meta name='author' content='SenseGraphics AB, 2008-2019'/>
+  </head>
+  <Scene>
+    <GlobalSettings>
+      <HapticsOptions maxDistance="-1" dynamicMode="ALWAYS" />
+    </GlobalSettings>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+  
+  <IMPORT inlineDEF='H3D_EXPORTS' exportedDEF='HDEV' AS='HDEV' />
+    <Viewpoint position='0.0 0.3 0.8' orientation='1 0 0 -0.1'/>
+
+    <Transform DEF="T1">
+      <Shape DEF="Shape1">
+        <Appearance>
+          <Material diffuseColor="1 1 1"/>
+        </Appearance>
+        <Box size="1.0 0.01 1.0"/>
+      </Shape>
+    </Transform>
+
+    <Transform DEF="T2">
+      <Shape DEF="Shape2">
+        <Appearance>
+          <Material diffuseColor="0 1 1"/>
+          <SmoothSurface stiffness="0.2" />
+        </Appearance>
+        <Box size="0.04 0.3 0.3"/>
+      </Shape>
+    </Transform>
+
+    <RigidBodyCollection DEF='RBC' gravity='0 -10 0' physicsEngine="Bullet" constantForceMix='0.001' contactSurfaceThickness='0.001'>
+      <CollisionCollection containerField='collider' DEF='CC' bounce='0.0' frictionCoefficients='100000 100000'>
+
+        <CollidableShape DEF="CS1" containerField='collidables' translation='0.0 0 0.0'>
+          <Shape containerField='shape' USE='Shape1'/>
+        </CollidableShape>
+
+
+        <CollidableShape DEF="CS2" containerField='collidables' translation='0.0 0.2 0.0'>
+          <Shape containerField='shape' USE='Shape2'/>
+        </CollidableShape>
+
+      </CollisionCollection>
+
+
+      <RigidBody DEF='RB1' position='0.0 -0.005 0.0' mass='0.5' useGlobalGravity='true' fixed='true'>
+        <Geometry USE='CS1' containerField='geometry'/>
+      </RigidBody>
+
+      <RigidBody DEF='RB2'  useGlobalGravity="false" position='0.0 0.2 0.0' >
+        <Geometry USE='CS2' containerField='geometry'/>
+      </RigidBody>
+
+      <SingleAxisHingeJoint anchorPoint='0.0 0.2 0.0' forceOutput="angle" axis='0 0 1' stopBounce="0.5" DEF='Joint2'>
+        <RigidBody USE='RB2' containerField='body1'/>
+      </SingleAxisHingeJoint>
+
+    </RigidBodyCollection>
+
+    <Group DEF="INFO">
+
+    </Group>
+
+    <PythonScript url="python/single_axis.py" >
+      <Group USE="INFO" containerField="references" />
+      <SingleAxisHingeJoint USE="Joint2" containerField="references" />
+    </PythonScript>
+
+    <ROUTE fromNode='RB1' fromField='position' toNode='T1' toField='translation'/>
+    <ROUTE fromNode='RB1' fromField='orientation' toNode='T1' toField='rotation'/>
+    <ROUTE fromNode='RB2' fromField='position' toNode='T2' toField='translation'/>
+    <ROUTE fromNode='RB2' fromField='orientation' toNode='T2' toField='rotation'/>
+  </Scene>
+</X3D>

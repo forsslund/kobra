@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='OculusRiftSensor.x3d'/>
+    <meta name='description' content='OculusRiftSensor node example.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+  
+  <Scene DEF="SCENE">
+    <Viewpoint position='0 0 0' />
+    <OculusRiftSensor DEF="ORS" />
+    
+    <!-- On screen instructions -->
+    <ToggleGroup DEF="description_gui">
+      <Transform DEF="description_transform">
+        <Transform translation='0 0.0 -0.4'>
+          <Shape>
+            <Appearance DEF='A'>
+              <Material diffuseColor='0 1 1' />
+            </Appearance>      
+            <Text
+                string='"Fire gun with index finger""Hold A/B or X/Y to change bullet colors""Press the left thumb stick button to toggle this message"' 
+                length='' maxExtent='0' solid='true'>
+              <FontStyle DEF='F' size='0.03' spacing='1.0' justify='MIDDLE'/>
+            </Text>
+          </Shape>
+        </Transform>
+      </Transform>
+    </ToggleGroup>
+
+    <PythonScript DEF='P' url='OculusRiftSensorScript.py'>
+      <ToggleGroup USE="description_gui" containerField="references" />
+    </PythonScript>
+
+    <!-- Left gun particle effect-->
+    <Transform DEF="left_particle_transform">
+      <Transform rotation="0.53702 0 0 0.84356">
+        <ParticleSystem DEF="left_particle" createParticles='true' enabled='true' particleLifetime='0.5'
+            lifetimeVariation='0.5' maxParticles='100' particleSize='0.005 0.005' geometryType='SPRITE' >
+          <Appearance>
+              <Material DEF="left_particle_material" diffuseColor='1 0 0' />
+          </Appearance>
+          <ConeEmitter DEF="left_ce" speed='0.25' variation='1' mass='0.0002' surfaceArea='0.02' direction= '0 -1 0' angle = '0.25' />
+        </ParticleSystem>
+      </Transform>
+    </Transform>
+
+    <!-- Right gun particle effect-->
+    <Transform DEF="right_particle_transform">
+      <Transform rotation="0.53702 0 0 0.84356">
+        <ParticleSystem DEF="right_particle" createParticles='true' enabled='true' particleLifetime='0.5'
+            lifetimeVariation='0.5' maxParticles='100' particleSize='0.005 0.005' geometryType='SPRITE'>
+          <Appearance>
+              <Material DEF="right_particle_material" diffuseColor='0 1 0' />
+          </Appearance>
+          <ConeEmitter DEF="right_ce" speed='0.25' variation='1' mass='0.0002' surfaceArea='0.02' direction= '0 -1 0' angle = '0.25' />
+        </ParticleSystem>
+      </Transform>
+    </Transform>
+
+    <!-- Left gun geometry-->
+    <Transform DEF="left_gun" >
+      <Group>
+        <Transform rotation="0.53702 0 0 0.84356">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor='0.3 0.3 0.3' />
+              <FrictionalSurface />
+            </Appearance>      
+            <Cylinder radius='0.01' height='0.08' />
+          </Shape>
+        </Transform>
+        <Transform rotation="0.53702 0 0 0.84356" translation="0.0 0.01 0.03">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor='0.3 0.3 0.3' />
+            </Appearance>      
+            <Box size='0.02 0.03 0.03' solid='true' />
+          </Shape>
+        </Transform>
+      </Group>
+    </Transform>
+
+    <!-- Right gun geometry-->
+    <Transform DEF="right_gun" >
+      <Group>
+        <Transform rotation="0.53702 0 0 0.84356">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor='0.3 0.3 0.3' />
+              <FrictionalSurface />
+            </Appearance>      
+            <Cylinder radius='0.01' height='0.08' />
+          </Shape>
+        </Transform>
+        <Transform rotation="0.53702 0 0 0.84356" translation="0.0 0.01 0.03">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor='0.3 0.3 0.3' />
+            </Appearance>      
+            <Box size='0.02 0.03 0.03' solid='true' />
+          </Shape>
+        </Transform>
+      </Group>
+    </Transform>
+  
+    <!-- Position routing-->
+    <ROUTE fromNode="ORS" fromField="leftHandPosition" toNode="left_gun" toField="translation" />
+    <ROUTE fromNode="ORS" fromField="rightHandPosition" toNode="right_gun" toField="translation" />
+    <ROUTE fromNode="ORS" fromField="leftHandOrientation" toNode="left_gun" toField="rotation" />
+    <ROUTE fromNode="ORS" fromField="rightHandOrientation" toNode="right_gun" toField="rotation" />
+    <ROUTE fromNode="ORS" fromField="leftHandPosition" toNode="left_particle_transform" toField="translation" />
+    <ROUTE fromNode="ORS" fromField="rightHandPosition" toNode="right_particle_transform" toField="translation" />
+    <ROUTE fromNode="ORS" fromField="leftHandOrientation" toNode="left_particle_transform" toField="rotation" />
+    <ROUTE fromNode="ORS" fromField="rightHandOrientation" toNode="right_particle_transform" toField="rotation" />
+
+    <!-- Position of the description text -->
+    <ROUTE fromNode="ORS" fromField="headPosition" toNode="description_transform" toField="translation" />
+    <ROUTE fromNode="ORS" fromField="headOrientation" toNode="description_transform" toField="rotation" /> 
+    <ROUTE fromNode="ORS" fromField="buttons" toNode="P" toField="description_toggle" />
+
+    <!-- Fire trigger-->
+    <ROUTE fromNode="ORS" fromField="leftHandIndexTrigger" toNode="P" toField="left_fire_gun" />
+    <ROUTE fromNode="ORS" fromField="rightHandIndexTrigger" toNode="P" toField="right_fire_gun" />
+    <ROUTE fromNode="P" fromField="left_fire_gun" toNode="left_ce" toField="speed" />
+    <ROUTE fromNode="P" fromField="right_fire_gun" toNode="right_ce" toField="speed" />
+
+    <!-- Color toggling -->
+    <ROUTE fromNode="ORS" fromField="buttons" toNode="P" toField="left_color_toggler" />
+    <ROUTE fromNode="ORS" fromField="buttons" toNode="P" toField="right_color_toggler" />
+
+    <ROUTE fromNode="P" fromField="left_color_toggler" toNode="left_particle_material" toField="diffuseColor" />
+    <ROUTE fromNode="P" fromField="right_color_toggler" toNode="right_particle_material" toField="diffuseColor" />
+
+  </Scene>
+</X3D>

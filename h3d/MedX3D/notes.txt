@@ -1,0 +1,21 @@
+* Specification: VolumeData - voxels is supposed to be a MF 3D texture field for explicit MIPmapping, how to do that
+* Specification: OpacityMapVolumeStyle - transfer functions 2D or 3D, how?
+* VolumeData - error when the default render style is deleted
+* VolumeData - raystep and planes, here or in renderStyle?
+* Need to set CLAMP_TO_EDGE for textures, have to investigate...
+* Non-power-of-two textures?
+* The old inside test for the raycaster
+  // check if pos is within [0,1]^3
+  bool inbox(vec3 pos) {
+    return all(lessThanEqual(abs(pos-0.5),vec3(0.5,0.5,0.5)));
+  }
+* What happens if we change render style, must get textureMatrices, 
+  set rayStep, ...
+* Now rayStep and useSlicing is in the VolumeData class, should it be in the X3DVolumeRenderStyleNode instead? 
+* Specification: No isovalue in ISOSurfaceVolumeStyle!?
+* Specification: No transferFunction for coloring isosurfaces in ISOSurfaceVolumeStyle?
+* Specification: No maximum intensity projection style?
+* How to access the VolumeData from the renderStyle field? Need voxels in ISOSurfaceVolumeRenderStyle in order to compute surfaceNormals
+* How to update the renderStyle when it is added to the volume? The voxels, texture matrioces, and rayStep must be set. For now it is done in VolumeData::render() 
+* Specification: X3DVolumeNode or X3DVolumeShapeNode?
+* Fixed the bug with the shader fields, now they are copied using the shaderField function. Is it possible to do the same for the fields in VolumeData (voxels, textureMatrix*, rayStep). Will it then work if we change the voxels field? For now we keep local copies in the render style node that are routed to from the VolumeData class in the preRender function.

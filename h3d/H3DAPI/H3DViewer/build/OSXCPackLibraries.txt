@@ -1,0 +1,52 @@
+file( GLOB H3DAPI_FILES "/usr/local/lib/libH3DAPI.*.dylib" )
+file( GLOB HAPI_FILES "/usr/local/lib/libHAPI.*.dylib" )
+file( GLOB H3DUTIL_FILES "/usr/local/lib/libH3DUtil.*.dylib" )
+file( GLOB GLEW_FILES "/opt/local/lib/libGLEW.*.dylib" )
+file( GLOB AUDIOFILE_FILES "/opt/local/lib/libaudiofile.*.dylib" )
+file( GLOB FONTCONFIG_FILES "/opt/local/lib/libfontconfig.*.dylib" "/opt/local/lib/libiconv.*.dylib" )
+file( GLOB FREEIMAGE_FILES "/opt/local/lib/libfreeimage*dylib*" )
+file( GLOB FREETYPE_FILES "/opt/local/lib/libfreetype.*.dylib" "/opt/local/lib/libz.*.dylib" "/opt/local/lib/libbz2.*.dylib" "/opt/local/lib/libexpat.*.dylib" )
+file( GLOB FTGL_FILES "/opt/local/lib/libftgl.*.dylib" )
+#file( GLOB NIFALCON_FILES "/usr/local/lib/libnifalcon*.dylib" )
+#libusb required for nifalcon
+file( GLOB LIBUSB_FILES  /usr/local/lib/libusb*.dylib )
+file( GLOB OGG_FILES "/opt/local/lib/libogg.*.dylib" )
+file( GLOB SPIDERMONKEY_FILES "/opt/local/lib/libjs.dylib" "/opt/local/lib/nspr/*.dylib" )
+file( GLOB TEEM_FILES "/opt/local/lib/libteem.*.dylib" )
+file( GLOB VORBIS_FILES "/opt/local/lib/libvorbis.*.dylib" )
+file( GLOB VORBISFILE_FILES "/opt/local/lib/libvorbisfile.*.dylib" )
+file( GLOB WXWIDGETS_FILES "/opt/local/lib/libwx*.*.dylib" "/opt/local/lib/libpng15.*.dylib" "/opt/local/lib/libjpeg.*.dylib" "/opt/local/lib/libtiff.*.dylib" "/opt/local/lib/libSDL-*.dylib" "/opt/local/lib/libX*.*.dylib" "/opt/local/lib/libxml2.*.dylib" "/opt/local/lib/liblzma.*.dylib" )
+file( GLOB XERCES_FILES "/opt/local/lib/libxerces-c.*.dylib" )
+file( GLOB ODE_FILES "/opt/local/lib/libode.*.dylib" )
+file( GLOB BULLET_FILES "/opt/local/lib/libbullet*.*.dylib" "/opt/local/lib/libLinearMath.*.dylib" )
+
+set( OSX_DEPENDENT_LIBRARIES ${H3DAPI_FILES}
+                             ${HAPI_FILES}
+                             ${H3DUTIL_FILES}
+                             ${GLEW_FILES}
+                             ${AUDIOFILE_FILES}
+                             ${BULLET_FILES}
+                             ${FONTCONFIG_FILES}
+                             ${FREEIMAGE_FILES}
+                             ${FREETYPE_FILES}
+                             ${FTGL_FILES}
+                             ${NIFALCON_FILES}
+                             ${LIBUSB_FILES}
+                             ${ODE_FILES}
+                             ${OGG_FILES}
+                             ${SPIDERMONKEY_FILES}
+                             ${TEEM_FILES}
+                             ${VORBIS_FILES}
+                             ${VORBISFILE_FILES}
+                             ${WXWIDGETS_FILES}
+                             ${XERCES_FILES} )
+
+message( STATUS ${CMAKE_INSTALL_PREFIX} )
+
+file( GLOB MEDX3D_FILES "${CMAKE_INSTALL_PREFIX}/lib/libh3dmedx3d.*.dylib" )
+file( GLOB UI_FILES ${CMAKE_INSTALL_PREFIX}/lib/libh3dui.*.dylib )
+file( GLOB H3DPHYSICS_FILES "${CMAKE_INSTALL_PREFIX}/lib/libh3dphysics.*.dylib" )
+
+set( OSX_PLUGIN_LIBRARIES ${MEDX3D_FILES}
+                          ${UI_FILES}
+                          ${H3DPHYSICS_FILES} )

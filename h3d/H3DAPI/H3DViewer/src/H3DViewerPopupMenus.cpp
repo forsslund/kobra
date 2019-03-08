@@ -1,0 +1,691 @@
+//////////////////////////////////////////////////////////////////////////////
+//    Copyright 2011-2019, SenseGraphics AB
+//
+//    This file is part of H3D API.
+//
+//    H3D API is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation; either version 2 of the License, or
+//    (at your option) any later version.
+//
+//    H3D API is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with H3D API; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//    A commercial license is also available. Please contact us at 
+//    www.sensegraphics.com for more information.
+//
+//
+/// \file H3DViewerPopupMenus.cpp
+/// \brief CPP file for H3DViewerPopupMenus.
+///
+//
+//
+//////////////////////////////////////////////////////////////////////////////
+#include "H3DViewerPopupMenus.h"
+#include "WxReferenceInfoResultDialog.h"
+#include <fstream>
+#include <wx/wx.h>
+#include <H3D/Scene.h>
+#include <H3D/Viewpoint.h>
+#include <H3D/IndexedTriangleSet.h>
+#include <H3D/Coordinate.h>
+#include <H3D/MatrixTransform.h>
+#include <H3D/X3DTexture2DNode.h>
+#include <H3D/X3DTexture3DNode.h>
+#include <H3D/X3DShapeNode.h>
+#include <H3D/X3DGeometryNode.h>
+#include <H3D/X3D.h>
+
+#include <H3DUtil/LoadImageFunctions.h>
+
+void H3DViewerPopupMenus::OnTreeViewCollapseAll( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  if( id.IsOk() ) {
+    treeview_dialog->collapseTree( id );
+  }
+}
+
+void H3DViewerPopupMenus::OnTreeViewExpandAll( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  if( id.IsOk() ) {
+    treeview_dialog->expandTree( id );
+  }
+}
+
+//Callback for collapse children menu choice.
+void H3DViewerPopupMenus::OnTreeViewCollapseChildren( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  wxTreeItemIdValue cookie;
+  wxTreeItemId child_id = treeview_dialog->TreeViewTree->GetFirstChild( id, cookie );
+  while( child_id.IsOk() ) {
+    treeview_dialog->collapseTree( child_id );
+    child_id = treeview_dialog->TreeViewTree->GetNextSibling( child_id );
+  }
+}
+
+//Callback for node watch menu choice.
+void H3DViewerPopupMenus::OnTreeViewNodeWatch( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+  } else {
+#ifdef USE_PROPGRID
+    H3DViewerFieldValuesDialogPropGrid *fv = new H3DViewerFieldValuesDialogPropGrid( this );
+#else
+    H3DViewerFieldValuesDialog *fv = new H3DViewerFieldValuesDialog( this );
+#endif
+    fv->displayFieldsFromNode( (*ni).second.get() );
+    fv->Show();
+  }
+}
+
+//Callback for show references menu choice.
+void H3DViewerPopupMenus::OnTreeViewShowNodeReferences( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+  } else {
+
+#ifdef HAVE_PROFILER
+    wxString dialog_title( "test");
+    WxReferenceInfoResultDialog *dialog = new WxReferenceInfoResultDialog( this, wxID_ANY, dialog_title,
+    wxDefaultPosition, wxDefaultSize,
+    (wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|wxMAXIMIZE_BOX|wxMINIMIZE_BOX|wxCLIP_CHILDREN));
+    dialog->setDisplayedNode( (*ni).second.get() );
+    //fv->displayFieldsFromNode( (*ni).second.get() );
+    dialog->Show();
+#endif
+  }
+}
+
+//Callback for show references menu choice.
+void H3DViewerPopupMenus::OnTreeViewDetectCircularReferences( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+  } else {
+  
+      wxMessageBox( wxT("No circular references detected"),
+                  wxT("Message"),
+                  wxOK | wxICON_EXCLAMATION);
+  }
+}
+
+
+//Callback for node save x3d menu choice.
+void H3DViewerPopupMenus::OnTreeViewSaveX3D( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+  } else {
+    auto_ptr< wxFileDialog > file_dialog ( new wxFileDialog ( this,
+                                                              wxT("File to save as.."),
+                                                              wxT(""),
+                                                              wxT(""),
+                                                              wxT("*.*"),
+                                                              wxFD_SAVE,
+                                                              wxDefaultPosition) );
+    
+    if (file_dialog->ShowModal() == wxID_OK) {
+      std::string filename(file_dialog->GetPath().mb_str());
+      std::ofstream os( filename.c_str() );
+      if( os.fail() ) {
+        wxMessageBox( wxT("Unable to open selected file"), 
+                      wxT("Error"),
+                      wxOK | wxICON_EXCLAMATION);
+      }
+      
+      try {
+        X3D::writeNodeAsX3D( os,
+                             (*ni).second.get() );
+      } catch (const Exception::H3DException &e) {
+        stringstream s;
+        s << e;
+        wxMessageBox( wxString(s.str().c_str(),wxConvUTF8), wxT("Error"),
+                      wxOK | wxICON_EXCLAMATION);
+      }
+      os.close();
+    }
+  }
+}
+
+void H3DViewerPopupMenus::onTreeViewLookAt( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+    return;
+  }
+
+  Matrix4f local_to_global;
+  wxTreeItemId tmp_id = treeview_dialog->TreeViewTree->GetItemParent(id);
+  while( tmp_id.m_pItem != NULL ) {
+    H3DViewerTreeViewDialog::TreeIdMap::iterator ni_tmp = treeview_dialog->node_map.find( tmp_id.m_pItem );
+    if( ni_tmp == treeview_dialog->node_map.end() )
+      break;
+    if( MatrixTransform * mt = dynamic_cast< MatrixTransform * >(ni_tmp->second.get()) ) {
+      local_to_global = mt->matrix->getValue();
+    }
+    tmp_id = treeview_dialog->TreeViewTree->GetItemParent(tmp_id);
+  }
+
+  if( H3DBoundedObject * bound_object = dynamic_cast< H3DBoundedObject * >(ni->second.get()) ) {
+    Bound * the_bound = bound_object->bound->getValue();
+    if( the_bound ) {
+      if( BoxBound *bb = dynamic_cast< BoxBound * >(the_bound) ) {
+        Vec3f object_center = bb->center->getValue();
+        Vec3f object_size = bb->size->getValue();
+        X3DViewpointNode * vp = X3DViewpointNode::getActive();
+        Matrix4f vp_inv_m = vp->accInverseMatrix->getValue();
+        Vec3f desired_point = vp_inv_m * local_to_global * object_center;
+        Vec3f dir = vp->totalPosition->getValue() - desired_point;
+        H3DFloat dir_length = dir.length();
+        if( dir_length < Constants::f_epsilon )
+          dir = Vec3f( 0, 0, 1 );
+        else
+          dir /= dir_length;
+        Vec3f ltg_scaling = local_to_global.getScalePart();
+        Vec3f vp_scaling = vp_inv_m.getScalePart();
+        // 2 is simply the 
+        H3DFloat scaled_size = 2 * H3DMax( vp_scaling.x, H3DMax( vp_scaling.y, vp_scaling.z ) ) *
+          H3DMax( ltg_scaling.x, H3DMax( ltg_scaling.y, ltg_scaling.z ) ) *
+          object_size.length();
+        vp->moveTo( desired_point + dir * scaled_size );
+        vp->rotateAroundSelf( -vp->totalOrientation->getValue() * Rotation( Vec3f(0, 0, 1), dir ) );
+      }
+    }
+  }
+}
+
+//Callback for node save VRML menu choice.
+void H3DViewerPopupMenus::OnTreeViewSaveVRML( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+  } else {
+    auto_ptr< wxFileDialog > file_dialog ( new wxFileDialog ( this,
+                                                              wxT("File to save as.."),
+                                                              wxT(""),
+                                                              wxT(""),
+                                                              wxT("*.*"),
+                                                              wxFD_SAVE,
+                                                              wxDefaultPosition) );
+
+    if (file_dialog->ShowModal() == wxID_OK) {
+      std::string filename(file_dialog->GetPath().mb_str());
+      std::ofstream os( filename.c_str() );
+      if( os.fail() ) {
+        wxMessageBox( wxT("Unable to open selected file"), 
+                      wxT("Error"),
+                      wxOK | wxICON_EXCLAMATION);
+      }
+      
+      try {
+        X3D::writeNodeAsVRML( os,
+                              (*ni).second.get() );
+      } catch (const Exception::H3DException &e) {
+        stringstream s;
+        s << e;
+        wxMessageBox( wxString(s.str().c_str(),wxConvUTF8), wxT("Error"),
+                      wxOK | wxICON_EXCLAMATION);
+      }
+      os.close();
+    }
+  }
+}
+
+
+//Callback for node save x3d menu choice.
+void H3DViewerPopupMenus::OnTreeViewSaveSTL( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+    return;
+  } else {
+    X3DGeometryNode *geom = 
+      dynamic_cast< X3DGeometryNode * >( (*ni).second.get() );
+
+    if( !geom ) {
+      wxMessageBox( wxT("Selected tree item is not a geometry node"),
+                    wxT("Error"),
+                    wxOK | wxICON_EXCLAMATION);
+      return;
+    }
+
+    auto_ptr< wxFileDialog > file_dialog( new wxFileDialog ( this,
+                                                             wxT("File to save as.."),
+                                                             wxT(""),
+                                                             wxT(""),
+                                                             wxT("*.*"),
+                                                             wxFD_SAVE,
+                                                             wxDefaultPosition) );
+
+    if (file_dialog->ShowModal() == wxID_OK) {
+      std::string filename(file_dialog->GetPath().mb_str());
+      std::ofstream os( filename.c_str() );
+      if( os.fail() ) {
+        wxMessageBox( wxT("Unable to open selected file"), 
+                      wxT("Error"),
+                      wxOK | wxICON_EXCLAMATION);
+      }
+      
+      try {
+        X3D::writeGeometryAsSTL( os, geom );
+      } catch (const Exception::H3DException &e) {
+        stringstream s;
+        s << e;
+        wxMessageBox( wxString(s.str().c_str(),wxConvUTF8), wxT("Error"),
+                      wxOK | wxICON_EXCLAMATION);
+      }
+      os.close();
+    }
+  }
+}
+
+//Callback for node save x3d menu choice.
+void H3DViewerPopupMenus::OnTreeViewSaveTrianglesX3D( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+  } else {
+    wxFileDialog *file_dialog = new wxFileDialog ( this,
+                                                   wxT("File to save as.."),
+                                                   wxT(""),
+                                                   wxT(""),
+                                                   wxT("*.*"),
+                                                   wxFD_SAVE,
+                                                   wxDefaultPosition) ;
+
+    if (file_dialog->ShowModal() == wxID_OK) {
+      std::string filename(file_dialog->GetPath().mb_str());
+      std::ofstream os( filename.c_str() );
+      if( os.fail() ) {
+        wxMessageBox( wxT("Unable to open selected file"), 
+                      wxT("Error"),
+                      wxOK | wxICON_EXCLAMATION);
+      }
+      
+      try {
+        Node *n = (*ni).second.get();
+
+        AutoRef< IndexedTriangleSet > its( new IndexedTriangleSet );
+
+        vector< Vec3f > triangles;
+        triangles.reserve( 200 );
+        treeview_dialog->collectAllTriangles( n, Matrix4f(), triangles ); 
+
+        Coordinate *c = new Coordinate;
+        c->point->setValue( triangles );
+        vector< int > indices;
+        indices.reserve( triangles.size() );
+        for( unsigned int i = 0; i < triangles.size(); ++i ) {
+          indices.push_back( i );
+        }
+
+        its->coord->setValue( c );
+        its->index->setValue( indices );
+       
+        X3D::writeNodeAsX3D( os, its.get() );
+      } catch (const Exception::H3DException &e) {
+        stringstream s;
+        s << e;
+        wxMessageBox( wxString(s.str().c_str(),wxConvUTF8), wxT("Error"),
+                      wxOK | wxICON_EXCLAMATION);
+      }
+      os.close();
+    }
+  }
+}
+
+void H3DViewerPopupMenus::OnTreeViewDeleteNode( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+    return;
+  }
+
+  Node *selected_node = (*ni).second.get();
+
+  if( dynamic_cast< Scene * >( selected_node ) ) {
+    wxMessageBox( wxT("Deletion of Scene node not allowed."),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+    return;
+  }
+
+  if( dynamic_cast< H3DWindowNode * >( selected_node ) ) {
+    wxMessageBox( wxT("Deletion of H3DWindowNode node not allowed."),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+    return;
+  }
+
+  wxTreeItemId parent_id = treeview_dialog->TreeViewTree->GetItemParent( id );
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni_parent = treeview_dialog->node_map.find( parent_id.m_pItem );
+
+  if( ni_parent == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item does not have a parent"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+    return;
+  }
+
+  Node *n = (*ni_parent).second.get();
+
+  H3DNodeDatabase *db = H3DNodeDatabase::lookupNodeInstance( n );
+  for( H3DNodeDatabase::FieldDBConstIterator i = db->fieldDBBegin();
+       db->fieldDBEnd() != i; ++i ) {
+    Field *f = i.getField( n ); 
+    if( SFNode *sfnode = dynamic_cast< SFNode * >( f ) ) {
+      if( sfnode->getValue() == selected_node ) {
+        if( sfnode->getAccessType() == Field::OUTPUT_ONLY ||
+            sfnode->getAccessType() == Field::INITIALIZE_ONLY ) {
+          wxMessageBox( wxT("Deletion of node in INITIALIZE_ONLY or OUTPUT_ONLY field not allowed."),
+                        wxT("Error"),
+                        wxOK | wxICON_EXCLAMATION);
+        } else {
+          sfnode->setValue( NULL );
+        }
+        return;
+      }
+    } else if( MFNode *mfnode = dynamic_cast< MFNode * >( f ) ) {
+      for( unsigned int j = 0; j < mfnode->size(); ++j ) {
+        if( mfnode->getValueByIndex( j ) == selected_node ) { 
+          if( mfnode->getAccessType() == Field::OUTPUT_ONLY ||
+              mfnode->getAccessType() == Field::INITIALIZE_ONLY ) {
+            wxMessageBox( wxT("Deletion of node in INITIALIZE_ONLY or OUTPUT_ONLY field not allowed."),
+                          wxT("Error"),
+                          wxOK | wxICON_EXCLAMATION);
+          } else {
+            mfnode->erase( selected_node );
+          }
+        }
+      }
+    }
+  }
+  
+}
+
+void H3DViewerPopupMenus::OnTreeViewAddChildNode( wxCommandEvent& event ) {
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+	return;
+  }
+
+  vector< wxString > node_fields;
+
+  Node *selected_node = (*ni).second.get();
+  if (!selected_node) {
+    return;
+  }
+
+  H3DNodeDatabase *db = H3DNodeDatabase::lookupNodeInstance( selected_node );
+  for( H3DNodeDatabase::FieldDBConstIterator i = db->fieldDBBegin();
+       db->fieldDBEnd() != i; ++i ) {
+    Field *f = i.getField( selected_node ); 
+    if( SFNode *sfnode = dynamic_cast< SFNode * >( f ) ) {
+      if( sfnode->getAccessType() == Field::INPUT_ONLY ||
+          sfnode->getAccessType() == Field::INPUT_OUTPUT ) {
+        node_fields.push_back( wxString(sfnode->getName().c_str(),wxConvUTF8) );
+      } 
+    } else if( MFNode *mfnode = dynamic_cast< MFNode * >( f ) ) {
+      if( mfnode->getAccessType() == Field::INPUT_ONLY ||
+          mfnode->getAccessType() == Field::INPUT_OUTPUT ) {
+        node_fields.push_back( wxString(mfnode->getName().c_str(), wxConvUTF8) );
+      }
+    }
+  }
+  
+  if( node_fields.empty() ) {
+    wxMessageBox( wxT("Selected node does not have a SFNode or MFNode field."),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+    return;
+  }
+
+  string field_to_change;
+
+  if( node_fields.size() > 1 ) {
+    wxString *choices = new wxString[ node_fields.size() ];
+    for( unsigned int i = 0; i < node_fields.size(); ++i ) {
+      choices[i] = node_fields[i];
+    }
+    wxSingleChoiceDialog *choice_dialog = new wxSingleChoiceDialog ( this,
+                                                                     wxT("Add/replace node in which field.."),
+                                                                     wxT(""),
+                                                                     node_fields.size(),
+                                                                     choices );
+    delete [] choices;
+
+    if (choice_dialog->ShowModal() == wxID_OK) {
+      field_to_change = std::string( node_fields[ choice_dialog->GetSelection() ].mb_str() );
+    } else {
+      return;
+    }
+  }
+
+  H3DViewerAddChildDialog *node_name_dialog = new H3DViewerAddChildDialog(this);
+  node_name_dialog->SetTargetField(selected_node->getField( field_to_change ));
+  if (node_name_dialog->ShowModal() == wxID_OK) {
+    Node *new_node = H3DNodeDatabase::createNode( std::string(node_name_dialog->GetNodeName().mb_str()) );
+    if( !new_node ) {
+      wxMessageBox( wxT("No such node type exists: " + node_name_dialog->GetNodeName()),
+                    wxT("Error"),
+                    wxOK | wxICON_EXCLAMATION);
+    } else {
+      Field *f = selected_node->getField( field_to_change );
+      SFNode *sfnode = dynamic_cast< SFNode * >( f );
+      MFNode *mfnode = dynamic_cast< MFNode * >( f );
+       
+      if( sfnode ) {
+        AutoRef< Node > old_node( sfnode->getValue() );
+        try { 
+          sfnode->setValue( new_node );
+        } catch (...) {
+          sfnode->setValue( old_node.get() );
+          wxMessageBox( wxT("Invalid node type for field"),
+                        wxT("Error"),
+                        wxOK | wxICON_EXCLAMATION);
+        }
+      } else if( mfnode ) {
+        try { 
+          mfnode->push_back( new_node );
+        } catch (...) {
+          wxMessageBox( wxT("Invalid node type for field"),
+                        wxT("Error"),
+                        wxOK | wxICON_EXCLAMATION);
+        }
+      }
+    }
+  }
+  delete node_name_dialog;
+}
+
+// Callback for node save Nrrd menu choice.
+void H3DViewerPopupMenus::OnTreeViewSaveNrrd( wxCommandEvent& event ) {
+#ifdef HAVE_TEEM
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+  } else {
+    auto_ptr< wxFileDialog > file_dialog ( new wxFileDialog ( this,
+                                                              wxT("File to save as.."),
+                                                              wxT(""),
+                                                              wxT(""),
+                                                              wxT("*.nrrd"),
+                                                              wxFD_SAVE,
+                                                              wxDefaultPosition) );
+
+    if (file_dialog->ShowModal() == wxID_OK) {
+      try {
+        Node *n = (*ni).second.get();
+        Image *image = NULL;
+        if( X3DTexture2DNode * tex = 
+            dynamic_cast< X3DTexture2DNode * >( n ) ) {
+          image = tex->image->getValue();
+
+          // Some texture nodes don't write to their image field; 
+          // e.g. GeneratedTexture and RenderTargetTexture. 
+          // 
+          // For these cases, we extract the image from OpenGL.
+          if(!image) {
+            image = tex->renderToImage(-1, -1);
+          }
+        } else if( X3DTexture3DNode * tex = 
+                   dynamic_cast< X3DTexture3DNode * >( n ) ) {
+          image = tex->image->getValue();
+
+          if(!image) {
+            image = tex->renderToImage(-1, -1);
+          }
+        }
+ 
+        if(!image || (H3DUtil::saveImageAsNrrdFile( 
+          std::string(file_dialog->GetPath().mb_str()), image ) != 0) ) {
+          stringstream s;
+          s << "Error saving nrrd file";
+          wxMessageBox( wxString(s.str().c_str(),wxConvUTF8), wxT("Error"),
+                        wxOK | wxICON_EXCLAMATION);
+        }
+      } catch (const Exception::H3DException &e) {
+        stringstream s;
+        s << e;
+        wxMessageBox( wxString(s.str().c_str(),wxConvUTF8), wxT("Error"),
+                      wxOK | wxICON_EXCLAMATION);
+      }
+    }
+  }
+#endif
+}
+
+// Callback for node save Png menu choice.
+void H3DViewerPopupMenus::OnTreeViewSavePng( wxCommandEvent& event ) {
+#ifdef HAVE_FREEIMAGE
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+  } else {
+    auto_ptr< wxFileDialog > file_dialog ( new wxFileDialog ( this,
+                                                              wxT("File to save as.."),
+                                                              wxT(""),
+                                                              wxT(""),
+                                                              wxT("*.png"),
+                                                              wxFD_SAVE,
+                                                              wxDefaultPosition) );
+
+    if (file_dialog->ShowModal() == wxID_OK) {
+      try {
+        Node *n = (*ni).second.get();
+        Image *image = NULL;
+        if( X3DTexture2DNode * tex = 
+            dynamic_cast< X3DTexture2DNode * >( n ) ) {
+          image = tex->image->getValue();
+
+          // Some texture nodes don't write to their image field; 
+          // e.g. GeneratedTexture and RenderTargetTexture. 
+          // 
+          // For these cases, we extract the image from OpenGL.
+          if(!image) {
+            image = tex->renderToImage(-1, -1);
+          }
+        } else if( X3DTexture3DNode * tex = 
+                   dynamic_cast< X3DTexture3DNode * >( n ) ) {
+          image = tex->image->getValue();
+
+          if(!image) {
+            image = tex->renderToImage(-1, -1);
+          }
+        }
+ 
+        if(!image || !H3DUtil::saveFreeImagePNG( 
+              std::string(file_dialog->GetPath().mb_str()), *image ) ) {
+          stringstream s;
+          s << "Error saving png file";
+          wxMessageBox( wxString(s.str().c_str(),wxConvUTF8), wxT("Error"),
+                        wxOK | wxICON_EXCLAMATION);
+        }
+      } catch (const Exception::H3DException &e) {
+        stringstream s;
+        s << e;
+        wxMessageBox( wxString(s.str().c_str(),wxConvUTF8), wxT("Error"),
+                      wxOK | wxICON_EXCLAMATION);
+      }
+    }
+  }
+#endif
+}
+
+void H3DViewerPopupMenus::OnTreeViewShowImage ( wxCommandEvent& event ) {
+#ifdef HAVE_FREEIMAGE
+  wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
+  
+  H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
+  if( ni == treeview_dialog->node_map.end() ) {
+    wxMessageBox( wxT("Selected tree item is not a node"),
+                  wxT("Error"),
+                  wxOK | wxICON_EXCLAMATION);
+  } else {
+    X3DTextureNode* image = dynamic_cast < X3DTextureNode* > ( (*ni).second.get() );
+    if ( image ) {
+      treeview_dialog->showImage ( *image );
+    } else {
+      wxMessageBox( wxT("Selected tree item is not an X3DTextureNode"),
+                    wxT("Error"),
+                    wxOK | wxICON_EXCLAMATION);
+    }
+  }
+#endif
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Group>
+  <Shape>
+    <Appearance>
+      <Material diffuseColor="1 0 0" transparency="0.5"/>
+    </Appearance>
+    <Sphere DEF="SPHERE" radius = "0.01" />
+  </Shape>
+  <SpringEffect DEF="SPRING" escapeDistance="0.03"/>
+  <PythonScript DEF="SPRINGSPYTHON" url='"springs.py" "http://www.h3dapi.org/uploads/H3DPluginExamples/springs.py"' />
+
+  <ROUTE fromNode="SPRING" fromField="active" toNode="SPRINGSPYTHON" toField="sphereRadius"/>
+  <ROUTE fromNode="SPRING" fromField="startDistance" toNode="SPRINGSPYTHON" toField="sphereRadius"/>
+  <ROUTE fromNode="SPRING" fromField="escapeDistance" toNode="SPRINGSPYTHON" toField="sphereRadius"/>
+  <ROUTE fromNode="SPRINGSPYTHON" fromField="sphereRadius" toNode="SPHERE" toField="radius"/>
+
+
+</Group>

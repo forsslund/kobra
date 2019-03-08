@@ -1,0 +1,129 @@
+﻿
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <title>H3DAPI Unit Testing Results</title>
+    <script src="jquery-2.1.4.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="jquery.flot.js"></script>
+    <script src="jquery.flot.stack.js"></script>
+    <script src="jquery.flot.tooltip.js"></script>
+    <script src="jquery.flot.navigate.js"></script>
+    <script src="jquery.flot.time.js"></script>
+    <script src="result_scripts.js"></script>
+    <script type="text/javascript">
+      function toggle_visibility(input_id){
+        var e = document.getElementById(input_id);
+        if(e.tagName == "TABLE") {
+          if(e.style.display == '')
+            e.style.display = 'none';
+          else
+            e.style.display = '';
+        } else {
+          if(e.style.display == 'block')
+            e.style.display = 'none';
+          else
+            e.style.display = 'block';
+        }
+      }
+    </script>
+    
+    <link rel='stylesheet' type='text/css' href='index.css'>
+    <link rel='stylesheet' type='text/css' href='iSpinner.css'>
+  </head>
+
+  <body>
+    <div id='Header'><h1><a href='.'>Test Results</a></h1></div>
+    <div id='Content'>
+    <div id='Servers'>
+      <span class="Build_Header">Test Builds:</span>
+      <span class="Hardware_Header">Test Hardware:</span>
+      <div id='Builds_list'></div>
+      <div id='Hardware_list'></div>
+    </div>
+    <div id='TestRuns'><h2>Test Runs:</h2><div id='TestRuns_List'></div></div>
+    <div id ="Toggle_button">
+      <button onclick="toggle_visibility('Options')">Toggle options</button>
+    </div>
+    <div id='Options' style="display:block">
+      <div id='Options_Legend'>
+        <h3>Color legend:</h3>
+        <span class="noselect legend_allsuccess">All tests in Build/Hardware/TestRun successful</span><br/>
+        <span class="noselect legend_successful_case">Test(s) successful </span><br/>
+        <span class="noselect legend_failed_case">Test(s) failed: again</span><br/>
+        <span class="noselect legend_failed_new">Test(s) failed: new failure</span><br/>
+      </div>
+      <div id='Option_Properties'></div>
+      <div id='Option_Servers'></div>  
+      <div id='Options_Toggle'>
+        <h3 class='Options_Header'>Expand/Collapse</h3>
+        <input id='Options_Toggle_Only_Show_Failed' type='button' value='Only Show Failed Cases'/><br/>
+        <input id='Options_Toggle_Categories' type='button' value='All Categories'/><br/>
+        <input id='Options_Toggle_Cases' type='button' value='Visible Cases'/><br/>
+        <input id='Options_Collapse_Steps' type='button' value='Collapse visible Steps'/>
+        <input id='Options_Expand_Steps' type='button' value='Expand Visible Steps'/>
+      </div>
+      <div id='Operations'>
+        <h3 class='Operations_Header'>Operations</h3>
+        <input id='Operations_Update_Baselines' type='button' value='Update all selected baselines'/>
+        <div id='baseline_result_div'>
+          <span id='baseline_result_span'>Result of baseline submission goes here</span>
+          <div id='baseline_loading_spinner_container'>
+            <div id='baseline_loading_spinner' class="ispinner black animating">
+              <div class="ispinner-blade"></div>
+              <div class="ispinner-blade"></div>
+              <div class="ispinner-blade"></div>
+              <div class="ispinner-blade"></div>
+              <div class="ispinner-blade"></div>
+              <div class="ispinner-blade"></div>
+              <div class="ispinner-blade"></div>
+              <div class="ispinner-blade"></div>
+              <div class="ispinner-blade"></div>
+              <div class="ispinner-blade"></div>
+              <div class="ispinner-blade"></div>
+              <div class="ispinner-blade"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+      <h2>Description</h2>
+      <div id='Description'></div>
+      <div id='Summary'><h2>Summary</h2><button onclick="toggle_visibility('Summary_Table')">Toggle Summary Table</Button><br /><br />
+        <table id='Summary_Table'>
+          <tr id='Summary_Table_Header'>
+            <th>Category</th>
+            <th>Successful</th>
+            <th>Successful cases</th>
+            <th>Failed cases</th>
+            <th>Failed test steps</th>
+            <th>Error count</th>
+            <th>Total case count</th>
+            <th>Success rate</th>
+          </tr>
+        </table>
+      </div>
+      <div id='Categories'><h2>Categories</h2>
+        <div id='loading_spinner_container'>
+          <div id='loading_spinner' class="ispinner black animating">
+            <div class="ispinner-blade"></div>
+            <div class="ispinner-blade"></div>
+            <div class="ispinner-blade"></div>
+            <div class="ispinner-blade"></div>
+            <div class="ispinner-blade"></div>
+            <div class="ispinner-blade"></div>
+            <div class="ispinner-blade"></div>
+            <div class="ispinner-blade"></div>
+            <div class="ispinner-blade"></div>
+            <div class="ispinner-blade"></div>
+            <div class="ispinner-blade"></div>
+            <div class="ispinner-blade"></div>
+          </div>
+        </div>
+        <div id='Categories_List'></div>
+      </div>
+    </div>
+  </body>
+
+</html>

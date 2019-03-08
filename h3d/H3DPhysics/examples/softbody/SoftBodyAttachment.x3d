@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='SoftBodyAttachment.x3d'/>
+    <meta name='description' content='An example of a SoftBodyAttachment used to connect two soft bodies.'/>
+    <meta name='author' content='SenseGraphics AB, 2011-2019'/>
+  </head>
+
+  <Scene>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+
+    <Viewpoint DEF='V' position='0 0 0.6' />
+    <GlobalSettings>
+      <!-- These options are required to keep the frame rate up when changing the geometry -->
+      <CollisionOptions avatarCollision='false' />
+      <HapticsOptions useBoundTree='false'
+                      maxDistance='0.005'
+                      lookAheadFactor='0.01' />
+    </GlobalSettings>
+    
+    <!-- Python script to set up ruspini renderer and other options -->
+    <!-- The Ruspini renderer is required to help prevent fall through on changing geometries -->
+    <PythonScript DEF='PS' url='SoftBody.py' />
+
+    <PhysicsBodyCollection DEF='SBC' physicsEngine='Bullet' gravity='0 0 0' desiredUpdateRate='100'>
+      <!-- Geometries for collision detection -->
+      <CollisionCollection DEF='CC' containerField='collider' frictionCoefficients='0.8 0.8' bounce='0' />
+
+    </PhysicsBodyCollection>
+
+    <Transform>
+      <Shape DEF='S'>
+        <Appearance>
+          <Material diffuseColor='0.9 0.9 0.9' />
+        </Appearance>
+      </Shape>
+    </Transform>
+
+    <Transform>
+      <Shape DEF='S2'>
+        <Appearance>
+          <Material />
+        </Appearance>
+      </Shape>
+    </Transform>
+    
+    <ToggleGroup DEF='ATTACHMENT_VISUALS' />
+
+    <!-- Display usage message -->
+    <Transform DEF="Nr">
+      <DirectionalLight direction="0 0 -1" />
+      <Transform translation="0 0.037 0.5" scale="0.2 0.2 0.2">
+        <Shape>
+          <Appearance>
+            <Material diffuseColor="1 1 1" />
+          </Appearance>
+          <Text DEF="Text" string='"H3DPhysics Soft Body: SoftBodyAttachment"' solid="true">
+            <FontStyle justify='"MIDDLE" "BEGIN"' size="0.015" spacing="1" />
+          </Text>
+        </Shape>
+        <Transform translation="0 -0.02 0">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor="1 1 1" />
+            </Appearance>
+            <Text DEF="Text" string='"g: Toggle gravity on/off; x: Remove attachment; a: Add attachment (sphere); c: Add attachment (cylinder)"
+                                     "d: Toggle debug graphics; s: Reduce link stiffness; r: Remove links; i: Add link; u: Update link"
+                                     " "
+                                     "These commands use the current haptic device position: a, c, s, r, i, u"
+                                     "To add an attachment, vertices must be very close (turn off gravity)"' solid="true">
+              <FontStyle justify='"MIDDLE" "BEGIN"' size="0.01" spacing="1" />
+            </Text>
+          </Shape>
+        </Transform>
+      </Transform>
+    </Transform>
+    
+    
+    <KeySensor DEF='KS' />
+
+    <PythonScript url='SoftBodyUtility.py' moduleName='SoftBodyUtility' />
+    <PythonScript url='SoftBodyAttachment.py' />
+    
+    <!-- Update title text message position -->
+    <ROUTE fromNode="V" fromField="totalPosition" toNode="PS" toField="textPos" />
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="PS" toField="textPos" />
+    <ROUTE fromNode="PS" fromField="textPos" toNode="Nr" toField="translation" />
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="Nr" toField="rotation" />
+
+  </Scene>
+</X3D>

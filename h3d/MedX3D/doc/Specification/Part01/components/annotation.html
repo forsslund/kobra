@@ -1,0 +1,468 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+
+<TITLE>Extensible 3D (X3D), ISO/IEC WD3 19775-1r1:200x, 20 Pointing device sensor component</TITLE>
+<link rel="stylesheet" href="../X3D.css" type="text/css">
+
+<style type="text/css">
+.style2 {
+	background-color: #FFFF00;
+}
+.style4 {
+	color: black;
+}
+.style6 {
+	background-color: #FFFFFF;
+}
+.style7 {
+	font-style: italic;
+}
+</style>
+
+</HEAD>
+<BODY>
+
+<div class="CenterDiv">
+<IMG class="x3dlogo" SRC="../../Images/x3d.png" ALT="X3D logo" style="width: 176px; height: 88px"> 
+</div>
+
+<div class="CenterDiv">
+<p class="HeadingPart">
+    Extensible 3D (X3D)<br />
+    Part 1: Architecture and base components</p>
+<p class="HeadingClause">42 Annotation component</p>
+</div>
+
+<IMG class="x3dbar" SRC="../../Images/x3dbar.png" ALT="--- X3D separator bar ---" width="430" height="23">
+
+<h1><a name="Introduction"></a>
+<img class="cube" src="../../Images/cube.gif" alt="cube" width="20" height="19"> 
+42.1 Introduction</h1>
+<h2><a name="Name"></a>42.1.1 Name</h2>
+<p>The name of this component is &quot;Annotation&quot;. This name shall be used when referring 
+to this component in the COMPONENT statement (see
+<a href="core.html#COMPONENTStatement">7.2.5.4 Component statement</a>).</p>
+<h2><a name="Overview"></a>42.1.2 Overview</h2>
+
+<p>This clause describes the Annotation component of this part of ISO/IEC 19775. This 
+component specifies how to include additional information as part of an 
+X3D file that is beyond basic metadata, and some or all of which may be displayed externally to the 
+scene.
+<a href="#t-Topics">Table 42.1</a> provides links to the major topics in this clause.</p>
+
+<div class="CenterDiv">
+
+<p class="TableCaption">
+<a name="t-Topics"></a><b>
+Table 42.1 &mdash; Topics</b></p>
+
+  <table>
+    <tr> 
+      <td> 
+        <ul>
+          <li><a href="#Introduction">42.1 Introduction</a>
+          <ul>
+            <li><a href="#Name">42.1.1 Name</a></li>
+            <li><a href="#Overview">42.1.2 Overview</a></li>
+          </ul>
+			<li><a href="#Concepts">42.2 Concepts</a> 
+            <ul>
+              <li><a href="#ConceptsOverview">42.2.1 Overview</a><li>
+				<a href="#RepresentingAnnotations">42.2.2 Representing 
+				annotations</a><ul>
+              <li><a href="#RegistrationAndScaling">42.2.2.1 Parts of an 
+				annotation</a></li>
+				<li><a href="#CoordinateSystem">42.2.2.2 Coordinate system</a></li>
+              </ul>
+              </ul>
+          </li>
+          <li><a href="#AbstractTypes">42.3 Abstract types</a>  
+            <ul>
+              <li><a href="#X3DAnnotationNode">42.3.1 <i>X3DAnnotationNode</i></a> 
+              </ul>
+			<a href="#NodeReference">42.4 Node reference</a>
+			<ul>
+				<li><a href="#AnnotationLayer">42.4.1 
+				AnnotationLayer</a><li><a href="#AnnotationTarget">42.4.2 
+				AnnotationTarget</a></ul>
+			<ul>
+				<li><a href="#GroupAnnotation">42.4.3 GroupAnnotation</a></li>
+				<li><a href="#IconAnnotation">42.4.4 IconAnnotation</a></li>
+				<li><a href="#TextAnnotation">42.4.5 TextAnnotation</a></li>
+				<li><a href="#URLAnnotation">42.4.6 URLAnnotation</a></li>
+			</ul>
+			<a href="#SupportLevels">42.5 Support levels</a>
+          </ul>
+<ul>
+<li><a href="#t-Topics">Table 42.1 &mdash; Topics</a></li>
+<li><a href="#t-LayoutPolicies">Table 42.2 &mdash; Display policies</a></li>
+<li><a href="#t-LayoutPolicies">Table 42.3 &mdash; Layout policies</a></li>
+<li><a href="#t-supportlevels">Table 42.4 &mdash; Annotation component support levels</a></li>
+</ul>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<h1><img class="cube" src="../../Images/cube.gif" alt="cube" width="20" height="19">
+<a name="Concepts"></a>42.2 Concepts</h1>
+
+<h2><a name="ConceptsOverview"></a>42.2.1 Overview</h2>
+
+<p>Annotations occupy the information space between metadata provided by the 
+core specification and the rendered visuals presented by the rest of the X3D 
+specification. The goal is to provide the ability to include or give reference 
+to large amounts of information that may be available in scene or, optionally at 
+the browser implementer&#39;s choice, externally to the scene. Another term for 
+annotations is &quot;labelling&quot; which implies purely in-scene information, where this 
+specification seeks to provide both in-scene and out-of-scene information 
+display capabilities.</p>
+
+<h2><a name="RepresentingAnnotations"></a>42.2.2 Representing annotations</h2>
+<h3><a name="RegistrationAndScaling"></a>42.2.2.1 Parts of an annotation</h3>
+<p>An annotation is comprised of three parts:</p>
+<ol>
+	<li>the object that is being annotated,</li>
+	<li>the information to be associated with that object, and</li>
+	<li>a visual connection between the two, such as a leadline.</li>
+</ol>
+<p>The leadline and information may be optionally presented by the browser.</p>
+<p class="Example">EXAMPLE&nbsp; A hide-away panel may be used to display 
+annotations that are available for currently visible objects.</p>
+<p>In addition, the user is provided with an ability to describe the preferred 
+policy for the browser to show annotations that are not currently visible, such 
+as when they are behind the current viewpoint.</p>
+<h3><a name="CoordinateSystem"></a>42.2.2.2 Coordinate system</h3>
+<p>The object that is being annotated will have the
+<a href="annotation_justin.html#AnnotationTarget">AnnotationTarget</a> node 
+associated with the containing grouping node. This node is not renderable, but 
+provides a point in the local coordinate system that forms the end point of the 
+annotation&#39;s leadline connecting that object. </p>
+<p>Annotations themselves are not part of the renderable scene graph. They may, 
+optionally, exist anywhere and are not effected by the parent transformation 
+hierarchy, such as Switch or LOD nodes. The AnnotationTarget node is effected by 
+parent transformation hierarchy changes, including those that disable parts of 
+the visible scene graph. When the parent hierarchy hides the renderable parts, 
+the target and any associated leadlines are also hidden. </p>
+<h1><img class="cube" src="../../Images/cube.gif" alt="cube" width="20" height="19">
+<a name="AbstractTypes"></a>42.3 Abstract types</h1>
+
+<h2><a name="X3DAnnotationNode"></a>42.3.1 <i>X3DAnnotationNode</i></h2>
+
+<pre class="node">X3DAnnotationNode : X3DChildNode {
+  SFString [in,out] annotationGroupID &quot;&quot;
+  SFString [in,out] displayPolicy     &quot;NEVER&quot; [&quot;POINTER_OVER&quot;, &quot;POINTER_ACTIVATE&quot;,
+                                               &quot;ALWAYS&quot;, &quot;WHEN_VISIBLE&quot;, &quot;NEVER&quot;]
+  SFBool   [in,out] enabled           TRUE
+  SFNode   [in,out] metadata          NULL    [X3DMetadataObject]
+}  </pre>
+<p>This abstract node type is the base type for all node types that contain 
+annotation information. The abstract type provides the facility to control the 
+policy of when the annotation should be displayed to the user through the <i>
+displayPolicy</i> field. Additionally, a grouping label can be assigned to each 
+annotation through the use of the <i>annotationGroupID</i> field.</p>
+<p>Large files with many annotations can become unwieldy to view. Two options 
+are available to control how and when annotations are to be made visible. The 
+first option is to create a global filter list through the use of the <i>
+annotationGroupID</i> field. This is a text string that can be used to group 
+sets of similar annotations together. It is recommended that plain, readable 
+text be used for this field as a browser may present the values of these fields in 
+a list of filter options. The second option controls when an individual 
+annotation will show based on user actions. These provide basic shortcuts 
+without the user needing to use combinations of touch sensors and scripting. 
+Available basic behaviours are in <a href="#t-LayoutPolicies">Table 42.2</a>:</p>
+<p class="TableCaption"><a name="t-DisplayPolicies"></a>Table 42.2 &mdash; 
+Display policies</p>
+<table style="width: 100%">
+	<tr>
+		<td><code>POINTER_OVER</code></td>
+		<td><code></code>Show the annotation when the pointing device is over 
+		the targets that reference this node.</td>
+	</tr>
+	<tr>
+		<td><code>POINTER_ACTIVATE</code></td>
+		<td><code></code>Show this annotation when the pointing device has 
+		clicked on the target of this node. It will remain active until replaced 
+		by another annotation.</td>
+	</tr>
+	<tr>
+		<td><code>WHEN_VISIBLE</code></td>
+		<td><code></code>Show this annotation when it is visible.</td>
+	</tr>
+	<tr>
+		<td><code>ALWAYS</code></td>
+		<td><code></code>Always show this annotation.</td>
+	</tr>
+	<tr>
+		<td><code>NEVER</code></td>
+		<td><code></code>Never show this annotation.</td>
+	</tr>
+</table>
+<p>The <i>enabled</i> field determines if the annotation is displayed. If <i>
+enabled</i> is <font face="Courier New" size="2">TRUE</font>, the annotation is 
+displayed as described. If <i>enabled</i> is <font face="Courier New" size="2">
+FALSE</font>, no action is performed.</p>
+<h1><img class="cube" src="../../Images/cube.gif" alt="cube" width="20" height="19">
+<a name="NodeReference"></a>42.4 Node reference</h1>
+ 
+<h2><a name="AnnotationLayer"></a>42.4.1 AnnotationLayer</h2>
+
+<pre class="node">AnnotationLayer : X3DLayerNode {
+  SFBool   [in,out] isPickable   TRUE
+  MFString [in,out] layoutPolicy &quot;&quot;   [&quot;circular&quot;, &quot;edges&quot;, ...]
+  SFNode   [in,out] metadata     NULL [X3DMetadataObject]
+  MFString [in,out] shownGroupID []
+  SFNode   [in,out] viewport     NULL [X3DViewportNode]
+}</pre>
+<p>The AnnotationLayer node is custom layer version that provides automated layout of currently 
+visible annotations and display of them within the currently running scene.</p>
+<p>The layer shows annotations directly in the scene and lays them out around 
+the target object&#39;s reference point according to one of the pre-defined layout 
+policies that are defined in the <i>layoutPolicy</i> field. This field contains 
+a list of policies in priority order based on what the browser implementation 
+supports. Browsers may also define implementation-specific policies in addition 
+to the required policies. The reference point is projected into the layer&#39;s 
+space and used as the location to base the annotations around. The defined 
+policies are specified in <a href="#t-LayoutPolicies">Table 42.3</a>:</p>
+<p class="TableCaption"><a name="t-LayoutPolicies"></a>Table 42.3 &mdash; 
+Layout policies</p>
+<table style="width: 100%">
+	<tr>
+		<td><code>CIRCULAR</code></td>
+		<td><code></code>Show the annotation when the pointing device is over 
+		the targets that reference this node.</td>
+	</tr>
+	<tr>
+		<td><code>DISPLAY_EDGE</code></td>
+		<td><code></code>Show this annotation when the pointing device has 
+		clicked on the target of this node. It will remain active until replaced 
+		by another annotation.</td>
+	</tr>
+	</table>
+
+<h2><a name="AnnotationTarget"></a>42.4.2 AnnotationTarget</h2>
+
+<pre class="node">AnnotationTarget : X3DChildNode {
+  MFNode  [in,out] annotations    []      [X3DAnnotationNode]
+  SFNode  [in,out] leadLineStyle  NULL    [X3DLinePropertiesNode]
+  SFNode  [in,out] marker         NULL    [X3DShapeNode]
+  SFNode  [in,out] metadata       NULL    [X3DMetadataObject]
+<span class="style4">  SFVec3f [<span class="style2"><span class="style6">in,out] referencePoint 0, 0, 0 (-&infin;,&infin;)</span>
+</span></span>}</pre>
+<p>The AnnotationTarget node specifies the target with which annotations are 
+associated. A target applies to all siblings of the parent grouping node. If the 
+parent or target has more than one parent transformation hierarchy, each shall 
+be rendered individually, including leader lines and markers to each visual 
+object.</p>
+<p>Each target may have zero or more annotation nodes associated with it as 
+specified by the <i>annotations</i> field. All nodes referenced in this field 
+are effected the position of this node&#39;s parent group in the world coordinates.</p>
+<p>A grouping node may have more than one AnnotationTarget specified, each with 
+different sets of annotations.</p>
+<p>Annotations are visually connected to the target through the use of a lead 
+line if a node is defined for the <i>leadLineStyle</i> field. If no style is 
+defined, a lead line is not shown and the annotation is shown with no connecting 
+line. When a LineProperties node is provided and line ends are defined, the 
+source end will be the target and the destination end will be the annotation.</p>
+<h2><a name="IconAnnotation"></a></h2>
+
+<h2><a name="GroupAnnotation"></a>42.4.3 GroupAnnotation</h2>
+<pre class="node">GroupAnnotation : X3DGroupingNode, X3DAnnotationNode {
+  MFNode   [in]     addChildren                [X3DChildNode]
+  MFNode   [in]     removeChildren             [X3DChildNode]
+  SFString [in,out] annotationGroupID &quot;&quot;
+  MFNode   [in,out] children          []       [X3DChildNode]  
+  SFString [in,out] displayPolicy     &quot;NEVER&quot;  [&quot;POINTER_OVER&quot;, &quot;POINTER_ACTIVATE&quot;,
+                                                &quot;ALWAYS&quot;, &quot;WHEN_VISIBLE&quot;, &quot;NEVER&quot;]
+  SFBool   [in,out] enabled           TRUE
+  SFNode   [in,out] metadata          NULL     [X3DMetadataObject]
+  SFVec3f  []       bboxCenter        0 0 0    (-∞,∞)
+  SFVec3f  []       bboxSize          -1 -1 -1 [0,∞) or −1 −1 −1
+}</pre>
+<p>The GroupAnnotation node specifies annotation that is 
+specified in the form of an X3D grouping node.</p>
+<p>The annotation to be displayed is specified in the
+<em>children</em> field. 
+The coordinate system established for this group is one in which the origin is 
+at the end of the offset sequence with the XY-plane parallel with the screen 
+plane. From this coordinate system the nodes in the <em>
+children</em> field may apply 
+further transformations. See 
+<a href="../concepts.html#Transformationhierarchy">4.3.5, 
+Transformation hierarchy</a>, and 
+<a href="../concepts.html#Standardunitscoordinates">4.3.6, 
+Standard units and coordinate system</a>, for a 
+description of coordinate systems and transformations.</p>
+<p><a href="group.html#Groupingandchildrennodes">10.2.1, 
+Grouping and children node types</a>, provides a 
+description of the <span class="style7">children</span>,
+addChildren, and 
+removeChildren fields.</p>
+<p>The <em>bboxCenter</em> 
+and <em>bboxSize</em> fields 
+specify a bounding box that encloses the children of the GroupAnnotation node. 
+This is a hint that may be used for optimization purposes. The results are 
+undefined if the specified bounding box is smaller than the actual bounding box 
+of the children at any time. A default <em>bboxSize</em> 
+value, (-1,&nbsp;-1,&nbsp;-1), implies that the bounding box is not specified and, if 
+needed, shall be calculated by the browser. The bounding box shall be large 
+enough at all times to enclose the union of the group&#39;s children&#39;s bounding 
+boxes; it shall not include any transformations performed by the group itself (<em>i.e.</em>, 
+the bounding box is defined in the local coordinate system of the children). The 
+results are undefined if the specified bounding box is smaller than the true 
+bounding box of the group. A description of the 
+<em>bboxCenter</em> and <em>bboxSize</em> 
+fields is provided in <a href="group.html#Boundingboxes">
+10.2.2 Bounding boxes</a>.</p>
+<h2>42.4.4 IconAnnotation</h2>
+<pre class="node">IconAnnotation : X3DAnnotationNode, X3DURLObject {
+  SFString [in,out] annotationGroupID &quot;&quot;
+  SFString [in,out] displayPolicy     &quot;NEVER&quot; [&quot;POINTER_OVER&quot;, &quot;POINTER_ACTIVATE&quot;,
+                                               &quot;ALWAYS&quot;, &quot;WHEN_VISIBLE&quot;, &quot;NEVER&quot;]
+  SFBool   [in,out] enabled           TRUE
+  SFNode   [in,out] metadata          NULL    <span class="style4">[X3DMetadataObject]</span>
+  MFString [in,out] url               []
+}</pre>
+<p>The IconAnnotation node specifies annotation that is iconic in form using an 
+image specified by the URL field. </p>
+<p>The icon to be displayed is read from location specified by the <i>url</i> 
+field. When the <em>url</em> field contains no satisfiable values, the browser 
+implementation shall substitute a default icon in its place. Browsers shall 
+support the JPEG (see <a href="../references#JPEG">2.[JPEG]</a>) and PNG (see
+<a href="../references#I15948">ISO/IEC 15948</a>) image file formats. Browsers 
+may support other image file formats. Details on the <em>url</em> field can be 
+found in <a href="Networking#URLs">9.2.1 URLs</a>.</p>
+
+<h2><a name="TextAnnotation"></a>42.4.5 TextAnnotation</h2>
+
+<pre class="node">TextAnnotation : X3DAnnotationNode {
+  SFString [in,out] annotationGroupID &quot;&quot;
+  SFString [in,out] contentType       &quot;text/plain&quot;
+  SFString [in,out] displayPolicy     &quot;NEVER&quot;      [&quot;POINTER_OVER&quot;, &quot;POINTER_ACTIVATE&quot;,
+                                                   &quot;ALWAYS&quot;, &quot;WHEN_VISIBLE&quot;, &quot;NEVER&quot;]
+  SFBool   [in,out] enabled           TRUE
+  SFNode   [in,out] metadata          NULL    <span class="style4">     [X3DMetadataObject]</span>
+  SFString [in,out] text              &quot;&quot;
+}
+</pre>
+<p>The TextAnnotation node specifies an annotation that contains in-lined 
+formatted text. The text may be one of several formats based on the defined MIME 
+type in the <i>contentType</i> field. All browsers shall support the default 
+plain text content type, and may support other content types (<em>e.g.</em>, 
+HTML).</p>
+
+<h2><a name="URLAnnotation"></a>42.4.6 URLAnnotation</h2>
+
+<pre class="node">URLAnnotation : X3DAnnotationNode {
+  SFString [in,out] annotationGroupID &quot;&quot;
+  SFString [in,out] displayPolicy     &quot;NEVER&quot; [&quot;POINTER_OVER&quot;, &quot;POINTER_ACTIVATE&quot;,
+                                               &quot;ALWAYS&quot;, &quot;WHEN_VISIBLE&quot;, &quot;NEVER&quot;]
+  SFBool   [in,out] enabled           TRUE
+  SFNode   [in,out] metadata          NULL    <span class="style4">[X3DMetadataObject]</span>
+  MFString [in,out] url               []
+}
+</pre>
+<p>The URLAnnotation node specifies an annotation that defines its content in 
+another file.</p>
+<p>The location of the other file is defined by the <i>url</i> field. This 
+annotation is not required to be immediately loaded. A browser may choose to 
+load the URL or just display the URL for the user to select and load externally.</p>
+
+<h1><img class="cube" src="../../Images/cube.gif" alt="cube" width="20" height="19">
+<a name="SupportLevels"></a>42.5 Support levels</h1>
+
+<p>The Volume Rendering component provides two levels of support as specified 
+  in <a href="#t-supportlevels">Table 42.4</a>. </p>
+
+<div class="CenterDiv">
+
+<p class="TableCaption">
+<a name="t-supportlevels"></a>
+Table 42.<b>4
+— Annotation</b> component support levels</p>
+  
+<table>
+      <tr> 
+        <th>Level</th>
+        <th>Prerequisites</th>
+        <th>Nodes/Features</th>
+        <th>Support</th>
+      </tr>
+      <tr> 
+        <td align="center"><b>1</b></td>
+        <td>Core 1<br>
+		Grouping 1<br>
+		Shape 1<br>
+		Rendering 1<br>
+		Networking 1</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td align="center"></td>
+        <td></td>
+        <td><i>X3DAnnotationNode</i></td>
+        <td>n/a</td>
+      </tr>
+      <tr> 
+        <td align="center"></td>
+        <td></td>
+        <td>AnnotationTarget</td>
+        <td>All fields fully supported.</td>
+      </tr>
+      <tr> 
+        <td align="center"></td>
+        <td></td>
+        <td>IconAnnotation</td>
+        <td>All fields fully supported.</td>
+      </tr>
+      <tr> 
+        <td align="center"></td>
+        <td></td>
+        <td>TextAnnotation</td>
+        <td>All fields fully supported.</td>
+      </tr>
+      <tr>
+        <td align="center">&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>URLAnnotation</td>
+        <td>All fields fully supported.</td>
+      </tr>
+      <tr>
+        <td align="center"><b>2</b></td>
+        <td>Core 1<br>
+		Grouping 1<br>
+		Shape 1<br>
+		Rendering 1 <br>
+		Networking 1, <br>
+		Layering 1</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td align="center">&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>All Level 1 nodes</td>
+        <td>All fields fully supported.</td>
+      </tr>
+      <tr>
+        <td align="center">&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>AnnotationLayer</td>
+        <td>All fields fully supported.</td>
+      </tr>
+      <tr>
+        <td align="center">&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>GroupAnnotation</td>
+        <td>All fields fully supported.</td>
+      </tr>
+      </table>
+</div>
+
+<img class="x3dbar" src="../../Images/x3dbar.png" alt="--- X3D separator bar ---" width="430" height="23" />
+
+</body>
+</html>

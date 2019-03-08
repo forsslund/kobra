@@ -1,0 +1,72 @@
+<Group>
+
+  <Transform rotation='0 0 1 -1.57' translation='5 0 0'>
+    <Shape>
+      <Appearance>
+        <Material diffuseColor='1 0 0' emissiveColor='0.2 0 0' />
+      </Appearance>
+      <Cone height='10' bottomRadius='0.5' />
+    </Shape>
+  </Transform>
+
+  <Transform translation='0 5 0'>
+    <Shape>
+      <Appearance>
+        <Material diffuseColor='0 1 0' emissiveColor='0 0.2 0' />
+      </Appearance>
+      <Cone height='10' bottomRadius='0.5' />
+    </Shape>
+  </Transform>
+  
+  <Transform rotation='1 0 0 1.57' translation='0 0 5'>
+    <Shape>
+      <Appearance>
+        <Material diffuseColor='0 0.3 1' emissiveColor='0 0.1 0.2' />
+      </Appearance>
+      <Cone height='10' bottomRadius='0.5' />
+    </Shape>
+  </Transform>
+  
+  <Transform translation='11 0 0'>
+    <Billboard axisOfRotation='0 0 0'>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='1 0 0' />
+        </Appearance>
+        <Text string='"x"' solid='true'>
+          <FontStyle DEF='FS' family='SERIF' horizontal='true' 
+                     justify='"MIDDLE" "MIDDLE"' language='en' 
+                     leftToRight='true' size='2' spacing='1.0' 
+                     style='ITALIC' topToBottom='true' renderType='TEXTURE' />
+        </Text>
+      </Shape>
+    </Billboard>
+  </Transform>
+  
+  <Transform translation='0 11 0'>
+    <Billboard axisOfRotation='0 0 0'>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='0 1 0' />
+        </Appearance>
+        <Text string='"y"' solid='true'>
+          <FontStyle USE='FS' />
+        </Text>
+      </Shape>
+    </Billboard>
+  </Transform>
+  
+  <Transform translation='0 0 11'>
+    <Billboard axisOfRotation='0 0 0'>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='0.3 0.5 1' />
+        </Appearance>
+        <Text string='"z"' solid='true'>
+          <FontStyle USE='FS' />
+        </Text>
+      </Shape>
+    </Billboard>
+  </Transform>
+     
+</Group>

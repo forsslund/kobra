@@ -1,0 +1,37 @@
+[Settings]
+NumFields=5
+
+[Field 1]
+Type=label
+Text=By default @CPACK_PACKAGE_INSTALL_DIRECTORY@ tries to register H3D plugin for Internet Explorer, Mozilla Firefox and Opera. Use the options below if any changes to this behaviour is desired. The bin folder in the installation will be added to the PATH environment variable if the plugin is installed for Firefox or Opera.\n\nWARNING: H3D have support for python scripting, which means that an x3d file loaded with this plugin can do everything that Python can do (such as erasing folders). NEVER load an x3d file with H3D content from a site that you do not trust.
+Left=0
+Right=-1
+Top=0
+Bottom=70
+
+[Field 2]
+Type=checkbox
+Text=Try to register ActiveX plugin for Internet Explorer.
+Left=0
+Right=-1
+Top=70
+Bottom=80
+State=1
+
+[Field 3]
+Type=checkbox
+Text=Try to register plugin for Mozilla Firefox.
+Left=0
+Right=-1
+Top=80
+Bottom=90
+State=1
+
+[Field 4]
+Type=checkbox
+Text=Try to register plugin for Opera.
+Left=0
+Right=-1
+Top=90
+Bottom=100
+State=1

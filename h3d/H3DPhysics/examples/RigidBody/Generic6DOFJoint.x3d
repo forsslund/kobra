@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version="3.2">
+  <head>
+    <!-- Declare components required to run -->
+    <component name="H3DPhysics"/>
+
+    <meta name='title' content='Generic6DOFJoint.x3d'/>
+    <meta name='description' content='A demonstration the Generic6DOFJoint joint type from the H3DPhysics component.'/>
+    <meta name='author' content='SenseGraphics AB, 2010-2019'/>
+  </head>
+  <Scene>
+
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+      
+    <IMPORT inlineDEF='H3D_EXPORTS' exportedDEF='HDEV' AS='HDEV' />
+    <Viewpoint DEF='V' position='0 0 0.6'/>
+    <Background skyColor='0.045 0.065 0.17, 0.77 0.87 0.99' skyAngle='1.57' />
+    <DirectionalLight direction='1 -1 0' />
+
+    <!-- Display usage message -->
+    <Transform DEF="Nr">
+      <DirectionalLight direction="0 0 -1" />
+      <Transform translation="0 0.037 0.5" scale="0.2 0.2 0.2">
+        <Shape>
+          <Appearance>
+            <Material diffuseColor="1 1 1" />
+          </Appearance>
+          <Text DEF="Text" string='"H3DPhysics Joints: Generic6DOFJoint"' solid="true">
+            <FontStyle justify='"MIDDLE" "BEGIN"' size="0.015" spacing="1" />
+          </Text>
+        </Shape>
+        <!--<Transform translation="0 -0.02 0">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor="1 1 1" />
+            </Appearance>
+            <Text DEF="Text" string='"Click on a joint title to toggle display of output fields. Press D to toggle display of all output fields."' solid="true">
+              <FontStyle justify='"MIDDLE" "BEGIN"' size="0.01" spacing="1" />
+            </Text>
+          </Shape>
+        </Transform>-->
+        <Transform translation="0 -0.015 -0.01">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor="0 0 0" transparency="0.6" />
+            </Appearance>
+            <Rectangle2D size="0.46 0.04" solid="true"/>
+          </Shape>
+        </Transform>
+      </Transform>
+    </Transform>
+    
+    <Group DEF='Root'>
+
+      <Transform DEF='T'>
+        <Shape DEF='S'>
+          <Appearance DEF='A'>
+            <Material diffuseColor='0.4 0.4 0.7' />
+            <FrictionalSurface />
+          </Appearance>
+          <Box DEF='G' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T1'>
+        <Shape DEF='S1'>
+          <Appearance USE='A' />
+          <Box DEF='G1' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T2'>
+        <Shape DEF='S2'>
+          <Appearance USE='A' />
+          <Box DEF='G2' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T3'>
+        <Shape DEF='S3'>
+          <Appearance USE='A' />
+          <Box DEF='G3' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T4'>
+        <Shape DEF='S4'>
+          <Appearance USE='A' />
+          <Box DEF='G4' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T5'>
+        <Shape DEF='S5'>
+          <Appearance USE='A' />
+          <Box DEF='G5' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+    </Group>
+
+    <RigidBodyCollection DEF='RBC' gravity='0 -1 0' physicsEngine='Bullet'>
+    
+      <CollisionCollection containerField='collider'>
+        <CollidableShape DEF='C' containerField='collidables'>
+          <Shape USE='S' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C1' containerField='collidables' translation='1 0 0'>
+          <Shape USE='S1' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C2' containerField='collidables' translation='2 0 0'>
+          <Shape USE='S2' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C3' containerField='collidables' translation='3 0 0'>
+          <Shape USE='S3' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C4' containerField='collidables' translation='4 0 0'>
+          <Shape USE='S4' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C5' containerField='collidables' translation='5 0 0'>
+          <Shape USE='S5' containerField='shape' />
+        </CollidableShape>
+      </CollisionCollection>
+
+      <RigidBody DEF='R' linearDampingFactor='0.1' angularDampingFactor='0.01' autoDamp='true' mass='1' position='-0.1 0 0' orientation='0 1 0 0.9'>
+        <Geometry USE='C' containerField='geometry' />
+        <Box USE='G' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R1' linearDampingFactor='0.1' angularDampingFactor='0.001' autoDamp='true' mass='1' position='-0.1 -0.1 0' orientation='1 0 0 0.9'>
+        <Geometry USE='C1' containerField='geometry' />
+        <Box USE='G1' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R2' linearDampingFactor='0.1' angularDampingFactor='0.001' autoDamp='true' mass='1' position='0.1 0 0' orientation='0 1 0 1.57'>
+        <Geometry USE='C2' containerField='geometry' />
+        <Box USE='G2' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R3' linearDampingFactor='0.1' angularDampingFactor='0.001' autoDamp='true' mass='1' position='0.1 -0.1 0' orientation='0 1 0 1.57'>
+        <Geometry USE='C3' containerField='geometry' />
+        <Box USE='G3' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R4' linearDampingFactor='0.1' angularDampingFactor='0.001' autoDamp='true' mass='1' position='0 0 0'>
+        <Geometry USE='C4' containerField='geometry' />
+        <Box USE='G4' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R5' linearDampingFactor='0.1' angularDampingFactor='0.001' autoDamp='true' mass='1' position='0 -0.15 0'>
+        <Geometry USE='C5' containerField='geometry' />
+        <Box USE='G5' containerField='massDensityModel' />
+      </RigidBody>
+      
+      <!-- Generic6DOFJoint with limits on each rotational degree of freedom -->
+      <Generic6DOFJoint anchorPoint='-0.1 0.05 0'
+                        minAngle1='-0.79' maxAngle1='0.79'
+                        minAngle2='-1.57' maxAngle2='1.57'
+                        minAngle3='-0.79' maxAngle3='0.79'>
+        <RigidBody USE='R' containerField='body1' />
+      </Generic6DOFJoint>
+
+      <!-- Generic6DOFJoint with no limits or motors, like a BallJoint -->
+      <Generic6DOFJoint anchorPoint='-0.1 -0.05 0'
+                        minAngle1='1' maxAngle1='-1'
+                        minAngle2='1' maxAngle2='-1'
+                        minAngle3='1' maxAngle3='-1'>
+        <RigidBody USE='R' containerField='body1' />
+        <RigidBody USE='R1' containerField='body2' />
+      </Generic6DOFJoint>
+
+      <!-- Generic6DOFJoint with 1 linear degree of freedom like a slider, and a no motor -->
+      <Generic6DOFJoint anchorPoint='0.1 0.05 0'
+                        minLimit1='-0.05' maxLimit1='0.05'
+                        maxForce1='100'>
+        <RigidBody USE='R2' containerField='body1' />
+      </Generic6DOFJoint>
+
+      <!-- Generic6DOFJoint with a motor on the z-axis -->
+      <Generic6DOFJoint anchorPoint='0.1 -0.07 0'
+                        maxTorque3='100' desiredAngularVelocity3='1'
+                        maxAngle3='-1' minAngle3='1'>
+        <RigidBody USE='R2' containerField='body1' />
+        <RigidBody USE='R3' containerField='body2' />
+      </Generic6DOFJoint>
+
+      
+      <Generic6DOFJoint DEF='Slider' anchorPoint='0 0.1 0'
+                        axis1='1 0 0'
+                        minLimit1='-0.05' maxLimit1='0.05'
+                        maxForce1='100'>
+        <RigidBody USE='R4' containerField='body1' />
+      </Generic6DOFJoint>
+
+      <!-- Generic6DOFJoint as vertical slider with linear motor and angular motor -->
+      <!-- The y-axis becomes unstable after 90', so rotate the coordinate system and use z as y axis instead -->
+      <Generic6DOFJoint DEF='VerticalSlider' anchorPoint='0 -0.075 0'
+                        
+                        axis1='1 0 0'
+                        axis2='0 0 -1'
+                        axis3='0 1 0'
+                        
+                        minLimit3='-0.05' maxLimit3='0.05'
+                        maxForce3='100'
+                        minAngle3='1' maxAngle3='-1'
+                        maxTorque3='100' desiredAngularVelocity3='1' >
+        <RigidBody USE='R4' containerField='body1' />
+        <RigidBody USE='R5' containerField='body2' />
+      </Generic6DOFJoint>
+      
+    </RigidBodyCollection>
+
+    <ROUTE fromNode='R' fromField='position' toNode='T' toField='translation' />
+    <ROUTE fromNode='R' fromField='orientation' toNode='T' toField='rotation' />
+    <ROUTE fromNode='R1' fromField='position' toNode='T1' toField='translation' />
+    <ROUTE fromNode='R1' fromField='orientation' toNode='T1' toField='rotation' />
+    <ROUTE fromNode='R2' fromField='position' toNode='T2' toField='translation' />
+    <ROUTE fromNode='R2' fromField='orientation' toNode='T2' toField='rotation' />
+    <ROUTE fromNode='R3' fromField='position' toNode='T3' toField='translation' />
+    <ROUTE fromNode='R3' fromField='orientation' toNode='T3' toField='rotation' />
+    <ROUTE fromNode='R4' fromField='position' toNode='T4' toField='translation' />
+    <ROUTE fromNode='R4' fromField='orientation' toNode='T4' toField='rotation' />
+    <ROUTE fromNode='R5' fromField='position' toNode='T5' toField='translation' />
+    <ROUTE fromNode='R5' fromField='orientation' toNode='T5' toField='rotation' />
+    
+    <PythonScript DEF='PS' url='python/jointVisuals.py'>
+      <Group USE='Root' containerField='references' />
+    </PythonScript>
+    <ROUTE fromNode='RBC' fromField='joints' toNode='PS' toField='joints' />
+
+    <PythonScript url='python/sliderToggle.py'>
+      <Generic6DOFJoint USE='VerticalSlider' containerField='references' />
+      <MetadataString name='axis' value='z' containerField='references' />
+      <MetadataString name='period' value='1' containerField='references' />
+      <MetadataString name='speed' value='0.1' containerField='references' />
+    </PythonScript>
+    
+    <PythonScript url='python/sliderToggle.py'>
+      <Generic6DOFJoint USE='Slider' containerField='references' />
+      <MetadataString name='axis' value='x' containerField='references' />
+      <MetadataString name='period' value='1.2' containerField='references' />
+      <MetadataString name='speed' value='0.05' containerField='references' />
+    </PythonScript>
+    
+    <KeySensor DEF='KS' />
+    <ROUTE fromNode='KS' fromField='keyPress' toNode='PS' toField='toggleDetails' />
+
+    <!-- Update title text message position -->
+    <ROUTE fromNode="V" fromField="totalPosition" toNode="PS" toField="textPos" />
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="PS" toField="textPos" />
+    <ROUTE fromNode="PS" fromField="textPos" toNode="Nr" toField="translation" />
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="Nr" toField="rotation" />
+    
+  </Scene>
+</X3D>

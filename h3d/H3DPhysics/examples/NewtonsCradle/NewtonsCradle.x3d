@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D profile='Full' version="3.2">
+  <head>
+    <!-- Declare components required to run -->
+    <component name="RigidBodyPhysics"/>
+    <component name="UI"/>
+
+    <meta name='title' content='NewtonsCradle.x3d'/>
+    <meta name='description' content='A demonstration of the Rigid Body Physics component, using a Newtons Cradle.'/>
+    <meta name='author' content='SenseGraphics AB, 2010-2019'/>
+  </head>
+  <Scene>
+    <!-- Use the following ImportLibrary nodes to load the RigidBodyPhysics and UI components -->
+    <!-- Edit the library paths as required. Alternatively use H3DViewer and ensure the       -->
+    <!-- RigidBodyPhysics and UI plugins are loaded.                                          -->
+    <!-- Use the ImportLibrary to load the RigidBodyPhysics dynamic library if needed.-->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+
+    <!-- Use the ImportLibrary to load the UI dynamic library if needed -->
+    <ImportLibrary url='"../../../bin32/UI" "../../../UI/bin32/UI" "../../../bin64/UI" "../../../UI/bin64/UI" "UI" "libh3dui.so" "libh3dui.dylib"' />
+
+    <Viewpoint position='0 0 0.6'/>
+    <Background skyColor='0.045 0.065 0.17, 0.77 0.87 0.99' skyAngle='1.57' />
+    <DirectionalLight direction='1 -1 0' />
+
+    <!-- Disable navigation to avoid accidental navigation when using UI -->
+    <NavigationInfo type='NONE' />
+
+    <!-- This is the root transformation to which we add the floor and all other simulated objects -->
+    <Transform DEF='Root' rotation='-0.68 -0.71 -0.14 -0.54' translation='0 -0.1 0'>
+
+      <Transform DEF='Group'>
+
+        <!-- The floor object -->
+        <Transform rotation='1 0 0 -1.57' >
+          <Shape>
+            <Appearance>
+              <Material />
+              <FrictionalSurface staticFriction='0.5' dynamicFriction='1' />
+              <ImageTexture url='images/wood3.jpg' repeatS='true' repeatT='true' />
+              <TextureTransform scale='8 8' />
+            </Appearance>
+            <Rectangle2D DEF='Floor_G' solid='true' size='1 1' />
+          </Shape>
+        </Transform>
+
+      </Transform>
+
+    </Transform>
+
+    <!-- The rigid body simulation to contain our rigid body and collision objects -->
+    <RigidBodyCollection DEF='RBC' gravity='0 -3.0 0' constantForceMix='0.001' physicsEngine = 'Bullet' enabled='true'>
+      <CollisionCollection containerField='collider' DEF='CC' bounce='1.0' frictionCoefficients='0.2 0.2' softnessConstantForceMix='0.001' />
+    </RigidBodyCollection>
+
+    <!-- A sensor used to detect collision between the balls -->
+    <CollisionSensor DEF='CS'>
+      <CollisionCollection containerField='collider' USE='CC' />
+    </CollisionSensor>
+
+    <!-- A sound to be played when balls collide -->
+    <Sound DEF='CollideSound' direction='0 0 1' location='0 0 0' maxFront='0.9' maxBack='0.9'
+                              minFront='0.5' minBack='0.5' priority='0' spatialize='true'>
+      <AudioClip url='sounds/click.wav' />
+    </Sound>
+
+    <!-- This Python script detects collisions and plays the sound with the appropriate intensity -->
+    <PythonScript url="python/CollisionSound.py">
+      <CollisionSensor USE='CS' containerField="references"/>
+      <Sound USE="CollideSound" containerField="references"/>
+    </PythonScript>
+
+    <!-- This Python  module provides a mechanism for manipulating rigid bodies in the simulation -->
+    <!-- It is included here so that other python scripts can import it regardless of current working directory -->
+    <PythonScript url="python/Manipulation.py" moduleName="Manipulation" />
+
+    <!-- Set up a KeySensor to control grabbing action with keyboard button as well as haptic device button -->
+    <!-- in case the device doesn't have a button. This key will control the grab action for device index 1 -->
+    <KeySensor DEF='KS' />
+
+    <!-- Module to provide debugging information for testing collisions -->
+    <PythonScript DEF="DebugCollisionPS" url="python/CollisionTest.py">
+      <RigidBodyCollection USE="RBC" containerField="references" />
+      <CollisionSensor USE="CS" containerField="references" />
+      <Transform USE='Root' containerField="references" />
+      <KeySensor USE='KS' containerField="references" />
+    </PythonScript>
+
+    <!-- This Python script generates the Newton's Cradle object -->
+    <PythonScript DEF="PS" url="python/NewtonsCradle.py">
+      <Transform USE="Root" containerField="references"/>
+      <!-- The root transform to add nodes to -->
+      <Transform USE="Group" containerField="references"/>
+      <RigidBodyCollection USE="RBC" containerField="references" />
+      <!-- The RigidBodyCollection to use for simulation -->
+    </PythonScript>
+
+    <!-- Import User Interface -->
+    <Inline DEF="UI" url="x3d/UI.x3d" />
+
+    <!-- Route the 'Update' button to the createCradle field of NewtonsCradle.py -->
+    <IMPORT inlineDEF="UI" exportedDEF="TB_Update" AS="TB_Update"/>
+    <ROUTE fromNode="TB_Update" fromField="state" toNode="PS" toField="createCradle" />
+
+    <!-- Route bounce slider value to CollisionCollection bounce field -->
+    <IMPORT inlineDEF="UI" exportedDEF="SB_Bounce" AS="SB_Bounce"/>
+    <ROUTE fromNode="SB_Bounce" fromField="value" toNode="CC" toField="bounce" />
+
+    <IMPORT inlineDEF="UI" exportedDEF="DebugText" AS="DebugText"/>
+    <ROUTE fromNode="DebugCollisionPS" fromField="text" toNode="DebugText" toField="string" />
+
+    <!-- Route other sliders to fields in NewtonsCradle.py -->
+
+    <!-- Damping slider -->
+    <IMPORT inlineDEF="UI" exportedDEF="SB_Damping" AS="SB_Damping"/>
+    <ROUTE fromNode="SB_Damping" fromField="value" toNode="PS" toField="damping" />
+
+    <!-- Mass slider -->
+    <IMPORT inlineDEF="UI" exportedDEF="SB_Mass" AS="SB_Mass"/>
+    <ROUTE fromNode="SB_Mass" fromField="value" toNode="PS" toField="mass" />
+
+    <!-- Ball count slider -->
+    <IMPORT inlineDEF="UI" exportedDEF="SB_BallCount" AS="SB_BallCount"/>
+    <ROUTE fromNode="SB_BallCount" fromField="value" toNode="PS" toField="ballCount" />
+
+    <!-- Ball radius slider -->
+    <IMPORT inlineDEF="UI" exportedDEF="SB_BallRadius" AS="SB_BallRadius"/>
+    <ROUTE fromNode="SB_BallRadius" fromField="value" toNode="PS" toField="ballRadius" />
+
+    <!-- String length slider -->
+    <IMPORT inlineDEF="UI" exportedDEF="SB_StringLength" AS="SB_StringLength"/>
+    <ROUTE fromNode="SB_StringLength" fromField="value" toNode="PS" toField="stringLength" />
+
+    <ROUTE fromNode="KS" fromField="keyPress" toNode="PS" toField="keyDown" />
+    <ROUTE fromNode="KS" fromField="keyRelease" toNode="PS" toField="keyUp" />
+
+  </Scene>
+</X3D>

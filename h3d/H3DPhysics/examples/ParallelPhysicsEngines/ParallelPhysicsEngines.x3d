@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D profile='H3DAPI' version="3.2">
+    <head>
+        <meta name='title' content='paralellPhysicsEngines.x3d'/>
+        <meta name='description' content='An example which can load multiple physics scenes with different configurations.'/>
+        <meta name='author' content='SenseGraphics AB, 2013-2019'/>
+    </head>
+    <Scene>
+        <!-- Import physics library -->
+        <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+        
+        <Viewpoint position='0 1 1' orientation = '1 0 0 -0.75'/>
+
+        <Background skyColor='0.045 0.065 0.17, 0.77 0.87 0.99' skyAngle='1.57' />
+        <DirectionalLight direction='1 -1 0'/>
+
+        <Group>
+
+            <Transform DEF="TEXTTRANS" translation="0 0.6 0" rotation ="0 1 0 0">
+                <Shape>
+                    <Appearance>
+                        <Material diffuseColor="1 1 1" />
+                    </Appearance>
+                    <Text DEF="Text" string='"Press L to load or reload the physics scene. Parameters are listed in Program settings"' solid="true">
+                        <FontStyle justify='"MIDDLE" "BEGIN"' size="0.035" spacing="1" />
+                    </Text>
+                </Shape>
+            </Transform>
+
+            <Transform DEF='PHYSICSROOT'>
+            </Transform>
+
+            <PythonScript DEF='PS' url='./python/loadPhysicsSimulation.py' >
+                <Group USE='PHYSICSROOT' containerField='references'/>
+            </PythonScript>
+
+            <KeySensor DEF='KS' />
+            <ROUTE fromNode='KS' fromField='keyPress' toNode='PS' toField='updatePhysicsGroup' />
+
+        </Group>
+    </Scene>
+</X3D>

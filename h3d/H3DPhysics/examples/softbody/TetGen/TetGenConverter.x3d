@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='TetGenConverter.x3d'/>
+    <meta name='description' content='Convert Tetgen output to IndexedTetraSet X3D format.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+  
+  <Scene>
+  <!-- Import physics library -->
+  <ImportLibrary url='"../../../bin32/H3DPhysics" "../../../../bin32/H3DPhysics" "../../../bin64/H3DPhysics" "../../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+  
+  <TetGenSoftBodyLoader DEF='L' filename='gear.1' output='gear_small.x3d' />
+  <TetGenSoftBodyLoader DEF='L1' filename='sphere.1' output='sphere.x3d' />
+  <TetGenSoftBodyLoader DEF='L2' filename='brain.1' output='brain.x3d' />
+  <TetGenSoftBodyLoader DEF='L3' filename='spine.1' output='spine.x3d' />
+  <TetGenSoftBodyLoader DEF='L3' filename='world.1' output='world.x3d' />
+  </Scene>
+</X3D>

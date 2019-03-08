@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='KinematicSoftBodyModifier_Cloth.x3d'/>
+    <meta name='description' content='Cloth soft body physics example showing use of kinematic rigid body deformer.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+
+  <Scene>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+
+    <GlobalSettings>
+      <!-- These options are required to keep the frame rate up when changing the geometry -->
+      <HapticsOptions useBoundTree='false'
+              maxDistance='0.005'
+              lookAheadFactor='0.01' />
+    </GlobalSettings>
+
+    <!-- Python script to set up ruspini renderer and other options -->
+    <!-- The Ruspini renderer is required to help prevent fall through on changing geometries -->
+    <PythonScript DEF='PS' url='SoftBody.py' />
+
+    <IMPORT inlineDEF='H3D_EXPORTS' exportedDEF='HDEV' AS='HDEV' />
+    <Viewpoint DEF='V' position='0 0 0.6' />
+
+    <ToggleGroup DEF='DeformerToggle' graphicsOn='false'>
+      <Transform DEF='DeformerTransform'>
+        <Shape DEF='DeformerShape'>
+          <Appearance>
+            <Material diffuseColor='1 0 0' transparency='0.5' />
+          </Appearance>
+          <Sphere radius='0.01' />
+        </Shape>
+      </Transform>
+    </ToggleGroup>
+
+    <Shape>
+      <Appearance>
+        <Material DEF='ClothMat' diffuseColor='0.5 0.9 0.9' />
+        <FrictionalSurface stiffness='0.1' />
+        <ImageTexture url='cloth.jpg'/>
+      </Appearance>
+      <IndexedTriangleSet solid='false' DEF='ClothGeom'>
+        <Coordinate />
+        <TextureCoordinate />
+      </IndexedTriangleSet>
+    </Shape>
+
+    <ToggleGroup DEF='MeshToggle' graphicsOn='false'>
+      <Shape>
+        <Appearance>
+          <FillProperties filled='false' hatched='false'/>
+          <Material diffuseColor='0.7 0.7 0.7' />
+        </Appearance>
+        <IndexedTriangleSet USE='ClothGeom' />
+      </Shape>
+    </ToggleGroup>
+
+    <Group DEF='Root' />
+
+    <!-- Display usage message -->
+    <Transform DEF="Nr">
+      <DirectionalLight direction="0 0 -1" />
+      <Transform translation="0 0.037 0.5" scale="0.2 0.2 0.2">
+        <Shape>
+          <Appearance>
+            <Material diffuseColor="1 1 1" />
+          </Appearance>
+          <Text DEF="Text" string='"H3DPhysics Soft Body: Kinematic Deformer"' solid="true">
+            <FontStyle justify='"MIDDLE" "BEGIN"' size="0.015" spacing="1" />
+          </Text>
+        </Shape>
+        <Transform translation="0 -0.02 0">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor="1 1 1" />
+            </Appearance>
+            <Text DEF="Text" string='"Touch the cloth with the haptic device. Press m to show/hide triangle mesh." "Press d to show/hide the kinematic deformer body."' solid="true">
+              <FontStyle justify='"MIDDLE" "BEGIN"' size="0.01" spacing="1" />
+            </Text>
+          </Shape>
+        </Transform>
+      </Transform>
+    </Transform>
+
+    <PhysicsBodyCollection DEF='RBC' physicsEngine='Bullet' gravity='0 -1 0'>
+
+      <BulletWorldOptions fixedTimeStep='0.002' worldScale='100' />
+
+      <!-- Geometries for collision detection -->
+      <CollisionCollection containerField='collider'>
+        <!-- Collision shape for haptic deformation -->
+        <CollidableShape DEF='DeformerCollidable' containerField='collidables'>
+          <Shape USE='DeformerShape' containerField='shape' />
+        </CollidableShape>
+      </CollisionCollection>
+
+      <!-- Rigid body for haptic deformation -->
+      <RigidBody DEF='DeformerBody'>
+        <CollidableShape USE='DeformerCollidable' containerField='geometry' />
+      </RigidBody>
+
+      <!-- Soft bodies -->
+      <Cloth DEF='Cloth'>
+
+        <MassSpringPhysicsMaterial>
+
+          <UniformMass mass="1.0" />
+          <UniformStiffness stiffness="0.05" />
+          <UniformDamping damping="0.005" />
+          <UniformFriction friction="0.1" />
+
+        </MassSpringPhysicsMaterial>
+        <IndexedTriangleSet USE='ClothGeom' containerField='geometry'/>
+      </Cloth>
+
+      <KinematicSoftBodyModifier>
+        <Cloth USE='Cloth' containerField='body1' />
+        <RigidBody USE='DeformerBody' containerField='rigidBody' />
+      </KinematicSoftBodyModifier>
+
+    </PhysicsBodyCollection>
+
+    <KeySensor DEF='KS' />
+
+    <PythonScript url='KinematicBodyModifier.py'>
+      <Cloth USE='Cloth' containerField='references' />
+      <ToggleGroup USE='MeshToggle' containerField='references' />
+      <Material USE='ClothMat' containerField='references' />
+      <KeySensor USE='KS' containerField='references' />
+      <PhysicsBodyCollection USE='RBC' containerField='references' />
+      <Group USE='Root' containerField='references' />
+      <ToggleGroup USE='DeformerToggle' containerField='references' />
+    </PythonScript>
+
+    <PythonScript url='GetTransforms.py' moduleName='GetTransforms' />
+    <PythonScript url='KinematicSoftBodyModifier_Cloth.py'>
+      <Cloth USE='Cloth' containerField='references' />
+      <PhysicsBodyCollection USE='RBC' containerField='references' />
+    </PythonScript>
+
+
+    <ROUTE fromNode='DeformerBody' fromField='position' toNode='DeformerTransform' toField='translation' />
+    <ROUTE fromNode='DeformerBody' fromField='orientation' toNode='DeformerTransform' toField='rotation' />
+
+    <!-- Update title text message position -->
+    <ROUTE fromNode="V" fromField="totalPosition" toNode="PS" toField="textPos" />
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="PS" toField="textPos" />
+    <ROUTE fromNode="PS" fromField="textPos" toNode="Nr" toField="translation" />
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="Nr" toField="rotation" />
+
+  </Scene>
+</X3D>

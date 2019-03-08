@@ -1,0 +1,154 @@
+Changes for version 1.4.0:
+- Added support for exr images.
+- Asynchronous callbacks are now potentially executed earlier when
+  being added to the thread.
+- Fixes to compile for visual studio 2015 and 2017.
+- Renamed many CMake cache variables and added functions to make it easier
+  to setup H3D projects in similar fashions.
+- New Image pixel type R.
+- Added CMake functionality for handling external checkouts that contain
+  subdirectories built for different visual studio versions.
+- Updates to console to make it output more useful log messages.
+- Fixed many compile warnings.
+- Added support for loading compressed image data (DDS) from both files
+  and input streams.
+- Improved reading of nrrd files.
+- Added support for using NVidia NSight for profiling.
+- Added a threadpool that can be used to limit number of threads.
+- Timestamps now use a nanosecond resolution timer on Linux instead of a microsecond resolution timer.
+- Added CMake option to enable Visual Leak Detector for release builds.
+- CMake fixes to support fastbuild.
+
+New classes:
+- DualQuaternion
+- ThreadPool
+
+New functions:
+- epsilonCompare
+- H3DClamp
+- H3DSqr
+- inverseSafe function in matrix classes.
+- loadDDSImage
+- loadOpenEXRImage
+- nearEqual in all linear algebra types.
+- saveOpenEXRImage
+- Image::setAllPixels
+
+Compability issues:
+- Removal of using std in some headers means adding std:: in headers that
+  previously relied on HAPI includes using std.
+- Several CMake cache variables have been replaced with new ones.
+- Deprecated H3D_USE_DEPENDENCIES_ONLY used in CMake configuration. Replace
+  by checking existing targets.
+- Many CMake cache variables are now deprecated. Warnings should give
+  instructions on what to do about them.
+- Previously deprecated constructor for SimpleThread is now removed.
+
+Changes for version 1.3.0:
+- Generated header is moved to CMake build directory and can only be found
+ in H3DUtil/include after INSTALL project has been built.
+- Added profiling capabilities through H3DTimer.
+- Renamed FindTeem.cmake to FindH3DTeem.cmake in order to use CMakes new
+ FindTeem module if it exists.
+- Speed optimizations that could affect some compilers.
+- Fixes to properly remove threads in all cases.
+- Added a InstallH3DUtilAndExternals.cmake package file which can be used by
+ applications to package up needed files by the current H3DUtil build.
+- Properly pack ACKNOWLEDGMENTS file.
+- Memory leak fixes.
+- Added CMake option to include visual leak detector in H3DUtil.
+- Updates to CMake build system to build properly when TortoiseSVN is installed
+ but the current H3D build is not a TortoiseSVN checkout.
+- Added enable/disable functions in Console which allow thread-safe disabling
+ of console output.
+
+New classes:
+- H3DTimer
+
+New functions:
+- saveFreeImagePNG
+- Image::setByteAlignment
+
+Changes for version 1.2.0:
+
+- CMake updates to configure build for MinGW toolchain.
+- New constructors to Matrix4f(d) to construct matrix from position,
+ rotation and scale parameters.
+- Fixes to make a proper debian package.
+- New constructors for 4 component constructs to use their 3 component version
+ plus a single value for the 4th component.
+- Fixed bugs with Dicom image loading.
+- Fixed a bug in assignment operator of AutoRefVector that would cause a crash
+if NULL was added to the vector .
+- Fixed a bug that could result in thread locking when a PeriodicThread was 
+destructed.
+- Updates to compile with gcc 4.5.
+- Fixed bug that could cause a problem when deallocating PixelImage instances
+created by the loadNrrdFile.
+- Fixed a bug that could result in callbacks not being removed from 
+removeAsynchronousCallback and clearAllCallbacks.
+- Added nrPixelComponents and convertToNormalizedData function to Image class.
+
+Changes for version 1.1.1:
+
+- Updates to compile with gcc 3.1.1 on Ubuntu 9.10 and Visual Studio 2010.
+- CMake build updates. Variables that points to include directories and
+libraries are now grouped together for each external library.
+- Memory allocation and deletion fixes.
+- Added support to read paletted image types with FreeImage.
+
+Changes for version 1.1:
+
+- Default rotation axis for Rotation is now 1 0 0 as it should be.
+- Added insert and erase methods to AutoRefVector.
+- Cmake build system updates, such as explicity listing all files belonging to
+the H3DUtil project.
+- Fixed bugs reported on www.h3d.org.
+- Various important fixes to image classes.
+- Additional LoadImageFunctions in order to load DICOM and nrrd images.
+- Added Priority enumerator for defining thread priority. The values of the
+enumerator used instead of system dependent thread priority definitions.
+- Added mechanisms for thread safe Console output.
+- Fixes to compile on 64 bit Windows.
+- Fixes to compile on recent versions of gcc.
+- Documentation updates.
+
+New source files:
+ - ReadWriteH3DTypes.h - Contains functions that can be used to write and read
+ H3DTypes as binary data to and from a stream.
+ - DicomImage.h, DicomImage.cpp. Contains an image loaded from dicom files.
+
+
+Changes for version 1.0:
+
+- Corrections to CMake build system and additions for compiling against static
+ libraries.
+- Doxygen updates.
+- Fixes in PixelImage and LoadImageFunctions.
+- Fixes concerning thread handling.
+- Fixed bugs reported on www.h3d.org.
+
+New Classes:
+Quaterniond - A double version of Quaternion.
+Rotationd - A double version of Rotation.
+
+
+
+Changes for version 1.0 beta 1:
+
+- Memory leak fixes.
+- The function asynchronousCallback in PeriodicThreadBase returns a handle that
+can be used as argument to the new function removeAsynchronousCallback.
+- Fixed a lot of minor bugs. See svn changelog at www.h3d.org:8080 for details.
+- Added ExtremaFindingAlgorithms which is a collection of algorithms that finds
+extrema. Currently only contains an implementation of amoeba.
+
+
+New Classes and related functions:
+Image - class moved here from H3D API.
+FreeImageImage - class moved here from H3D API.
+LoadImageFunctions - moved functions here. They are used to read image files.
+PixelImage - class moved here for H3D API.
+
+Compability issues:
+- Header files moved to include/H3DUtil. Include them with H3DUtil/ prefix.

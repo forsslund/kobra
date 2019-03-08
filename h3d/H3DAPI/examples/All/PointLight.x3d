@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version='1.4'>
+  <head>
+    <meta name='title' content='PointLight.x3d'/>
+    <meta name='description' content='X3D PointLight example. This example 
+          uses H3DAPI node(s) and runs on H3DAPI-supported browsers only. Visit
+          http://www.h3d.org for more information and to download an H3DAPI-
+          compatible browser.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+
+  <Scene>
+    <Viewpoint position='0 0 1' />
+    <NavigationInfo headlight="false" />
+    <IMPORT inlineDEF='H3D_EXPORTS' exportedDEF='HDEV' AS='H' />
+
+    <PointLight DEF='L'
+        ambientIntensity='0.0' color='1 1 0' global='true'
+        intensity='1.0' on='true' attenuation='1 0.6 0.15' />
+		
+	<Transform translation='0 -0.25 -0.25' >
+		<Shape>
+		<Sphere radius='0.15'/>
+		<Appearance>
+			<Material emissiveColor='0.3 0.3 0.3' ambientIntensity='0.5' shininess='0.8' />
+			<SmoothSurface />
+		</Appearance>
+		</Shape>
+	</Transform>
+
+    <ROUTE
+        fromNode='H' fromField='trackerPosition'
+        toNode='L' toField='location' />
+  </Scene>
+</X3D>

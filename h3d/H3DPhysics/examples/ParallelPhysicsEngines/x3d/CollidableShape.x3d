@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version="3.2">
+  <head>
+    <!-- Declare components required to run -->
+    <component name="H3DPhysics"/>
+
+    <meta name='title' content='CollidableShape.x3d'/>
+    <meta name='description' content='A demonstration of CollidableShape from the H3DPhysics component.'/>
+    <meta name='author' content='SenseGraphics, 2012'/>
+  </head>
+  <Scene>
+
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+    
+    <Viewpoint position="0 0 0.6" />
+    
+    <DirectionalLight direction='0 -1 0' intensity='0.3' />
+    
+    <Transform DEF='Floor_T'>
+      <Shape DEF='Floor_S'>
+        <Appearance>
+          <Material diffuseColor='0.7 0.2 0.4' />
+          <FrictionalSurface />
+        </Appearance>
+        <Box DEF='Floor_G' size='0.4 0.004 0.4' />
+      </Shape>
+    </Transform>
+
+    <Transform DEF='Body1_T'>
+    
+      <Shape DEF='Body1_BoxS'>
+        <Appearance>
+          <Material diffuseColor='1 0 0'/>
+          <FrictionalSurface />
+        </Appearance>
+        <Box DEF='Body1_BoxG' size='0.025 0.025 0.025' />
+      </Shape>
+    
+    </Transform>
+      
+    <Transform DEF='Body2_T' scale='2 2 2'>
+    
+      <Shape DEF='Body2_BoxS'>
+        <Appearance>
+          <Material diffuseColor='1 0 0'/>
+          <FrictionalSurface />
+        </Appearance>
+        <Box USE='Body1_BoxG' />
+      </Shape>
+      
+    </Transform>
+
+    <RigidBodyCollection physicsEngine='PhysX3' gravity='0 -1 0'>
+      <CollisionCollection DEF='CC' containerField='collider' bounce='0'>
+        <CollidableShape DEF='Floor_C' containerField='collidables'>
+          <Shape USE='Floor_S' containerField='shape' />
+        </CollidableShape>
+
+        <CollidableShape DEF='Body1_BoxC' containerField='collidables'>
+          <Shape USE='Body1_BoxS' containerField='shape' />
+        </CollidableShape>
+
+        <CollidableShape DEF='Body2_BoxC' containerField='collidables'>
+          <Shape USE='Body2_BoxS' containerField='shape' />
+        </CollidableShape>
+        <ROUTE fromNode='Body2_T' fromField='scale' toNode='Body2_BoxC' toField='scale' />
+        
+      </CollisionCollection>
+
+
+      <RigidBody  DEF='Floor' fixed='true' position='0 -0.15 0'>
+        <CollidableShape USE='Floor_C' containerField='geometry' />
+        <Box USE='Floor_G' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='Body1' position='-0.05 0 0'>
+        <CollidableShape USE='Body1_BoxC' containerField='geometry' />
+      </RigidBody>
+      
+      <RigidBody DEF='Body2' position='0.05 0 0'>
+        <CollidableShape USE='Body2_BoxC' containerField='geometry' />
+      </RigidBody>
+
+    </RigidBodyCollection>
+    
+    <CollisionSensor DEF='CS'>
+      <CollisionCollection USE='CC' containerField='collider' />
+    </CollisionSensor>
+
+    <ROUTE fromNode='Floor' fromField='position' toNode='Floor_T' toField='translation' />
+    <ROUTE fromNode='Floor' fromField='orientation' toNode='Floor_T' toField='rotation' />
+
+    <ROUTE fromNode='Body1' fromField='position' toNode='Body1_T' toField='translation' />
+    <ROUTE fromNode='Body1' fromField='orientation' toNode='Body1_T' toField='rotation' />
+    
+    <ROUTE fromNode='Body2' fromField='position' toNode='Body2_T' toField='translation' />
+    <ROUTE fromNode='Body2' fromField='orientation' toNode='Body2_T' toField='rotation' />
+    
+    <ROUTE fromNode='PS' fromField='text' toNode='Text' toField='string' />
+    
+  </Scene>
+</X3D>

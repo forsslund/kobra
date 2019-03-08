@@ -1,0 +1,102 @@
+The Volume Rendering Extension(VRE) to X3D has been implemented in H3D
+API by using a GPU-based raycaster and 3D-textures. glsl shaders are
+used to implement all the volume rendering styles.
+
+In principle the raycaster works by first rendering a simple box
+geometry with the same size as the volume to render. This is used to
+figure out where to shoot the rays.  
+
+Depending on the rendering styles chosen the glsl shader will look
+different. This means that the glsl code has to be dynamically
+generated. The implementation is done in the following way:
+
+The X3DVolumeNode is responsible for setting up the raycaster fragment
+shader and run it. The shader is rebuilt each time the volume render styles
+change. The main shader skeleton can be found in
+src/shaders/RayCaster_FS_main.glsl. This file currently
+contains function for the main raycaster. All the render style
+functions can be found in StyleFunctions.glsl. The
+important function to look at is the traverseRay function, which will
+be dynamically updated depending on functions in the
+X3DVolumeNode. It is the main raycaster loop that shoots a ray through
+the volume and determines the final color.
+
+The skeleton looks as follows and can be found in X3DVolumeNode.cpp:
+
+// traverse ray
+// Inputs:
+//   r0  - ray start (xyz), ray exit time (w)
+//   dir - ray direction (xyz), step length (-w)
+// Output:
+//   RayResult.color  - the computed RGBA color for this fragment
+//   RayResult.zpoint - the point to use for depth calculations,
+//                      if zpoint.x<0, no depth is computed
+RayResult traverseRay(vec4 r0, vec4 dir) {
+  //useful stuff (hopefully not computed if not needed...?)
+  mat4 view_to_tex = textureMatrix*gl_ModelViewMatrixInverse;
+  mat4 tex_to_view = gl_ModelViewMatrix*textureMatrixInverse;
+  vec4 viewdir_tex = vec4( -normalize(dir.xyz), 0.0 );
+  
+  // return value
+  RayResult rr;
+  
+  // initial color of this fragment is black with zero alpha
+  rr.color = vec4(0.0, 0.0, 0.0, 0.0);
+  // initial depth is not defined
+  rr.zpoint = vec4(-1.0, 0.0, 0.0, 0.0);
+  
+  //BEGIN PRE-LOOP
+  //END PRE-LOOP
+  
+  // compositing loop
+  while( rr.color.a<0.95 && r0.w>=0.0 ) {
+  	     
+    vec4 orig_sample_color = texture3D(voxels, r0.xyz);
+
+    //ORIG_SAMPLE_MANIP
+
+    // color of this sample
+    vec4 sample_color = orig_sample_color;  
+    
+    //BEGIN INSIDE-LOOP
+    //END INSIDE-LOOP
+    
+    //BEGIN COMPOSITING
+    //END COMPOSITING
+    
+    // step forward along ray
+    r0 += dir;
+  }
+  
+  //BEGIN POST-LOOP
+  //END POST-LOOP
+
+  if( rr.color.a == 0.0 ) discard;
+  
+  // return result
+  return rr;
+}
+
+The following functions are used to add to the skeleton. They all
+return glsl code to be inserted in different places.
+
+virtual string getShaderCode();            (INSIDE-LOOP)
+virtual string getShaderInitCode();        (PRE-LOOP)
+virtual string getShaderPostCode();        (POST-LOOP)
+virtual string getShaderCompositingCode(); (COMPOSITING)
+
+There are also two other function to return code for insertion in
+other places of the shader
+virtual string addUniforms();
+virtual string getShaderFunctions();    
+
+See Doxygen documentation for more information about each function.
+
+These functions are implemented in the VolumeData and
+SegmentedVolumeData nodes to just add code from the
+X3DVolumeRenderStyle nodes that are specified. All render styles have
+similar virtual functions to add code to the shader. 
+
+Picking
+TouchSensor and other sensor nodes and navigation collision is all
+implemented using the bounding box of the volume data.

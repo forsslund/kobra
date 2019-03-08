@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='SOFAHexmshSoftBodyLoader.x3d'/>
+    <meta name='description' content='SOFAHexmshSoftBodyLoader physics example.'/>
+    <meta name='author' content='SenseGraphics AB, 2014-2019'/>
+  </head>
+
+  <Scene>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+    
+    <SOFAHexmshSoftBodyLoader DEF="SOFAHexmsh" filename="tetraset" output="tetraset_output.x3d" />
+    <ProtoDeclare name='Text'>
+      <ProtoInterface>
+        <field accessType='inputOutput' name='offset' type='SFVec3f' value='0 0 0'/>
+        <field accessType='inputOutput' name='string' type='MFString' value='"Hello"'/>
+        <field accessType='inputOutput' name='solid' type='SFBool' value='false'/>
+      </ProtoInterface>
+      <ProtoBody>
+      <Transform>
+        <IS>
+          <connect nodeField='translation' protoField='offset' />
+        </IS>
+        <Shape>
+          <Appearance>
+            <Material diffuseColor='1 1 1' />
+          </Appearance>
+          <Text>
+            <IS>
+              <connect nodeField='string' protoField='string' />
+            </IS>
+            <FontStyle justify='MIDDLE' size='0.02' />
+          </Text>
+        </Shape>
+      </Transform>
+      </ProtoBody>
+    </ProtoDeclare>
+    
+    <Transform translation="0 0 0">
+      <ProtoInstance name='Text' containerField='children' >
+        <fieldValue name='offset' value='-0.04 -0.12 0' />
+        <fieldValue name='string' value='"SOFAHexmshSoftBodyLoader::geometry field"' />
+      </ProtoInstance>
+      
+      <Shape DEF="GEOMETRY_SHAPE">
+        <Appearance>
+          <Material emissiveColor="1 0 0"/>
+          <FillProperties hatched="true" filled="false" />
+        </Appearance>
+      </Shape>
+    </Transform>
+    
+    <ROUTE fromNode="SOFAHexmsh" fromField="geometry"
+           toNode="GEOMETRY_SHAPE" toField="geometry" />
+
+  </Scene>
+</X3D>

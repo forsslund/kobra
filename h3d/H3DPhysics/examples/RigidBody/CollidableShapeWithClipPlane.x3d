@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version="3.2">
+  <head>
+    <!-- Declare components required to run -->
+    <component name="H3DPhysics"/>
+
+    <meta name='title' content='CollidableShapeWithClipPlane.x3d'/>
+    <meta name='description' content='A demonstration of CollidableShape from the H3DPhysics component.'/>
+    <meta name='author' content='SenseGraphics AB, 2012-2019'/>
+  </head>
+  <Scene>
+
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+    
+    <Viewpoint position="0 0 0.6" />
+    
+    <DirectionalLight direction='0 -1 0' intensity='0.3' />
+    
+    <Transform translation='-0.2 0.12 0'>
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='1 1 1' />
+        </Appearance>
+        <Text DEF='Text' string='"Click on the green box to enable/disable clip plane."'>
+          <FontStyle size='0.02' />
+        </Text>
+      </Shape>
+    </Transform>
+    
+    <Transform DEF='Floor_T'>
+      <Shape DEF='Floor_S'>
+        <Appearance>
+          <Material diffuseColor='0.7 0.2 0.4' />
+          <FrictionalSurface />
+        </Appearance>
+        <Box DEF='Floor_G' size='0.4 0.004 0.4' />
+      </Shape>
+    </Transform>
+
+    <Transform DEF='Body1_T'>
+    
+      <Shape DEF='Body1_BoxS'>
+        <Appearance>
+          <Material diffuseColor='1 0 0'/>
+          <FrictionalSurface />
+        </Appearance>
+        <Box DEF='Body1_BoxG' size='0.025 0.025 0.025' />
+      </Shape>
+    
+    </Transform>
+      
+    <Transform DEF='Body2_T'>
+    
+      <Shape DEF='Body2_BoxS'>
+        <Appearance>
+          <Material diffuseColor='1 0 0'/>
+          <FrictionalSurface />
+        </Appearance>
+        <Box DEF='Body2_BoxG' size='0.05 0.05 0.05' />
+      </Shape>
+      
+    </Transform>
+    
+    <Transform DEF='Body3_T'>
+      <TouchSensor DEF="TS" />
+      <ClipPlane DEF='CP' plane='-1 0 0 -0.03' enabled='true' />
+      <Shape DEF='Body3_BoxS'>
+        <Appearance>
+          <Material diffuseColor='0 1 0'/>
+          <FrictionalSurface />
+        </Appearance>
+        <Box DEF='Body3_BoxG' size='0.3 0.004 0.05' solid="false" />
+      </Shape>
+    </Transform>
+
+    <RigidBodyCollection physicsEngine='PhysX3' gravity='0 -0.5 0'>
+      <CollisionCollection DEF='CC' containerField='collider' bounce='0'>
+        <CollidableShape DEF='Floor_C' containerField='collidables'>
+          <Shape USE='Floor_S' containerField='shape' />
+        </CollidableShape>
+
+        <CollidableShape DEF='Body1_BoxC' containerField='collidables'>
+          <Shape USE='Body1_BoxS' containerField='shape' />
+        </CollidableShape>
+
+        <CollidableShape DEF='Body2_BoxC' containerField='collidables'>
+          <Shape USE='Body2_BoxS' containerField='shape' />
+        </CollidableShape>
+        <ROUTE fromNode='Body2_T' fromField='scale' toNode='Body2_BoxC' toField='scale' />
+        
+        <CollidableShape DEF='Body3_BoxC' containerField='collidables'>
+          <Shape USE='Body3_BoxS' containerField='shape' />
+          <ClipPlane USE='CP' containerField='clipPlanes' />
+        </CollidableShape>
+        
+      </CollisionCollection>
+
+
+      <RigidBody  DEF='Floor' fixed='true' position='0 -0.15 0'>
+        <CollidableShape USE='Floor_C' containerField='geometry' />
+        <Box USE='Floor_G' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='Body1' position='-0.1 0.1 0'>
+        <CollidableShape USE='Body1_BoxC' containerField='geometry' />
+      </RigidBody>
+      
+      <RigidBody DEF='Body2' position='0.05 0 0'>
+        <CollidableShape USE='Body2_BoxC' containerField='geometry' />
+      </RigidBody>
+      
+      <RigidBody DEF='Body3' position='0 -0.05 0' fixed='true' orientation='0 0 1 0'>
+        <CollidableShape USE='Body3_BoxC' containerField='geometry' />
+      </RigidBody>
+
+    </RigidBodyCollection>
+    
+    <CollisionSensor DEF='CS'>
+      <CollisionCollection USE='CC' containerField='collider' />
+    </CollisionSensor>
+    
+    <BooleanToggle DEF="BT" />
+    <ROUTE fromNode='TS' fromField='isActive' toNode='BT' toField='set_boolean' />
+    <ROUTE fromNode='BT' fromField='toggle' toNode='CP' toField='enabled' />
+
+    <ROUTE fromNode='Floor' fromField='position' toNode='Floor_T' toField='translation' />
+    <ROUTE fromNode='Floor' fromField='orientation' toNode='Floor_T' toField='rotation' />
+
+    <ROUTE fromNode='Body1' fromField='position' toNode='Body1_T' toField='translation' />
+    <ROUTE fromNode='Body1' fromField='orientation' toNode='Body1_T' toField='rotation' />
+    
+    <ROUTE fromNode='Body2' fromField='position' toNode='Body2_T' toField='translation' />
+    <ROUTE fromNode='Body2' fromField='orientation' toNode='Body2_T' toField='rotation' />
+    
+    <ROUTE fromNode='Body3' fromField='position' toNode='Body3_T' toField='translation' />
+    <ROUTE fromNode='Body3' fromField='orientation' toNode='Body3_T' toField='rotation' />
+    
+  </Scene>
+</X3D>

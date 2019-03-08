@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D profile='Full' version="3.2">
+  <head>
+    <component name="RigidBodyPhysics"/>
+    <meta name='title' content='Tower.x3d'/>
+    <meta name='description' content='A rigidbody physics demo in which you can use the haptics device to build a Tower.'/>
+    <meta name='author' content='SenseGraphics AB, 2010-2019'/>
+  </head>
+
+  <Scene>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+
+    <Inline url="Viewpoints/Basic.x3d" />
+
+    <GlobalSettings>
+      <GraphicsOptions defaultShadowDepthOffset="30" />
+    </GlobalSettings>
+
+    <NavigationInfo headlight="false" type="NONE" />
+
+    <ToggleGroup DEF='ROOT'>
+      <Transform DEF='MODEL_Tx' translation='0 0 -0.3' scale='0.4 0.4 0.4' >
+
+        <!-- SenseGraphics logo -->
+        <Transform scale="3.5 3.5 3.5" translation='0 0.23 -0.499'>
+          <Shape>
+            <Appearance>
+              <Material transparency="0.0000001" diffuseColor='0.7 0.7 0.7' />
+              <ImageTexture url='images/sglogowhite.png' />
+            </Appearance>
+            <Rectangle2D size='0.2 0.055' />
+          </Shape>
+        </Transform>
+
+        <!-- The floor of the scene -->
+        <Transform DEF="FLOOR_T">
+          <Shape DEF="FLOOR_S">
+            <Appearance>
+              <FrictionalSurface staticFriction='0.5' dynamicFriction='1' />
+              <Material diffuseColor="1 0.7 0" />
+              <ComposedShader language="GLSL" >
+                <ShaderPart type="FRAGMENT" url="shaders/phong.frag" />
+                <ShaderPart type="VERTEX" url="shaders/phong.vert" />
+                <field name="texture" type="SFNode" accessType="inputOutput">
+                  <ImageTexture url='images/floor.jpg' />
+                </field>
+              </ComposedShader>
+            </Appearance>
+            <Rectangle2D DEF='FLOOR_G' solid='true' size='1 1' />
+          </Shape>
+        </Transform>
+
+        <!-- Walls -->
+        <Transform DEF="Tx1">
+          <Shape DEF="BoxShape1">
+            <Appearance DEF="WallApp">
+              <Material />
+              <ComposedShader language="GLSL" >
+                <ShaderPart type="FRAGMENT" url="shaders/phong.frag" />
+                <ShaderPart type="VERTEX" url="shaders/phong.vert" />
+                <field name="texture" type="SFNode" accessType="inputOutput">
+                  <ImageTexture url='images/wall.jpg'/>
+                </field>
+              </ComposedShader>
+            </Appearance>
+            <Rectangle2D DEF='rectGeom1' solid='true' size='1 1' />
+          </Shape>
+        </Transform>
+        <Transform DEF="Tx2">
+          <Shape DEF="BoxShape2">
+            <Appearance USE="WallApp"/>
+            <Rectangle2D DEF='rectGeom2' solid='true' size='1 1' />
+          </Shape>
+        </Transform>
+        <Transform DEF="Tx3">
+          <Shape DEF="BoxShape3">
+            <Appearance USE="WallApp"/>
+            <Rectangle2D DEF='rectGeom3' solid='true' size='1 1' />
+          </Shape>
+        </Transform>
+        <ToggleGroup graphicsOn="false">
+          <Transform DEF="Tx4">
+            <Shape DEF="BoxShape4">
+              <Appearance USE="WallApp"/>
+              <Rectangle2D DEF='rectGeom4' solid='true' size='1 1' />
+            </Shape>
+          </Transform>
+        </ToggleGroup>
+
+        <Transform DEF="LAMP_TRANSFORM">
+
+          <!-- Graphic only representation of the lamp -->
+          <ToggleGroup hapticsOn="false">
+            <Transform rotation='1 0 0 -1.57' translation='0 0.22 0'>
+              <Inline DEF="LAMP"  url="x3d/lamp.x3d" />
+            </Transform>
+          </ToggleGroup>
+
+          <!-- Haptics representation of the lamp -->
+          <ToggleGroup graphicsOn="false">
+            <Transform translation='0 0.09 0'>
+              <Shape DEF="LAMP_SHAPE">
+                <Appearance>
+                  <FrictionalSurface staticFriction='0.5' dynamicFriction='1' />
+                  <Material emissiveColor='1 0 0'/>
+                </Appearance>
+                <Cone DEF="LAMP_GEOM" bottom="true" bottomRadius="0.085" height="0.12" />
+              </Shape>
+            </Transform>
+          </ToggleGroup>
+
+          <Transform DEF="LIGHT_TRANSFORM" translation="0 0.1 0">
+            <PointLight DEF="SWING_LIGHT" global="true" />
+          </Transform>
+        </Transform>
+
+      </Transform>
+
+      <!-- Rigid body collection -->
+      <RigidBodyCollection DEF='RBC' gravity='0 -2 0' constantForceMix='0.001' physicsEngine = 'Bullet' contactSurfaceThickness='0.001'>
+
+        <!-- Collision objects -->
+        <CollisionCollection containerField='collider' DEF='CC' bounce='0.0' frictionCoefficients='0.3 0.3' softnessConstantForceMix='0.003'>
+
+          <!-- Collidable shape for floor (Use a separate Shape node instance so that the haptic device cannot move the floor) -->
+          <CollidableShape DEF="CSx" containerField='collidables' translation='0.0 0.0 -0.005'>
+            <Shape DEF='CollisionWall' containerField='shape'>
+              <Box DEF='CollisionWallGeom' solid='false' size='5 5 0.01' />
+            </Shape>
+          </CollidableShape>
+
+          <!-- The walls -->
+          <CollidableShape DEF="CSx1" containerField='collidables' translation='0 0 -0.005'>
+            <Shape containerField='shape' USE='CollisionWall'/>
+          </CollidableShape>
+          <CollidableShape DEF="CSx2" containerField='collidables' translation='0 0 -0.005'>
+            <Shape containerField='shape' USE='CollisionWall'/>
+          </CollidableShape>
+          <CollidableShape DEF="CSx3" containerField='collidables' translation='0 0 -0.005'>
+            <Shape containerField='shape' USE='CollisionWall'/>
+          </CollidableShape>
+          <CollidableShape DEF="CSx4" containerField='collidables' translation='0 0 -0.005'>
+            <Shape containerField='shape' USE='CollisionWall'/>
+          </CollidableShape>
+
+          <!-- Collidable shape for roof -->
+          <CollidableShape DEF="CSx5" containerField='collidables'>
+            <Shape containerField='shape'>
+              <Box size='1 0.1 1' />
+            </Shape>
+          </CollidableShape>
+
+          <!-- The Lamp -->
+          <CollidableShape DEF="CS_Lamp" containerField='collidables' translation='0.0 0.09 0.0' rotation='0 0 1 0'>
+            <Shape containerField='shape'>
+              <Box size='0.15 0.1 0.15' />
+            </Shape>
+          </CollidableShape>
+
+        </CollisionCollection>
+
+        <!-- Rigid body for the floor -->
+        <RigidBody DEF='RBx' fixed='true' position='0.0 -0.1 0.0'  orientation='1 0 0 -1.57'>
+          <CollidableShape USE='CSx' containerField='geometry'/>
+        </RigidBody>
+
+        <!-- The walls -->
+        <RigidBody DEF='RBx1' fixed='true' position='0.0 0.4 -0.5'>
+          <CollidableShape USE='CSx1' containerField='geometry'/>
+        </RigidBody>
+        <RigidBody DEF='RBx2' fixed='true' position='-0.5 0.4 0.0'  orientation='0 1 0 1.570796'>
+          <CollidableShape USE='CSx2' containerField='geometry'/>
+        </RigidBody>
+        <RigidBody DEF='RBx3' fixed='true' position='0.5 0.4 0.0'  orientation='0 1 0 -1.570796'>
+          <CollidableShape USE='CSx3' containerField='geometry'/>
+        </RigidBody>
+        <RigidBody DEF='RBx4' fixed='true' position='0.0 0.4 0.5'>
+          <CollidableShape USE='CSx4' containerField='geometry'/>
+        </RigidBody>
+
+        <!-- Rigid body for the roof -->
+        <RigidBody DEF='RBx5' fixed='true' position='0 0.85 0'>
+          <CollidableShape USE='CSx5' containerField='geometry'/>
+        </RigidBody>
+
+        <!-- The Lamp -->
+        <RigidBody DEF='RB_Lamp' mass='1' position="-0.3 0.5 -0.22" orientation="1 0 0 0">
+          <Geometry USE='CS_Lamp' containerField='geometry'/>
+          <Cone USE='LAMP_GEOM' containerField='massDensityModel' />
+        </RigidBody>
+
+        <!-- Anchor the lamp using a joint -->
+        <UniversalJoint axis1='1 0 0' axis2='0 0 1' anchorPoint='-0.3 0.75 -0.22'>
+          <RigidBody USE='RB_Lamp' containerField='body1' />
+        </UniversalJoint>
+
+      </RigidBodyCollection>
+
+    </ToggleGroup>
+
+    <!-- The floor -->
+    <ROUTE fromNode='RBx' fromField='position' toNode='FLOOR_T' toField='translation'/>
+    <ROUTE fromNode='RBx' fromField='orientation' toNode='FLOOR_T' toField='rotation'/>
+
+    <!-- The walls -->
+    <ROUTE fromNode='RBx1' fromField='position' toNode='Tx1' toField='translation'/>
+    <ROUTE fromNode='RBx1' fromField='orientation' toNode='Tx1' toField='rotation'/>
+    <ROUTE fromNode='RBx2' fromField='position' toNode='Tx2' toField='translation'/>
+    <ROUTE fromNode='RBx2' fromField='orientation' toNode='Tx2' toField='rotation'/>
+    <ROUTE fromNode='RBx3' fromField='position' toNode='Tx3' toField='translation'/>
+    <ROUTE fromNode='RBx3' fromField='orientation' toNode='Tx3' toField='rotation'/>
+    <ROUTE fromNode='RBx4' fromField='position' toNode='Tx4' toField='translation'/>
+    <ROUTE fromNode='RBx4' fromField='orientation' toNode='Tx4' toField='rotation'/>
+
+    <ROUTE fromNode='RB_Lamp' fromField='position' toNode='LAMP_TRANSFORM' toField='translation'/>
+    <ROUTE fromNode='RB_Lamp' fromField='orientation' toNode='LAMP_TRANSFORM' toField='rotation'/>
+
+    <ToggleGroup DEF="shadowedNodesToggle">
+      <!-- Light to illuminate the blocks (doesn't look good if lamp model is lit with the same light) -->
+      <DirectionalLight direction='1 0 -1' intensity='0.5' shadows='false' />
+      <Transform translation='0 0 -0.3' scale='0.4 0.4 0.4' >
+        <Group DEF="shadowedNodes" />
+      </Transform>
+    </ToggleGroup>
+
+    <!-- TimeSensor to drive auto add block -->
+    <TimeSensor DEF='TS' cycleInterval='5' loop='true' />
+
+    <!-- Python modules imported by Tower.py -->
+    <PythonScript url="python/Manipulation.py" moduleName="Manipulation" />
+    <PythonScript url="python/DeviceCalibration.py" moduleName="DeviceCalibration" />
+
+    <!-- Main python script to generate tower etc -->
+    <PythonScript DEF="PS" url="python/Tower.py">
+      <ToggleGroup USE="ROOT" containerField="references"/>
+      <Transform USE="MODEL_Tx" containerField="references"/>
+      <Group USE="shadowedNodes" containerField="references"/>
+      <ToggleGroup USE="shadowedNodesToggle" containerField="references"/>
+      <RigidBodyCollection USE="RBC" containerField="references" />
+      <TimeSensor USE='TS' containerField="references"/>
+      <RigidBody USE="RB_Lamp" containerField="references" />
+      <Cone USE="LAMP_GEOM" containerField="references" />
+    </PythonScript>
+
+    <ROUTE fromNode="LAMP_GEOM" fromField="force" toNode="PS" toField="lampGeometryForces" />
+
+    <!-- Mouse handler -->
+    <MouseSensor DEF="MS" />
+    <ROUTE fromNode="MS" fromField="rightButton" toNode="PS" toField="mReset" />
+
+    <!-- Key handler -->
+    <KeySensor DEF='KS' enabled='true' />
+    <ROUTE fromNode='KS' fromField='keyPress' toNode='PS' toField='kReset' />
+    <ROUTE fromNode='KS' fromField='keyPress' toNode='PS' toField='auto' />
+    <ROUTE fromNode='TS' fromField='cycleTime' toNode='PS' toField='auto' />
+
+    <!-- Key handling to add new box -->
+    <ROUTE fromNode='KS' fromField='keyPress' toNode='PS' toField='kAddBox' />
+
+    <!-- Key handling for manipulation key -->
+    <ROUTE fromNode='KS' fromField='keyPress' toNode='PS' toField='keyDown' />
+    <ROUTE fromNode='KS' fromField='keyRelease' toNode='PS' toField='keyUp' />
+
+    <!-- Forces to move swing lamp using keyboard -->
+    <ROUTE fromNode='PS' fromField='lampForces' toNode='RB_Lamp' toField='forces' />
+    <ROUTE fromNode='RB_Lamp' fromField='linearVelocity' toNode='PS' toField='kDampLampForce' />
+
+    <!-- Key handling for device calibration -->
+    <ROUTE fromNode='KS' fromField='keyPress' toNode='PS' toField='toggleCalibration' />
+
+  </Scene>
+</X3D>

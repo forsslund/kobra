@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version='1.4'>
+  <head>
+    <meta name='title' content='PhantomDevice.x3d'/>
+    <meta name='description' content='H3DAPI dual PhantomDevice example.
+      Refer the wiki at http://www.h3dapi.org/modules/mediawiki/index.php
+      /Haptic_device_settings_in_H3D for complete instructions to set up
+      dual Phantom devices.
+      This example will initialize a device and let the user know if it succeeded or not.
+      This example uses H3DAPI node(s) and runs on H3DAPI-supported 
+      browsers only. Visit http://www.h3d.org for more information and 
+      to download an H3DAPI-compatible browser.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+  
+  <Scene>
+    <Viewpoint position='0 0 0.6' />
+    <DeviceInfo>
+      <PhantomDevice DEF="HAPTICS_DEVICE"
+          deviceName='P1' 
+          positionCalibration='3 0 0 0
+                               0 3 0 0
+                               0 0 3 0
+                               0 0 0 1'>
+        <OpenHapticsRenderer/>
+      </PhantomDevice>
+      <PhantomDevice DEF="HAPTICS_DEVICE2"
+          deviceName='P2' 
+          positionCalibration='3 0 0 0
+                               0 3 0 0 
+                               0 0 3 0 
+                               0 0 0 1'>
+        <OpenHapticsRenderer/>
+      </PhantomDevice>
+    </DeviceInfo>
+
+    <ExternProtoDeclare name='Text' url='"./Prototype.x3d#Text"'>
+      <field accessType='inputOutput' name='offset' type='SFVec3f'/>
+      <field accessType='inputOutput' name='string' type='MFString'/>
+    </ExternProtoDeclare>
+
+    <ProtoInstance DEF="PI_TEXT" name='Text'>
+    </ProtoInstance>
+    <ProtoInstance DEF="PI_TEXT2" name='Text'>
+      <fieldValue name='offset' value='0 -0.1 0' />
+    </ProtoInstance>
+
+    <PythonScript DEF="P" url="script.py" />
+    <ROUTE
+      fromNode='HAPTICS_DEVICE' fromField='initialized'
+      toNode='P' toField='deviceInitializedText' />
+    <ROUTE
+      fromNode='P' fromField='deviceInitializedText'
+      toNode='PI_TEXT' toField='string' />
+    <ROUTE
+      fromNode='HAPTICS_DEVICE2' fromField='initialized'
+      toNode='P' toField='deviceInitializedText2' />
+    <ROUTE
+      fromNode='P' fromField='deviceInitializedText2'
+      toNode='PI_TEXT2' toField='string' />
+  </Scene>
+</X3D>

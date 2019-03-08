@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='NurbsCurve.x3d'/>
+    <meta name='description' content='X3D NurbsCurve node example.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+  
+  <Scene>
+    <Viewpoint position='0.2 0 0.6' />
+
+    <Transform translation='0 0.1 0'>
+      <Shape>
+        <!-- A simple NURBS curve with a uniform knot vector -->
+        <NurbsCurve 
+            containerField='geometry' 
+            order='3' 
+            tessellation='60' 
+            closed='false'
+            weight='1 1 1 1 1'>
+          <Coordinate DEF="C" containerField='controlPoint' 
+              point='0 0 0 
+                     0.1 0.1 0
+                     0.2 -0.1 0
+                     0.3 0.1 0
+                     0.4 -0.1 0'/>
+        </NurbsCurve>
+        <Appearance>
+          <Material emissiveColor='1 1 0' />
+        </Appearance>
+      </Shape>
+
+      <!-- Show the control points as a LineSet -->
+      <Shape>
+        <Appearance>
+          <Material emissiveColor="1 0 0" />
+        </Appearance>
+        <LineSet vertexCount="5">
+          <Coordinate USE='C' />
+        </LineSet>
+      </Shape>
+    </Transform>
+
+    <Transform translation='0 -0.1 0'>
+      <Shape>
+        <!-- The same curve with a "pinned" uniform knot vector                -->
+        <!-- so that the start and end points are pinned to the control points -->
+        <NurbsCurve
+            containerField='geometry'
+            order='3'
+            tessellation='60'
+            closed='false'
+            weight='1 1 1 1 1'
+            knot='0 0 0 1 2 3 3 3'>
+          <Coordinate USE='C' containerField='controlPoint'  />
+        </NurbsCurve>
+        <Appearance>
+          <Material emissiveColor='1 1 0' />
+        </Appearance>
+      </Shape>
+
+      <!-- Show the control points as a LineSet -->
+      <Shape>
+        <Appearance>
+          <Material emissiveColor="1 0 0" />
+        </Appearance>
+        <LineSet vertexCount="5">
+          <Coordinate USE='C' />
+        </LineSet>
+      </Shape>
+    </Transform>
+
+  </Scene>
+</X3D>

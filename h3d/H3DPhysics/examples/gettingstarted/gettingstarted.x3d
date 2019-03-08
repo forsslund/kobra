@@ -1,0 +1,81 @@
+<!--
+  RigidBodyPhysics basic example
+  Refer to the article at: http://www.h3dapi.org/modules/mediawiki/index.php/RigidBodyPhysics_Example:_Getting_Started
+-->
+<X3D profile="Full" version="3.0">
+  <head>
+    <meta name='title' content='gettingstarted.x3d'/>
+    <meta name='description' content='A simple example demonstrating the X3D RigidBodyPhysics component.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+  <Scene>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+    
+    <Viewpoint position="0 0 0.6" />
+    
+    <Group>
+      <Transform translation="-0.17 0.05 0">
+        <Shape>
+          <Appearance>
+            <Material diffuseColor="1 1 1"/>
+          </Appearance>
+          <Text string='"Testing rigid body fields. Press G to enable/disable gravity"'>
+            <FontStyle size='0.02'/>
+          </Text>
+        </Shape>
+      </Transform>
+
+      <Transform DEF='BOX-T'>
+        <Shape DEF='BOX-S'>
+          <Appearance DEF='A'>
+            <Material diffuseColor='0.180 0.565 0.173' />
+            <FrictionalSurface />
+          </Appearance>
+          <Box DEF='BOX-G' size='0.4 0.004 0.4' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='BOX2-T'>
+        <Shape DEF='BOX2-S'>
+          <Appearance>
+            <Material diffuseColor='0.243 0.173 0.267' />
+          </Appearance>
+          <Box DEF='BOX2-G' size='0.7 0.008 0.05' />
+        </Shape>
+      </Transform>
+
+      <RigidBodyCollection DEF='RBC' enabled='false' physicsEngine='Bullet' gravity='0 -1 0'>
+        <CollisionCollection containerField='collider' bounce='0'>
+          <CollidableShape DEF='BOX-C' containerField='collidables'>
+            <Shape USE='BOX-S' containerField='shape' />
+          </CollidableShape>
+          <CollidableShape DEF='BOX2-C' containerField='collidables'>
+            <Shape USE='BOX2-S' containerField='shape' />
+          </CollidableShape>
+        </CollisionCollection>
+
+        <RigidBody DEF='BOX-R' fixed='true' mass='0.2' orientation='0 1 0 0.5' position='0 -0.1 0'>
+          <Geometry USE='BOX-C' containerField='geometry' />
+          <Box USE='BOX-G' containerField='massDensityModel' />
+        </RigidBody>
+        <RigidBody DEF='BOX2-R' fixed='FALSE' mass='1' orientation = '0 1 0 0' position = '0 0 0'>
+          <Geometry USE='BOX2-C' containerField='geometry' />
+          <Box USE='BOX2-G' containerField='massDensityModel' />
+        </RigidBody>
+      </RigidBodyCollection>
+
+      <ROUTE fromNode='BOX-R' fromField='position' toNode='BOX-T' toField='translation' />
+      <ROUTE fromNode='BOX-R' fromField='orientation' toNode='BOX-T' toField='rotation' />
+
+      <ROUTE fromNode='BOX2-R' fromField='position' toNode='BOX2-T' toField='translation' />
+      <ROUTE fromNode='BOX2-R' fromField='orientation' toNode='BOX2-T' toField='rotation' />
+
+      <KeySensor DEF='K' />
+      <PythonScript DEF='P' url='gettingstarted.py'>
+        <RigidBodyCollection containerField='references' USE='RBC' />
+      </PythonScript>
+      <ROUTE fromNode='K' fromField='keyPress' toNode='P' toField='toggleRBP' />
+    </Group>
+  </Scene>
+</X3D>

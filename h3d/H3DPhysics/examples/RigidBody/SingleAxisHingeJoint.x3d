@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version="3.2">
+  <head>
+    <!-- Declare components required to run -->
+    <component name="H3DPhysics"/>
+
+    <meta name='title' content='SingleAxisHingeJoint.x3d'/>
+    <meta name='description' content='A demonstration the SingleAxisHingeJoint joint type from the H3DPhysics component.'/>
+    <meta name='author' content='SenseGraphics AB, 2010-2019'/>
+  </head>
+  <Scene>
+
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+  
+    <IMPORT inlineDEF='H3D_EXPORTS' exportedDEF='HDEV' AS='HDEV' />
+    <Viewpoint DEF='V' position='0 0 0.6'/>
+    <Background skyColor='0.045 0.065 0.17, 0.77 0.87 0.99' skyAngle='1.57' />
+    <DirectionalLight direction='1 -1 0' />
+
+    <!-- Display usage message -->
+    <Transform DEF="Nr">
+      <DirectionalLight direction="0 0 -1" />
+      <Transform translation="0 0.037 0.5" scale="0.2 0.2 0.2">
+        <Shape>
+          <Appearance>
+            <Material diffuseColor="1 1 1" />
+          </Appearance>
+          <Text DEF="Text" string='"RigidBodyPhysics Joints: SingleAxisHingeJoint"' solid="true">
+            <FontStyle justify='"MIDDLE" "BEGIN"' size="0.015" spacing="1" />
+          </Text>
+        </Shape>
+        <Transform translation="0 -0.02 0">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor="1 1 1" />
+            </Appearance>
+            <Text DEF="Text" string='"Click on a joint title to toggle display of output fields. Press D to toggle display of all output fields."' solid="true">
+              <FontStyle justify='"MIDDLE" "BEGIN"' size="0.01" spacing="1" />
+            </Text>
+          </Shape>
+        </Transform>
+        <Transform translation="0 -0.015 -0.01">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor="0 0 0" transparency="0.6" />
+            </Appearance>
+            <Rectangle2D size="0.46 0.04" solid="true"/>
+          </Shape>
+        </Transform>
+      </Transform>
+    </Transform>
+    
+    <!-- Scene graph consisting of transforms containing shapes that will be linked to 
+         rigid bodys in the simulation -->
+    <Group DEF='Root'>
+
+      <Transform DEF='T'>
+        <Shape DEF='S'>
+          <Appearance DEF='A'>
+            <Material diffuseColor='0.4 0.4 0.7' />
+            <FrictionalSurface stiffness='0.35' damping='0.2'/>
+          </Appearance>
+          <Box DEF='G' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T1'>
+        <Shape DEF='S1'>
+          <Appearance USE='A' />
+          <Box DEF='G1' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T2'>
+        <Shape DEF='S2'>
+          <Appearance USE='A' />
+          <Box DEF='G2' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T3'>
+        <Shape DEF='S3'>
+          <Appearance USE='A' />
+          <Box DEF='G3' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+
+      <Transform DEF='T4'>
+        <Shape DEF='S4'>
+          <Appearance USE='A' />
+          <Box DEF='G4' size='0.05 0.03 0.035' />
+        </Shape>
+      </Transform>
+      
+    </Group>
+
+    <!-- Define rigid body simulation -->
+    <RigidBodyCollection DEF='RBC' physicsEngine='Bullet'>
+    
+      <!-- Geometries for collision detection -->
+      <CollisionCollection containerField='collider'>
+        <CollidableShape DEF='C' containerField='collidables'>
+          <Shape USE='S' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C1' containerField='collidables' translation='1 0 0'>
+          <Shape USE='S1' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C2' containerField='collidables' translation='2 0 0'>
+          <Shape USE='S2' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C3' containerField='collidables' translation='3 0 0'>
+          <Shape USE='S3' containerField='shape' />
+        </CollidableShape>
+        <CollidableShape DEF='C4' containerField='collidables' translation='4 0 0'>
+          <Shape USE='S4' containerField='shape' />
+        </CollidableShape>
+        
+      </CollisionCollection>
+
+      <!-- Rigid bodies for physics simulation -->
+      <RigidBody DEF='R' autoDamp='true' linearDampingFactor='1' angularDampingFactor='0.001' mass='3' position='-0.1 0 0' orientation='1 0 0 -0.3'>
+        <CollidableShape USE='C' containerField='geometry' />
+        <Box USE='G' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R1' autoDamp='true' linearDampingFactor='1' angularDampingFactor='0.001' mass='1' position='-0.1 -0.1 0' orientation='0 1 0 0.9'>
+        <CollidableShape USE='C1' containerField='geometry' />
+        <Box USE='G1' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R2' autoDamp='true' linearDampingFactor='1' angularDampingFactor='0.001' mass='3' position='0.1 0 0' orientation='0 1 0 1.57'>
+        <CollidableShape USE='C2' containerField='geometry' />
+        <Box USE='G2' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R3' autoDamp='true' linearDampingFactor='1' angularDampingFactor='0.001' mass='1' position='0.1 -0.1 0'>
+        <CollidableShape USE='C3' containerField='geometry' />
+        <Box USE='G3' containerField='massDensityModel' />
+      </RigidBody>
+
+      <RigidBody DEF='R4' autoDamp='true' linearDampingFactor='1' angularDampingFactor='0.001' mass='1' position='0 0 0' orientation='0 1 0 0.9'>
+        <CollidableShape USE='C4' containerField='geometry' />
+        <Box USE='G4' containerField='massDensityModel' />
+      </RigidBody>
+      
+      <!-- Joints connecting rigid bodies together -->
+
+      <!-- Joint anchoring a single body in body1 field to space -->
+      <SingleAxisHingeJoint anchorPoint='-0.1 0.05 0' axis='1 0 0' >
+        <RigidBody USE='R' containerField='body1' />
+      </SingleAxisHingeJoint>
+      
+      <SingleAxisHingeJoint anchorPoint='-0.1 -0.05 0' axis='0 0 1' >
+        <RigidBody USE='R' containerField='body1' />
+        <RigidBody USE='R1' containerField='body2' />
+      </SingleAxisHingeJoint>
+
+      <SingleAxisHingeJoint anchorPoint='0.1 0.05 0' axis='1 0 1' >
+        <RigidBody USE='R2' containerField='body1' />
+      </SingleAxisHingeJoint>
+
+      <SingleAxisHingeJoint anchorPoint='0.1 -0.05 0' axis='1 0 0' >
+        <RigidBody USE='R2' containerField='body1' />
+        <RigidBody USE='R3' containerField='body2' />
+      </SingleAxisHingeJoint>
+
+      <!-- Single body joint with angle limits -->
+      <SingleAxisHingeJoint anchorPoint='0 0.1 0' axis='1 0 0' minAngle='-0.1' maxAngle='0.5' stopBounce='1'>
+        <RigidBody USE='R4' containerField='body1' />
+      </SingleAxisHingeJoint>
+      
+    </RigidBodyCollection>
+
+    <!-- Set up routes to update positions and orientations based on simulation -->
+    <ROUTE fromNode='R' fromField='position' toNode='T' toField='translation' />
+    <ROUTE fromNode='R' fromField='orientation' toNode='T' toField='rotation' />
+    <ROUTE fromNode='R1' fromField='position' toNode='T1' toField='translation' />
+    <ROUTE fromNode='R1' fromField='orientation' toNode='T1' toField='rotation' />
+    <ROUTE fromNode='R2' fromField='position' toNode='T2' toField='translation' />
+    <ROUTE fromNode='R2' fromField='orientation' toNode='T2' toField='rotation' />
+    <ROUTE fromNode='R3' fromField='position' toNode='T3' toField='translation' />
+    <ROUTE fromNode='R3' fromField='orientation' toNode='T3' toField='rotation' />
+    <ROUTE fromNode='R4' fromField='position' toNode='T4' toField='translation' />
+    <ROUTE fromNode='R4' fromField='orientation' toNode='T4' toField='rotation' />
+
+    <!-- Python script used to graphically display joints -->
+    <PythonScript DEF='PS' url='python/jointVisuals.py'>
+      <Group USE='Root' containerField='references' />
+    </PythonScript>
+    <ROUTE fromNode='RBC' fromField='joints' toNode='PS' toField='joints' />
+
+    <KeySensor DEF='KS' />
+    <ROUTE fromNode='KS' fromField='keyPress' toNode='PS' toField='toggleDetails' />
+
+    <!-- Update title text message position -->
+    <ROUTE fromNode="V" fromField="totalPosition" toNode="PS" toField="textPos" />
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="PS" toField="textPos" />
+    <ROUTE fromNode="PS" fromField="textPos" toNode="Nr" toField="translation" />
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="Nr" toField="rotation" />
+    
+  </Scene>
+</X3D>

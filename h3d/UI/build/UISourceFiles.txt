@@ -1,0 +1,33 @@
+set( UI_HEADERS "${UI_SOURCE_DIR}/../include/H3D/UI/Frame.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/GridInfo.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/GridLayoutManager.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/H3DButtonNode.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/H3DLabeledWidget.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/H3DLayoutInfoNode.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/H3DLayoutManagerNode.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/H3DWidgetNode.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/Label.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/PopupMenu.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/SizeJustifiedText.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/SliderBar.h"
+                "${UI_SOURCE_DIR}/../include/H3D/UI/TouchButton.h" )
+
+if( EXISTS ${CMAKE_CURRENT_BINARY_DIR}/UI )
+  set( UI_HEADERS ${UI_HEADERS} "${CMAKE_CURRENT_BINARY_DIR}/UI/include/H3D/UI/UI.h" )
+else()
+  set( UI_HEADERS ${UI_HEADERS} "${CMAKE_CURRENT_BINARY_DIR}/include/H3D/UI/UI.h" )
+endif()
+
+set( UI_SRCS "${UI_SOURCE_DIR}/../src/Frame.cpp"
+             "${UI_SOURCE_DIR}/../src/GridInfo.cpp"
+             "${UI_SOURCE_DIR}/../src/GridLayoutManager.cpp"
+             "${UI_SOURCE_DIR}/../src/H3DButtonNode.cpp"
+             "${UI_SOURCE_DIR}/../src/H3DLabeledWidget.cpp"
+             "${UI_SOURCE_DIR}/../src/H3DLayoutManagerNode.cpp"
+             "${UI_SOURCE_DIR}/../src/H3DWidgetNode.cpp"
+             "${UI_SOURCE_DIR}/../src/Label.cpp"
+             "${UI_SOURCE_DIR}/../src/PopupMenu.cpp"
+             "${UI_SOURCE_DIR}/../src/SizeJustifiedText.cpp"
+             "${UI_SOURCE_DIR}/../src/SliderBar.cpp"
+             "${UI_SOURCE_DIR}/../src/TouchButton.cpp"
+             "${UI_SOURCE_DIR}/../src/UI.cpp" )

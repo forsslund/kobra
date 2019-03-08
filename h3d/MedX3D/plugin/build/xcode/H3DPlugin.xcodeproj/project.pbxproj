@@ -1,0 +1,426 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		964647C90FC2C47A00D7B148 /* np_entry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 964647C80FC2C47A00D7B148 /* np_entry.cpp */; };
+		96A7ABEF0FC2D512006D9F0E /* npn_gate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 96A7ABED0FC2D512006D9F0E /* npn_gate.cpp */; };
+		96A7ABF00FC2D512006D9F0E /* npp_gate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 96A7ABEE0FC2D512006D9F0E /* npp_gate.cpp */; };
+		96BA2EBD0FC3FAB400C716E8 /* PluginWindowOSX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 96BA2EBC0FC3FAB400C716E8 /* PluginWindowOSX.cpp */; };
+		96BA2EBF0FC3FAB400C716E8 /* H3DPluginNetscapeOSX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 96BA2EBE0FC3FAB400C716E8 /* H3DPluginNetscapeOSX.cpp */; };
+		96BA2F100FC3FAB400C716E8 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96BA2F0F0FC3FAB400C716E8 /* Carbon.framework */; };
+		96BA32200FC58CC200C716E8 /* H3DPluginNetscapeOSX.r in Rez */ = {isa = PBXBuildFile; fileRef = 96BA321F0FC58CC200C716E8 /* H3DPluginNetscapeOSX.r */; };
+		96BF09510FC2B4BE0049D8E6 /* H3DPluginNetscapeWin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1F5353101F5353101F535310 /* H3DPluginNetscapeWin.cpp */; };
+		96BF09520FC2B4D50049D8E6 /* H3DPluginInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1F50C0101F50C0101F50C010 /* H3DPluginInstance.cpp */; };
+		96BF09530FC2B4D50049D8E6 /* keys.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1F58C1201F58C1201F58C120 /* keys.cpp */; };
+		96BF09540FC2B4D50049D8E6 /* PluginWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1F580BF01F580BF01F580BF0 /* PluginWindow.cpp */; };
+		96BF09550FC2B4D50049D8E6 /* H3DPluginNetscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1F58E4001F58E4001F58E400 /* H3DPluginNetscape.cpp */; };
+		96BF09560FC2B4DF0049D8E6 /* NPAPIFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1F5649001F5649001F564900 /* NPAPIFunctions.cpp */; };
+		96BF09570FC2B4DF0049D8E6 /* stdafx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1F54ED901F54ED901F54ED90 /* stdafx.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		167D4F0167D4F0167D4F0000 /* CommonInclude.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CommonInclude.h; path = /Users/Knok/H3D/MedX3D/plugin/src/CommonInclude.h; sourceTree = "<absolute>"; };
+		1F50C0101F50C0101F50C010 /* H3DPluginInstance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = H3DPluginInstance.cpp; path = /Users/Knok/H3D/MedX3D/plugin/src/H3DPluginInstance.cpp; sourceTree = "<absolute>"; };
+		1F518F601F518F601F518F60 /* H3DPluginNetscapeWin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = H3DPluginNetscapeWin.h; path = /Users/Knok/H3D/MedX3D/plugin/src/netscape/H3DPluginNetscapeWin.h; sourceTree = "<absolute>"; };
+		1F52F9C01F52F9C01F52F9C0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = /Users/Knok/H3D/MedX3D/plugin/build/xcode/CMakeFiles/H3DPluginNetscape.dir/Info.plist; sourceTree = "<absolute>"; };
+		1F5353101F5353101F535310 /* H3DPluginNetscapeWin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = H3DPluginNetscapeWin.cpp; path = /Users/Knok/H3D/MedX3D/plugin/src/netscape/H3DPluginNetscapeWin.cpp; sourceTree = "<absolute>"; };
+		1F5385601F5385601F538560 /* stdafx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = stdafx.h; path = /Users/Knok/H3D/MedX3D/plugin/src/netscape/stdafx.h; sourceTree = "<absolute>"; };
+		1F54E6E01F54E6E01F54E6E0 /* Resource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Resource.h; path = /Users/Knok/H3D/MedX3D/plugin/src/netscape/Resource.h; sourceTree = "<absolute>"; };
+		1F54ED901F54ED901F54ED90 /* stdafx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stdafx.cpp; path = /Users/Knok/H3D/MedX3D/plugin/src/netscape/stdafx.cpp; sourceTree = "<absolute>"; };
+		1F562B601F562B601F562B60 /* H3DPluginNetscape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = H3DPluginNetscape.h; path = /Users/Knok/H3D/MedX3D/plugin/src/netscape/H3DPluginNetscape.h; sourceTree = "<absolute>"; };
+		1F5649001F5649001F564900 /* NPAPIFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NPAPIFunctions.cpp; path = /Users/Knok/H3D/MedX3D/plugin/src/netscape/NPAPIFunctions.cpp; sourceTree = "<absolute>"; };
+		1F56E6601F56E6601F56E660 /* H3DPluginInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = H3DPluginInstance.h; path = /Users/Knok/H3D/MedX3D/plugin/src/H3DPluginInstance.h; sourceTree = "<absolute>"; };
+		1F5800F01F5800F01F5800F0 /* keys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = keys.h; path = /Users/Knok/H3D/MedX3D/plugin/src/keys.h; sourceTree = "<absolute>"; };
+		1F580BF01F580BF01F580BF0 /* PluginWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PluginWindow.cpp; path = /Users/Knok/H3D/MedX3D/plugin/src/PluginWindow.cpp; sourceTree = "<absolute>"; };
+		1F5817201F5817201F581720 /* PluginWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PluginWindow.h; path = /Users/Knok/H3D/MedX3D/plugin/src/PluginWindow.h; sourceTree = "<absolute>"; };
+		1F58C1201F58C1201F58C120 /* keys.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = keys.cpp; path = /Users/Knok/H3D/MedX3D/plugin/src/keys.cpp; sourceTree = "<absolute>"; };
+		1F58E4001F58E4001F58E400 /* H3DPluginNetscape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = H3DPluginNetscape.cpp; path = /Users/Knok/H3D/MedX3D/plugin/src/netscape/H3DPluginNetscape.cpp; sourceTree = "<absolute>"; };
+		964647C80FC2C47A00D7B148 /* np_entry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = np_entry.cpp; path = ../../src/netscape/npapi/np_entry.cpp; sourceTree = SOURCE_ROOT; };
+		96A7ABED0FC2D512006D9F0E /* npn_gate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = npn_gate.cpp; path = ../../src/netscape/npapi/npn_gate.cpp; sourceTree = SOURCE_ROOT; };
+		96A7ABEE0FC2D512006D9F0E /* npp_gate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = npp_gate.cpp; path = ../../src/netscape/npapi/npp_gate.cpp; sourceTree = SOURCE_ROOT; };
+		96BA2EBC0FC3FAB400C716E8 /* PluginWindowOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PluginWindowOSX.cpp; path = ../../src/PluginWindowOSX.cpp; sourceTree = SOURCE_ROOT; };
+		96BA2EBE0FC3FAB400C716E8 /* H3DPluginNetscapeOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = H3DPluginNetscapeOSX.cpp; path = ../../src/netscape/H3DPluginNetscapeOSX.cpp; sourceTree = SOURCE_ROOT; };
+		96BA2F0F0FC3FAB400C716E8 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		96BA321F0FC58CC200C716E8 /* H3DPluginNetscapeOSX.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; name = H3DPluginNetscapeOSX.r; path = ../../src/netscape/H3DPluginNetscapeOSX.r; sourceTree = SOURCE_ROOT; };
+		96BF09270FC2ABF30049D8E6 /* H3DPlugin.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = H3DPlugin.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		96BF09280FC2ABF30049D8E6 /* H3DPlugin-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "H3DPlugin-Info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		96BF09250FC2ABF30049D8E6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				96BA2F100FC3FAB400C716E8 /* Carbon.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1678C701678C701678C70000 = {
+			isa = PBXGroup;
+			children = (
+				96BA321F0FC58CC200C716E8 /* H3DPluginNetscapeOSX.r */,
+				96BA2F0F0FC3FAB400C716E8 /* Carbon.framework */,
+				1F5222B01F5222B01F5222B0 /* Sources */,
+				1F56BDD01F56BDD01F56BDD0 /* Resources */,
+				1F52EAC01F52EAC01F52EAC0 /* Products */,
+				96BF09280FC2ABF30049D8E6 /* H3DPlugin-Info.plist */,
+			);
+			sourceTree = "<group>";
+		};
+		1F5222B01F5222B01F5222B0 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				1F525BB01F525BB01F525BB0 /* H3DPluginNetscape */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		1F5249101F5249101F524910 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				96BA2EBE0FC3FAB400C716E8 /* H3DPluginNetscapeOSX.cpp */,
+				96BA2EBC0FC3FAB400C716E8 /* PluginWindowOSX.cpp */,
+				96A7ABED0FC2D512006D9F0E /* npn_gate.cpp */,
+				96A7ABEE0FC2D512006D9F0E /* npp_gate.cpp */,
+				964647C80FC2C47A00D7B148 /* np_entry.cpp */,
+				1F50C0101F50C0101F50C010 /* H3DPluginInstance.cpp */,
+				1F58C1201F58C1201F58C120 /* keys.cpp */,
+				1F580BF01F580BF01F580BF0 /* PluginWindow.cpp */,
+				1F58E4001F58E4001F58E400 /* H3DPluginNetscape.cpp */,
+				1F5353101F5353101F535310 /* H3DPluginNetscapeWin.cpp */,
+				1F5649001F5649001F564900 /* NPAPIFunctions.cpp */,
+				1F54ED901F54ED901F54ED90 /* stdafx.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		1F525BB01F525BB01F525BB0 /* H3DPluginNetscape */ = {
+			isa = PBXGroup;
+			children = (
+				1F52ED001F52ED001F52ED00 /* Header Files */,
+				1F5249101F5249101F524910 /* Source Files */,
+				1F5868001F5868001F586800 /* Resources */,
+			);
+			name = H3DPluginNetscape;
+			sourceTree = "<group>";
+		};
+		1F52EAC01F52EAC01F52EAC0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				96BF09270FC2ABF30049D8E6 /* H3DPlugin.plugin */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1F52ED001F52ED001F52ED00 /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				167D4F0167D4F0167D4F0000 /* CommonInclude.h */,
+				1F56E6601F56E6601F56E660 /* H3DPluginInstance.h */,
+				1F5800F01F5800F01F5800F0 /* keys.h */,
+				1F5817201F5817201F581720 /* PluginWindow.h */,
+				1F562B601F562B601F562B60 /* H3DPluginNetscape.h */,
+				1F518F601F518F601F518F60 /* H3DPluginNetscapeWin.h */,
+				1F54E6E01F54E6E01F54E6E0 /* Resource.h */,
+				1F5385601F5385601F538560 /* stdafx.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		1F56BDD01F56BDD01F56BDD0 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		1F5868001F5868001F586800 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1F52F9C01F52F9C01F52F9C0 /* Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		96BF09260FC2ABF30049D8E6 /* H3DPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 96BF092D0FC2ABF30049D8E6 /* Build configuration list for PBXNativeTarget "H3DPlugin" */;
+			buildPhases = (
+				96BF09230FC2ABF30049D8E6 /* Resources */,
+				96BF09240FC2ABF30049D8E6 /* Sources */,
+				96BF09250FC2ABF30049D8E6 /* Frameworks */,
+				96BA321E0FC58C7C00C716E8 /* Rez */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = H3DPlugin;
+			productName = H3DPlugin;
+			productReference = 96BF09270FC2ABF30049D8E6 /* H3DPlugin.plugin */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1F5194501F5194501F519450 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 167C930167C930167C930000 /* Build configuration list for PBXProject "H3DPlugin" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 0;
+			mainGroup = 1678C701678C701678C70000;
+			projectDirPath = "";
+			projectRoot = /Users/Knok/H3D/MedX3D/plugin/build;
+			targets = (
+				96BF09260FC2ABF30049D8E6 /* H3DPlugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		96BF09230FC2ABF30049D8E6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXRezBuildPhase section */
+		96BA321E0FC58C7C00C716E8 /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			comments = "Define the mime types supported by the plugin";
+			files = (
+				96BA32200FC58CC200C716E8 /* H3DPluginNetscapeOSX.r in Rez */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXRezBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		96BF09240FC2ABF30049D8E6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				96BF09560FC2B4DF0049D8E6 /* NPAPIFunctions.cpp in Sources */,
+				96BF09570FC2B4DF0049D8E6 /* stdafx.cpp in Sources */,
+				96BF09510FC2B4BE0049D8E6 /* H3DPluginNetscapeWin.cpp in Sources */,
+				96BF09520FC2B4D50049D8E6 /* H3DPluginInstance.cpp in Sources */,
+				96BF09530FC2B4D50049D8E6 /* keys.cpp in Sources */,
+				96BF09540FC2B4D50049D8E6 /* PluginWindow.cpp in Sources */,
+				96BF09550FC2B4D50049D8E6 /* H3DPluginNetscape.cpp in Sources */,
+				964647C90FC2C47A00D7B148 /* np_entry.cpp in Sources */,
+				96A7ABEF0FC2D512006D9F0E /* npn_gate.cpp in Sources */,
+				96A7ABF00FC2D512006D9F0E /* npp_gate.cpp in Sources */,
+				96BA2EBD0FC3FAB400C716E8 /* PluginWindowOSX.cpp in Sources */,
+				96BA2EBF0FC3FAB400C716E8 /* H3DPluginNetscapeOSX.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		167AEB0167AEB0167AEB0000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		167B0B0167B0B0167B0B0000 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = MinSizeRel;
+		};
+		167B260167B260167B260000 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = RelWithDebInfo;
+		};
+		167CAC0167CAC0167CAC0000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		96BF09290FC2ABF30049D8E6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				INFOPLIST_FILE = "H3DPlugin-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../../../Desktop/xulrunner-sdk/lib\"";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = H3DPlugin;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		96BF092A0FC2ABF30049D8E6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					PRINT_ERR_FILE,
+					"XP_MACOSX=1",
+				);
+				"GCC_PREPROCESSOR_DEFINITIONS = XP_MACOSX=1\nGCC_PREPROCESSOR_DEFINITIONS" = "XP_MACOSX=1;PRINT_ERR_FILE=1";
+				HEADER_SEARCH_PATHS = (
+					/Users/Knok/H3D/MedX3D/plugin/build/../src,
+					/usr/local/include,
+				);
+				INFOPLIST_FILE = "H3DPlugin-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../../../Desktop/xulrunner-sdk/lib\"";
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-headerpad_max_install_names",
+					/usr/local/lib/libH3DUtil.dylib,
+					/usr/lib/libpthread.dylib,
+					/usr/local/lib/libHAPI.dylib,
+					"-framework",
+					AGL,
+					"-framework",
+					OpenGL,
+					/usr/local/lib/libGLEW.dylib,
+					/usr/local/lib/libH3DAPI.dylib,
+					"/usr/local/lib/libxerces-c.dylib",
+					"-framework",
+					AGL,
+					"-framework",
+					OpenGL,
+					"-framework",
+					AGL,
+					"-framework",
+					OpenGL,
+					/usr/local/lib/libMedX3D.dylib,
+					/usr/local/lib/libGLEW.dylib,
+					/usr/local/lib/libH3DAPI.dylib,
+					"/usr/local/lib/libxerces-c.dylib",
+					/usr/local/lib/libMedX3D.dylib,
+				);
+				PREBINDING = NO;
+				PRINT_ERR_FILE = 1;
+				PRODUCT_NAME = H3DPlugin;
+				WRAPPER_EXTENSION = plugin;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		96BF092B0FC2ABF30049D8E6 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				INFOPLIST_FILE = "H3DPlugin-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../../../Desktop/xulrunner-sdk/lib\"";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = H3DPlugin;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = YES;
+			};
+			name = MinSizeRel;
+		};
+		96BF092C0FC2ABF30049D8E6 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				INFOPLIST_FILE = "H3DPlugin-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../../../Desktop/xulrunner-sdk/lib\"";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = H3DPlugin;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = YES;
+			};
+			name = RelWithDebInfo;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		167C930167C930167C930000 /* Build configuration list for PBXProject "H3DPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				167CAC0167CAC0167CAC0000 /* Debug */,
+				167AEB0167AEB0167AEB0000 /* Release */,
+				167B0B0167B0B0167B0B0000 /* MinSizeRel */,
+				167B260167B260167B260000 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		96BF092D0FC2ABF30049D8E6 /* Build configuration list for PBXNativeTarget "H3DPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				96BF09290FC2ABF30049D8E6 /* Debug */,
+				96BF092A0FC2ABF30049D8E6 /* Release */,
+				96BF092B0FC2ABF30049D8E6 /* MinSizeRel */,
+				96BF092C0FC2ABF30049D8E6 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1F5194501F5194501F519450 /* Project object */;
+}

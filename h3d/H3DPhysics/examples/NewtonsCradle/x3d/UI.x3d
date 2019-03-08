@@ -1,0 +1,199 @@
+<!-- Billboard containing UI controls - always faces viewer -->
+<Billboard axisOfRotation='0 0 0'>
+
+  <!-- Light to illuminate the UI controls -->
+  <DirectionalLight direction='0 0 -1' />
+
+  <!-- Title message text -->
+  <Transform translation='0 0.23 0'>
+    <Shape>
+      <Appearance>
+        <Material diffuseColor="0 0 0" />
+      </Appearance>
+      <Text DEF="Text" string='"To grab a ball touch it with the haptic device, then hold down the main button on the device (or the G-key) and drag""""You can also click and drag a ball with the mouse to move it""""""""Use the mouse to change properties of the simulation""Press C to toggle contact information"' solid="true">
+        <FontStyle justify='"MIDDLE" "BEGIN"' size="0.015" spacing="1" />
+      </Text>
+    </Shape>
+  </Transform>
+
+  
+  <!-- Debug message text -->
+  <Transform translation='0 0 0.1'>
+    <Shape>
+      <Appearance>
+        <Material diffuseColor="0 0 0" />
+      </Appearance>
+      <Text DEF="DebugText" solid="true">
+        <FontStyle justify='"MIDDLE" "BEGIN"' size="0.015" spacing="1" />
+      </Text>
+      <EXPORT localDEF="DebugText" AS="DebugText" />
+    </Shape>
+  </Transform>
+  
+  <!-- UI Controls -->
+  <Transform translation="0 0.1 0">
+    <Frame desiredSize="0.6 0.1 0.003">
+
+      <Frame DEF="SliderFrame">
+
+        <!-- Bounce slider: Controls how elastic the collisions are -->
+        <Label text="Bounce">
+          <FontStyle DEF="FS" justify='"MIDDLE" "MIDDLE"' size="0.01" 
+                   family='"Verdana" "FreeSerif"' />
+          <ImageTexture DEF="ButtonTexture" url="../images/button.png" />
+          <GridInfo columnSpan="3" row="0" padding="0.0001 0.001"
+                    sticky="W+E+N+S"/>
+        </Label>
+        <SliderBar DEF="SB_Bounce" valueRange="0 1" value="0.9" 
+                   stepLength="0.001">
+          <ImageTexture DEF="SliderTexture" url="../images/slider.png" />
+          <GridInfo columnSpan="10" column="3" row="0" 
+                    padding="0.0001 0.001" sticky="W+E+N+S"/>
+        </SliderBar>
+        <EXPORT localDEF="SB_Bounce" AS="SB_Bounce" />
+        <Label DEF="L_Bounce">
+          <FontStyle USE="FS" />
+          <ImageTexture USE="ButtonTexture" />
+          <GridInfo columnSpan="3" column="13" row="0" 
+                    padding="0.0009 0.001" sticky="W+E+N+S"/>
+        </Label>
+
+        <!-- Linear damping: To simulation air resistance and other friction -->
+        <Label text="Damping">
+          <FontStyle USE="FS" />
+          <ImageTexture USE="ButtonTexture" />
+          <GridInfo columnSpan="3" row="1" padding="0.0001 0.001"
+                    sticky="W+E+N+S"/>
+        </Label>
+        <SliderBar DEF="SB_Damping" valueRange="0 10" value="0.63" 
+                   stepLength="0.001" >
+          <ImageTexture USE="SliderTexture" />
+          <GridInfo columnSpan="10" column = "3" row="1" 
+                    padding="0.0001 0.001" sticky="W+E+N+S"/>
+        </SliderBar>
+        <EXPORT localDEF="SB_Damping" AS="SB_Damping" />
+        <Label DEF="L_Damping">
+          <FontStyle USE="FS" />
+          <ImageTexture USE="ButtonTexture" />
+          <GridInfo columnSpan="3" column="13" row="1" 
+                    padding="0.0009 0.001" sticky="W+E+N+S"/>
+        </Label>
+
+        <!-- Mass: Change the mass of the balls -->
+        <Label text="Mass">
+          <FontStyle USE="FS" />
+          <ImageTexture USE="ButtonTexture" />
+          <GridInfo columnSpan="3" row="2" padding="0.0001 0.001"
+                    sticky="W+E+N+S"/>
+        </Label>
+        <SliderBar DEF="SB_Mass" valueRange="0.1 3" value="1" 
+                   stepLength="0.001">
+          <ImageTexture USE="SliderTexture" />
+          <GridInfo columnSpan="10" column = "3" row="2" 
+                    padding="0.0001 0.001" sticky="W+E+N+S"/>
+        </SliderBar>
+        <EXPORT localDEF="SB_Mass" AS="SB_Mass" />
+        <Label DEF="L_Mass">
+          <FontStyle USE="FS" />
+          <ImageTexture USE="ButtonTexture" />
+          <GridInfo columnSpan="3" column="13" row="2" 
+                    padding="0.0009 0.001" sticky="W+E+N+S"/>
+        </Label>
+        <GridInfo row="0" column="0" padding="0.01 0" sticky="W+E+N+S" />
+      </Frame>
+
+      <!-- Details about the Newton's cradle configuration -->
+      <Frame DEF="SliderFrame">
+
+        <!-- Number of balls in the simulation -->
+        <Label text="Balls">
+          <FontStyle USE="FS" />
+          <ImageTexture USE="ButtonTexture" />
+          <GridInfo columnSpan="3" row="0" padding="0.0001 0.001"
+                    sticky="W+E+N+S"/>
+        </Label>
+        <SliderBar DEF="SB_BallCount" valueRange="1 5.05" value="4" 
+                   stepLength="1">
+          <ImageTexture USE="SliderTexture" />
+          <GridInfo columnSpan="10" column = "3" row="0" 
+                    padding="0.0001 0.001" sticky="W+E+N+S"/>
+        </SliderBar>
+        <EXPORT localDEF="SB_BallCount" AS="SB_BallCount" />
+        <Label DEF="L_BallCount">
+          <FontStyle USE="FS" />
+          <ImageTexture USE="ButtonTexture" />
+          <GridInfo columnSpan="3" column="13" row="0" 
+                    padding="0.0009 0.001" sticky="W+E+N+S"/>
+        </Label>
+
+        <!-- The radius of each ball -->
+        <Label text="Radius">
+          <FontStyle USE="FS" />
+          <ImageTexture USE="ButtonTexture" />
+          <GridInfo columnSpan="3" row="1" padding="0.0001 0.001"
+                    sticky="W+E+N+S"/>
+        </Label>
+        <SliderBar DEF="SB_BallRadius" valueRange="0.005 0.02" value="0.015" 
+                   stepLength="0.0001">
+          <ImageTexture USE="SliderTexture" />
+          <GridInfo columnSpan="10" column = "3" row="1" 
+                    padding="0.0001 0.001" sticky="W+E+N+S"/>
+        </SliderBar>
+        <EXPORT localDEF="SB_BallRadius" AS="SB_BallRadius" />
+        <Label DEF="L_BallRadius">
+          <FontStyle USE="FS" />
+          <ImageTexture USE="ButtonTexture" />
+          <GridInfo columnSpan="3" column="13" row="1" 
+                    padding="0.0009 0.001" sticky="W+E+N+S"/>
+        </Label>
+
+        <!-- The length of the string/joint connected to the ball -->
+        <Label text="Length">
+          <FontStyle USE="FS" />
+          <ImageTexture USE="ButtonTexture" />
+          <GridInfo columnSpan="3" row="2" padding="0.0001 0.001"
+                    sticky="W+E+N+S"/>
+        </Label>
+        <SliderBar DEF="SB_StringLength" valueRange="0.01 0.2" value="0.1" 
+                   stepLength="0.0001">
+          <ImageTexture USE="SliderTexture" />
+          <GridInfo columnSpan="10" column = "3" row="2" 
+                    padding="0.0001 0.001" sticky="W+E+N+S"/>
+        </SliderBar>
+        <EXPORT localDEF="SB_StringLength" AS="SB_StringLength" />
+        <Label DEF="L_StringLength">
+          <FontStyle USE="FS" />
+          <ImageTexture USE="ButtonTexture" />
+          <GridInfo columnSpan="3" column="13" row="2" 
+                    padding="0.0009 0.001" sticky="W+E+N+S"/>
+        </Label>
+        <GridInfo row="0" column="1" padding="0.01 0" sticky="W+E+N+S" />
+      </Frame>
+
+      <!-- Button used to apply the settings to the cradle model -->
+      <TouchButton DEF="TB_Update" desiredSize="0.06 0.02 0.003" 
+                   text="Update" >
+        <FontStyle USE="FS"/>
+        <ImageTexture USE="ButtonTexture" />
+        <GridInfo row="1" column="1" padding="0.01 0.001" sticky="E" />
+      </TouchButton>
+      <EXPORT localDEF="TB_Update" AS="TB_Update" />
+    </Frame>
+  </Transform>
+
+  <!-- Python script to update slider lables with values -->
+  <PythonScript DEF="UI_PS" url="../python/UI.py" />
+  <ROUTE fromNode="SB_Bounce" fromField="value" toNode="UI_PS" toField="bounce" />
+  <ROUTE fromNode="UI_PS" fromField="bounce" toNode="L_Bounce" toField="text" />
+  <ROUTE fromNode="SB_Damping" fromField="value" toNode="UI_PS" toField="damping" />
+  <ROUTE fromNode="UI_PS" fromField="damping" toNode="L_Damping" toField="text" />
+  <ROUTE fromNode="SB_Mass" fromField="value" toNode="UI_PS" toField="mass" />
+  <ROUTE fromNode="UI_PS" fromField="mass" toNode="L_Mass" toField="text" />
+  <ROUTE fromNode="SB_BallCount" fromField="value" toNode="UI_PS" toField="ballCount" />
+  <ROUTE fromNode="UI_PS" fromField="ballCount" toNode="L_BallCount" toField="text" />
+  <ROUTE fromNode="SB_BallRadius" fromField="value" toNode="UI_PS" toField="ballRadius" />
+  <ROUTE fromNode="UI_PS" fromField="ballRadius" toNode="L_BallRadius" toField="text" />
+  <ROUTE fromNode="SB_StringLength" fromField="value" toNode="UI_PS" toField="stringLength" />
+  <ROUTE fromNode="UI_PS" fromField="stringLength" toNode="L_StringLength" toField="text" />
+  
+</Billboard>

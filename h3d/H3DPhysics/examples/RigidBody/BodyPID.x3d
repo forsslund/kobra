@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version="3.2">
+  <head>
+    <!-- Declare components required to run -->
+    <component name="H3DPhysics"/>
+
+    <meta name='title' content='BodyPID.x3d'/>
+    <meta name='description' content='A demonstration the BodyPID node from the H3DPhysics component.'/>
+    <meta name='author' content='Neil Forrest 2010 and SenseGraphics AB, 2010-2019'/>
+  </head>
+  <Scene>
+
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+  
+    <DeviceInfo>
+      <PlaybackDevice DEF="DEVICE" url='device_log.txt' play='true' followViewpoint='true' />
+    </DeviceInfo>
+
+    <IMPORT inlineDEF='H3D_EXPORTS' exportedDEF='HDEV' AS='HDEV' />
+    <Viewpoint DEF='V' position='0 0 0.6'/>
+    <Background skyColor='0.045 0.065 0.17, 0.77 0.87 0.99' skyAngle='1.57' />
+    <DirectionalLight direction='1 -1 0' />
+
+    <!-- Display usage message -->
+    <Transform DEF="Nr">
+      <DirectionalLight direction="0 0 -1" />
+      <Transform translation="0 0.037 0.5" scale="0.2 0.2 0.2">
+        <Shape>
+          <Appearance>
+            <Material diffuseColor="1 1 1" />
+          </Appearance>
+          <Text DEF="Text" string='"RigidBodyPhysics: BodyPID"' solid="true">
+            <FontStyle justify='"MIDDLE" "BEGIN"' size="0.015" spacing="1" />
+          </Text>
+        </Shape>
+        <Transform translation="0 -0.02 0">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor="1 1 1" />
+            </Appearance>
+            <Text DEF="Text" string='"Use the treeviewer to restart the PlaybackDevice if desired."' solid="true">
+              <FontStyle justify='"MIDDLE" "BEGIN"' size="0.01" spacing="1" />
+            </Text>
+          </Shape>
+        </Transform>
+        <Transform translation="0 -0.015 -0.01">
+          <Shape>
+            <Appearance>
+              <Material diffuseColor="0 0 0" transparency="0.6" />
+            </Appearance>
+            <Rectangle2D size="0.46 0.04" solid="true"/>
+          </Shape>
+        </Transform>
+      </Transform>
+    </Transform>
+    
+    <!-- Scene graph consisting of transforms containing shapes that will be linked to 
+         rigid bodys in the simulation -->
+    <Group DEF='Root'>
+
+      <Transform DEF='T'>
+        <Shape DEF='S'>
+          <Appearance DEF='A'>
+            <Material diffuseColor='0.4 0.4 0.7' />
+            <FrictionalSurface stiffness='0.35' damping='0.2'/>
+          </Appearance>
+          <Box DEF='G' size='0.05 0.03 0.035' />
+        </Shape>
+
+
+        <Transform DEF='TARGET' scale='0.01 0.01 0.01'>
+          <Inline url='axis.x3d' />
+        </Transform>
+
+      </Transform>
+      
+      <Transform DEF='TARGET' scale='0.01 0.01 0.01'>
+        <Inline url='axis.x3d' />
+      </Transform>
+
+    </Group>
+
+    <Transform DEF='JTx1' translation='0 0.1 0' rotation='1 0 0 1.57' />
+    
+    <!-- Define rigid body simulation -->
+    <RigidBodyCollection DEF='RBC' physicsEngine='PhysX3' gravity='0 -3 0'>
+    
+      <!-- Geometries for collision detection -->
+      <CollisionCollection containerField='collider'>
+        
+        <CollidableShape DEF='C' containerField='collidables'>
+          <Shape USE='S' containerField='shape' />
+        </CollidableShape>
+        
+      </CollisionCollection>
+
+      <!-- Rigid bodies for physics simulation -->
+      <RigidBody DEF='R' useGlobalGravity='false' autoDamp='false' linearDampingFactor='1' angularDampingFactor='0.001' mass='1' position='-0.1 0 0' orientation='1 0 0 0'>
+        <CollidableShape USE='C' containerField='geometry' />
+        <Box USE='G' containerField='massDensityModel' />
+        <Transform USE='JTx1' containerField='transform' />
+      </RigidBody>
+      
+    </RigidBodyCollection>
+    
+    <PIDCollection>
+      <RigidBodyCollection USE='RBC' containerField='rbc' />
+      
+      <BodyPID DEF='PID1'>
+        <RigidBody USE='R' containerField='body' />
+
+        <PIDController DEF='PID1X' containerField='linearControl1' pidParams='120 1 18 0' />
+        <PIDController DEF='PID1Y' containerField='linearControl2' />
+        <PIDController DEF='PID1Z' containerField='linearControl3' />
+        <ROUTE fromNode="PID1X" fromField="pidParams" toNode="PID1Y" toField="pidParams" />
+        <ROUTE fromNode="PID1X" fromField="pidParams" toNode="PID1Z" toField="pidParams" />
+
+        <PIDController DEF='PID1AX' containerField='angularControl1' pidParams='0.3 0 0.01 0' />
+        <PIDController DEF='PID1AY' containerField='angularControl2' />
+        <PIDController DEF='PID1AZ' containerField='angularControl3' />
+        <ROUTE fromNode="PID1AX" fromField="pidParams" toNode="PID1AY" toField="pidParams" />
+        <ROUTE fromNode="PID1AX" fromField="pidParams" toNode="PID1AZ" toField="pidParams" />
+
+      </BodyPID>
+      
+    </PIDCollection>
+    
+    <ROUTE fromNode="PID1" fromField="targetPosition" toNode="TARGET" toField="translation" />
+    <ROUTE fromNode="PID1" fromField="targetOrientation" toNode="TARGET" toField="rotation" />
+
+    <PROGRAM_SETTING node='PID1X' field='pidParams' section='PID 1' name='linearPidParams' />
+    <PROGRAM_SETTING node='PID1AX' field='pidParams' section='PID 1' name='angularPidParams' />
+
+    <PROGRAM_SETTING node='PID1X' field='currentError' section='PID 1' name='currentError X-linear' />
+    <PROGRAM_SETTING node='PID1Y' field='currentError' section='PID 1' name='currentError Y-linear' />
+    <PROGRAM_SETTING node='PID1Z' field='currentError' section='PID 1' name='currentError Z-linear' />
+
+    <PROGRAM_SETTING node='PID1X' field='currentActuation' section='PID 1' name='currentActuation X-linear' />
+    <PROGRAM_SETTING node='PID1Y' field='currentActuation' section='PID 1' name='currentActuation Y-linear' />
+    <PROGRAM_SETTING node='PID1Z' field='currentActuation' section='PID 1' name='currentActuation Z-linear' />
+
+    <PROGRAM_SETTING node='PID1AX' field='currentError' section='PID 1' name='currentError X-angular' />
+    <PROGRAM_SETTING node='PID1AY' field='currentError' section='PID 1' name='currentError Y-angular' />
+    <PROGRAM_SETTING node='PID1AZ' field='currentError' section='PID 1' name='currentError Z-angular' />
+
+    <PROGRAM_SETTING node='PID1AX' field='currentActuation' section='PID 1' name='currentActuation X-angular' />
+    <PROGRAM_SETTING node='PID1AY' field='currentActuation' section='PID 1' name='currentActuation Y-angular' />
+    <PROGRAM_SETTING node='PID1AZ' field='currentActuation' section='PID 1' name='currentActuation Z-angular' />
+
+    <!-- Set up routes to update positions and orientations based on simulation -->
+    <ROUTE fromNode='R' fromField='position' toNode='T' toField='translation' />
+    <ROUTE fromNode='R' fromField='orientation' toNode='T' toField='rotation' />
+    
+    <ROUTE fromNode='DEVICE' fromField='trackerPosition' toNode='PID1' toField='targetPosition' />
+    <ROUTE fromNode='DEVICE' fromField='trackerOrientation' toNode='PID1' toField='targetOrientation' />
+
+
+    <!-- Python script used to graphically display joints -->
+    <PythonScript DEF='PS' url='python/jointVisuals.py'>
+      <Group USE='Root' containerField='references' />
+    </PythonScript>
+    <ROUTE fromNode='RBC' fromField='joints' toNode='PS' toField='joints' />
+
+    <KeySensor DEF='KS' />
+    <ROUTE fromNode='KS' fromField='keyPress' toNode='PS' toField='toggleDetails' />
+
+    <!-- Update title text message position -->
+    <ROUTE fromNode="V" fromField="totalPosition" toNode="PS" toField="textPos" />
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="PS" toField="textPos" />
+    <ROUTE fromNode="PS" fromField="textPos" toNode="Nr" toField="translation" />
+    <ROUTE fromNode="V" fromField="totalOrientation" toNode="Nr" toField="rotation" />
+    
+  </Scene>
+</X3D>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='PopupMenu.x3d'/>
+    <meta name='description' content='UI example for PopupMenu node.'/>
+    <meta name='author' content='SenseGraphics AB, 2005-2019'/>
+  </head>
+  <Scene>
+    <NavigationInfo type="NONE" />
+    <!-- Use the ImportLibrary to load the UI dynamic library if needed.-->
+    <ImportLibrary url='"../bin32/UI" "../../bin32/UI" "../bin64/UI" "../../bin64/UI" "libh3dui.so" "libh3dui.dylib"' />
+
+    <Viewpoint position="0 0 0.6"/>
+    <Frame DEF="FRAME" desiredSize="0.1 0.1 0.001">
+      <PopupMenu DEF="FILE_SELECT_POPUP" popupOffset="0.12 -0.05 0" >
+        <GridInfo sticky="W+E+N+S" padding="0.001 0.001"/>
+        <TouchButton containerField="button" 
+                     buttonMode="RADIO_TOGGLE_PRESS"
+                     text="Menu1" buttonGroup="0" >
+          <ImageTexture DEF="ButtonTexture" url="textures/button.png" />
+          <FontStyle DEF="MAIN_FS" size="0.014" justify='"MIDDLE", "MIDDLE"' />
+        </TouchButton>
+        <Frame containerField="popupFrame" desiredSize="0.1 0.1 0.001">
+          <TouchButton buttonMode="RADIO_PRESS" text="Press">
+            <FontStyle DEF="FS" size="0.014" justify='"MIDDLE", "MIDDLE"' />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo sticky="W+E+N+S" padding="0.001 0.001"/>
+          </TouchButton>
+          <TouchButton buttonMode="RADIO_PRESS" text="Press" >
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo row="0" column="1" DEF="GI" sticky="W+E+N+S" padding="0.001 0.001"/>
+          </TouchButton>
+          <TouchButton buttonMode="RADIO_RELEASE" text="Release" >
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo row="1" column="0" sticky="W+E+N+S" padding="0.001 0.001"/>
+          </TouchButton>
+          <TouchButton buttonMode="RADIO_RELEASE" text="Release" >
+            <FontStyle USE="FS" />
+            <ImageTexture USE="ButtonTexture" />
+            <GridInfo row="1" column="1" sticky="W+E+N+S" padding="0.001 0.001"/>
+          </TouchButton>
+        </Frame>
+      </PopupMenu>
+
+      <PopupMenu popupOffset="0.12 0.02 0" >
+        <GridInfo sticky="W+E+N+S" padding="0.001 0.001"/>
+        <TouchButton containerField="button" buttonMode="RADIO_TOGGLE_PRESS"
+                     text="Menu2" buttonGroup="0" >
+          <ImageTexture USE="ButtonTexture" />
+          <FontStyle USE="MAIN_FS" />
+        </TouchButton>
+        <Frame containerField="popupFrame" desiredSize="0.1 0.05 0.001" >
+          <Label text="Popup Frame" />
+        </Frame>
+      </PopupMenu>
+    </Frame>
+  </Scene>
+</X3D>

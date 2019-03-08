@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version='1.4'>
+  <head>
+    <meta name='title' content='RawImageLoader.x3d'/>
+    <meta name='description' content='H3DAPI RawImageLoader example' />
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+  
+  <Scene>
+    <Viewpoint position='0 0 0.6' />
+    <Shape>
+      <Appearance>
+        <Material />
+        <ImageTexture3D url='textures/hydrogen64.raw'>
+          <RawImageLoader 
+              width='64'
+              height='64'
+              depth='64'
+              bitsPerPixel='8'
+              pixelSize='0.01 0.01 0.01'
+              pixelType="LUMINANCE"/>
+        </ImageTexture3D>
+      </Appearance>
+      <IndexedTriangleSet ccw='true' colorPerVertex='false'
+                          normalPerVertex='false' solid='false'
+                          index='0 1 2 0 2 3'>
+        <Coordinate DEF='C' point='0.1 0.1 0, -0.1 0.1 0, -0.1 -0.1 0, 0.1 -0.1 0'/>
+        <TextureCoordinate3D point='1 1 0.5, 0 1 0.5, 0 0 0.5, 1 0 0.5' />
+      </IndexedTriangleSet>
+    </Shape>
+  </Scene>
+</X3D>

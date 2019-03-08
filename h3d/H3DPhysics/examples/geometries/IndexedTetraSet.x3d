@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='Full' version='3.2'>
+  <head>
+    <meta name='title' content='IndexedTetraSet.x3d'/>
+    <meta name='description' content='Example of an IndexedTetraSet.'/>
+    <meta name='author' content='SenseGraphics AB, 2014-2019'/>
+  </head>
+
+  <Scene>
+    <!-- Import physics library -->
+    <ImportLibrary url='"../../bin32/H3DPhysics" "../../../bin32/H3DPhysics" "../../bin64/H3DPhysics" "../../../bin64/H3DPhysics" "H3DPhysics" "libh3dphysics.so" "libh3dphysics.dylib"' />
+
+    <Shape>
+      <Appearance>
+        <Material />
+      </Appearance>
+      <IndexedTetraSet index="0 1 2 3" normalPerVertex="false" >
+        <Coordinate point="-0.1 0 0, 0.1 -0.1 0.1, 0.1 0.1 0.06, 0.1 0 -0.1" />
+        <Color color="1 0 0, 0.54 0 0, 0.54 0.5 0, 1 0 0" />
+      </IndexedTetraSet>
+    </Shape>
+    
+  </Scene>
+</X3D>

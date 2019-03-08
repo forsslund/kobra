@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='MedX3D' version='1.0'>
+  <head>
+    <meta name='title' content='MedX3D example'/>
+    <meta name='description' content='MedX3D example showing the FrameBufferTexture node.'/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+    <meta name='generator' content='MedX3DDemo, http://www.h3d.org'/>
+  </head>
+  <Scene>
+    <Group>
+      <!-- Use the ImportLibrary to load the MedX3D dynamic library if needed -->
+      <ImportLibrary url='"../bin32/MedX3D" "../../bin32/MedX3D" "../bin64/MedX3D" "../../bin64/MedX3D" "libh3dmedx3d.so" "libh3dmedx3d.dylib"' />
+      
+      <Viewpoint DEF="VP" position='0 0 0.6'  />
+      
+      <ProtoDeclare name='Text'>
+      <ProtoInterface>
+        <field accessType='inputOutput' name='offset' type='SFVec3f' value='0 0 0'/>
+        <field accessType='inputOutput' name='string' type='MFString' value='"Hello"'/>
+        <field accessType='inputOutput' name='solid' type='SFBool' value='false'/>
+      </ProtoInterface>
+      <ProtoBody>
+      <Transform>
+        <IS>
+          <connect nodeField='translation' protoField='offset' />
+        </IS>
+        <Shape>
+          <Appearance>
+            <Material diffuseColor='1 1 1' />
+          </Appearance>
+          <Text>
+            <IS>
+              <connect nodeField='string' protoField='string' />
+            </IS>
+            <FontStyle justify='MIDDLE' size='0.02' />
+          </Text>
+        </Shape>
+      </Transform>
+      </ProtoBody>
+    </ProtoDeclare>
+    
+      <Transform>
+        <Shape>
+          <Appearance>
+            <Material diffuseColor="1 0 0" />
+          </Appearance>
+          <Sphere radius="0.05" />
+        </Shape>
+      </Transform>     
+      
+      <Transform translation="-0.2 0 0">
+        <Shape>
+          <Appearance>
+            <Material />
+            <FrameBufferTexture type="COLOR" />
+          </Appearance>
+          <Rectangle2D size="0.1 0.1" />
+        </Shape>
+        <ProtoInstance name='Text' containerField='children' >
+          <fieldValue name='offset' value='0 0.08 0' />
+          <fieldValue name='string' value='"FrameBufferTexture using color."' />
+        </ProtoInstance>
+      </Transform>
+      
+      <Transform translation="0.2 0 0">
+        <Shape>
+          <Appearance>
+            <Material />
+            <FrameBufferTexture type="DEPTH" />
+          </Appearance>
+          <Rectangle2D size="0.2 0.1" />
+        </Shape>
+        <ProtoInstance name='Text' containerField='children' >
+          <fieldValue name='offset' value='0 0.08 0' />
+          <fieldValue name='string' value='"FrameBufferTexture using depth."' />
+        </ProtoInstance>
+      </Transform>
+    </Group>
+  </Scene>
+</X3D>

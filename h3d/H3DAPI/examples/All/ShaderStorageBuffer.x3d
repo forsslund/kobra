@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<X3D profile='H3DAPI' version='1.4'>
+  <head>
+    <meta name='title' content='ShaderStorageBuffer.x3d'/>
+    <meta name='description' content='H3DAPI ShaderStorageBuffer example. Three spheres are placed in the same location. The first sphere has texture values written to the shader storage buffer. The second sphere reads the values from the buffer and writes to screen. The third clears the buffer.
+      compatible browser. '/>
+    <meta name='author' content='SenseGraphics AB, 2006-2019'/>
+  </head>
+
+  <Scene>
+    <Viewpoint position="0 0 0.6" />
+
+    <Transform translation="0.0 0.0 0.0">
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='1 0 0' />
+          <ComposedShader DEF="SHADER" language="GLSL" suppressUniformWarnings="false">
+              <field name="ssbo_instance" type="SFNode" accessType="inputOutput">
+                <ShaderStorageBuffer DEF="TEXTURE_SSBO" storageName="SSBO" dataSize="12" />
+              </field>
+              
+              <field name="earth_day" type="SFNode" accessType="inputOutput">
+                <ImageTexture DEF="EARTH_DAT" url="textures/day.jpg" />
+              </field>
+              
+              <field name="width" type="SFInt32" accessType="inputOutput"/>     
+              
+              <ShaderPart type="VERTEX" url="shaders/shaderStorageBuffer.vert"/>
+              <ShaderPart type="FRAGMENT" url="shaders/shaderStorageBufferWrite.frag"/>
+              
+          </ComposedShader>
+        </Appearance>
+        <Sphere radius="0.08"/>
+      </Shape>
+    </Transform>
+    
+    <Transform translation="0.0 0.0 0.0">
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='1 0 0' />
+          <ComposedShader DEF="SHADER_READ" language="GLSL" suppressUniformWarnings="false">
+              <field name="ssbo_instance" type="SFNode" accessType="inputOutput">
+                <ShaderStorageBuffer USE="TEXTURE_SSBO" />
+              </field>          
+              
+              <field name="width" type="SFInt32" accessType="inputOutput"/>                
+              
+              <ShaderPart type="VERTEX" url="shaders/shaderStorageBuffer.vert"/>
+              <ShaderPart type="FRAGMENT" url="shaders/shaderStorageBufferRead.frag"/>
+              
+          </ComposedShader>
+        </Appearance>
+        <Sphere radius="0.08"/>
+      </Shape>
+    </Transform>
+    
+    <Transform translation="0.0 0.0 0.0">
+      <Shape>
+        <Appearance>
+          <Material diffuseColor='1 0 0' />
+          <ComposedShader DEF="SHADER_CLEAR" language="GLSL" suppressUniformWarnings="false">
+              <field name="ssbo_instance" type="SFNode" accessType="inputOutput">
+                <ShaderStorageBuffer USE="TEXTURE_SSBO" />
+              </field>          
+              
+              <field name="width" type="SFInt32" accessType="inputOutput"/>                
+              
+              <ShaderPart type="VERTEX" url="shaders/shaderStorageBuffer.vert"/>
+              <ShaderPart type="FRAGMENT" url="shaders/shaderStorageBufferClear.frag"/>
+              
+          </ComposedShader>
+        </Appearance>
+        <Sphere radius="0.08"/>
+      </Shape>
+    </Transform>    
+    
+    <PythonScript url="shader_storage_buffer.py"></PythonScript>
+    
+  </Scene>
+</X3D>
