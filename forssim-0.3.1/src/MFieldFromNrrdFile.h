@@ -314,40 +314,12 @@ public:
 	}
 
 	/**
-	 * Set the lengths of each dimension stored in the nrrd file
-	 * /param A vector of dimension lengths
-	 */
-	inline void SetDimensionLengths(vector<unsigned int>& dimensionLengths)
-	{
-		vector<unsigned int>::iterator i;
-
-		this->dimensionLengths.clear();
-
-		for(i=dimensionLengths.begin();i<dimensionLengths.end();i++)
-			this->dimensionLengths.push_back(i);
-	}
-
-	/**
 	 * Get the spacing of each dimension stored in the nrrd file
 	 * /return A vector of each spacing
 	 */
 	inline vector<double>& GetSpacings()
 	{
 		return spacings;
-	}
-
-	/**
-	 * Set the spacing of each dimension stored in the nrrd file
-	 * /param A vector of each spacing
-	 */
-	inline void SetSpacings(vector<double>& spacings)
-	{
-		vector<double>::iterator i;
-
-		this->spacings.clear();
-
-		for(i=spacings.begin();i<spacings.end();i++)
-			this->spacings.push_back(i);
 	}
 
 	/**
