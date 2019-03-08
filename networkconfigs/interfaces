@@ -1,0 +1,32 @@
+# interfaces(5) file used by ifup(8) and ifdown(8)
+auto lo
+iface lo inet loopback
+
+# On-board RJ45 to haptic device
+auto enp3s0
+iface enp3s0 inet static
+address 192.168.0.132
+netmask 255.255.255.0
+
+#auto enx00133b0c17c0
+#iface enx00133b0c17c0 inet dhcp
+
+# Pi Wifi Dongle (acting as AP for Pad)
+auto wlx000f600c1c23
+iface wlx000f600c1c23 inet static
+address 10.42.0.1
+netmask 255.255.255.240
+wireless-mode Master
+
+# ASUS Dongle
+#auto  wlx88d7f6a4a4d9
+#iface wlx88d7f6a4a4d9 inet dhcp
+#wpa-ssid comhem_E0C429
+#wpa-psk 8B04A59537
+
+# ThinkPenguin Wifi Dongle (to Router/Internet)
+auto  wlx2824ff1a0453 
+iface wlx2824ff1a0453 inet dhcp
+wpa-ssid comhem_E0C429
+wpa-psk 8B04A59537
+
