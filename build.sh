@@ -24,6 +24,16 @@ sudo make install
 cd ../../
 
 # Build forssim
+cd forssim-0.3.1/build
+qmake
+make -j5
+sudo make install
+cd ../../
+
+# Install/setup pedal
+cd pedal/
+sh install-pedal.sh
+cd ../
 
 
 

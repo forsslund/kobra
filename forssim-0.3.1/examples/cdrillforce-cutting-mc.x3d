@@ -48,11 +48,11 @@ Sum 	1000000
 <Scene>
 <Collision enabled="FALSE"> <!-- NEVER EVER FORGET THIS ONE - Graphics will run slow -->
 <!-- Import libraries, Windows -->
-<ImportLibrary library="forssim.dll" />
+<ImportLibrary library="libforssim.so" />
 
 <!-- Import libraries, GNU/Linux -->
-<ImportLibrary library="libMedX3D.so" />
-<ImportLibrary library="libforssim.so" />
+<!--ImportLibrary library="libMedX3D.so" />
+<ImportLibrary library="libforssim.so" /-->
 
 <Viewpoint position="0 0 0.35" fieldOfView="0.895040"/>
 <NavigationInfo type="ANY" visibilityLimit="10" nearVisibilityLimit="0.01"/>

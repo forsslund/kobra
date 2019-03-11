@@ -134,7 +134,7 @@ void HaptikfabrikenHapticsDevice::updateDeviceValues( DeviceValues &dv,
 
 
   calculateVelocity(dv, dt);
-  dv.button_status = 0; // bitmask to be filled
+  dv.button_status = hfab->getSwitchesState().to_ulong(); // bitmask to be filled
 }
 
 void HaptikfabrikenHapticsDevice::sendOutput( DeviceOutput &dv,
