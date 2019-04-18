@@ -44,6 +44,36 @@ namespace WebservInternals
     H3D::FIELDDB_ELEMENT( Webserv, doPlayback, INPUT_OUTPUT );
     H3D::FIELDDB_ELEMENT( Webserv, adrillforce_force, INPUT_OUTPUT );
     H3D::FIELDDB_ELEMENT( Webserv, textout, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpvec3f0, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpvec3f1, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpvec3f2, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpvec3f3, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpvec3f4, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpvec3f5, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpvec3f6, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpvec3f7, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpvec3f8, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpvec3f9, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpfloat0, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpfloat1, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpfloat2, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpfloat3, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpfloat4, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpfloat5, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpfloat6, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpfloat7, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpfloat8, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpfloat9, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpmatrix4f0, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpmatrix4f1, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpmatrix4f2, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpmatrix4f3, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpmatrix4f4, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpmatrix4f5, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpmatrix4f6, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpmatrix4f7, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpmatrix4f8, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, gpmatrix4f9, INPUT_OUTPUT );
 }
 
 Webserv::Webserv(Inst<SFBool> pedal_0,
@@ -62,7 +92,38 @@ Webserv::Webserv(Inst<SFBool> pedal_0,
                  Inst< SFRotation> teethRotation,
                  Inst< SFBool> doPlayback,
                  Inst< SFVec3f> adrillforce_force,
-                 Inst<SFString> textout):
+                 Inst<SFString> textout,
+                 Inst< SFVec3f> gpvec3f0,
+                 Inst< SFVec3f> gpvec3f1,
+                 Inst< SFVec3f> gpvec3f2,
+                 Inst< SFVec3f> gpvec3f3,
+                 Inst< SFVec3f> gpvec3f4,
+                 Inst< SFVec3f> gpvec3f5,
+                 Inst< SFVec3f> gpvec3f6,
+                 Inst< SFVec3f> gpvec3f7,
+                 Inst< SFVec3f> gpvec3f8,
+                 Inst< SFVec3f> gpvec3f9,
+                 Inst< SFFloat> gpfloat0,
+                 Inst< SFFloat> gpfloat1,
+                 Inst< SFFloat> gpfloat2,
+                 Inst< SFFloat> gpfloat3,
+                 Inst< SFFloat> gpfloat4,
+                 Inst< SFFloat> gpfloat5,
+                 Inst< SFFloat> gpfloat6,
+                 Inst< SFFloat> gpfloat7,
+                 Inst< SFFloat> gpfloat8,
+                 Inst< SFFloat> gpfloat9,
+                 Inst< SFMatrix4f> gpmatrix4f0,
+                 Inst< SFMatrix4f> gpmatrix4f1,
+                 Inst< SFMatrix4f> gpmatrix4f2,
+                 Inst< SFMatrix4f> gpmatrix4f3,
+                 Inst< SFMatrix4f> gpmatrix4f4,
+                 Inst< SFMatrix4f> gpmatrix4f5,
+                 Inst< SFMatrix4f> gpmatrix4f6,
+                 Inst< SFMatrix4f> gpmatrix4f7,
+                 Inst< SFMatrix4f> gpmatrix4f8,
+                 Inst< SFMatrix4f> gpmatrix4f9
+                 ):
                     pedal_0(pedal_0),
                     pedal_1(pedal_1),
                     pedal_2(pedal_2),
@@ -79,7 +140,37 @@ Webserv::Webserv(Inst<SFBool> pedal_0,
                     teethRotation(teethRotation),
                     doPlayback(doPlayback),
                     adrillforce_force(adrillforce_force),
-                    textout(textout){
+                    textout(textout),
+                    gpvec3f0(gpvec3f0),
+                    gpvec3f1(gpvec3f1),
+                    gpvec3f2(gpvec3f2),
+                    gpvec3f3(gpvec3f3),
+                    gpvec3f4(gpvec3f4),
+                    gpvec3f5(gpvec3f5),
+                    gpvec3f6(gpvec3f6),
+                    gpvec3f7(gpvec3f7),
+                    gpvec3f8(gpvec3f8),
+                    gpvec3f9(gpvec3f9),
+                    gpfloat0(gpfloat0),
+                    gpfloat1(gpfloat1),
+                    gpfloat2(gpfloat2),
+                    gpfloat3(gpfloat3),
+                    gpfloat4(gpfloat4),
+                    gpfloat5(gpfloat5),
+                    gpfloat6(gpfloat6),
+                    gpfloat7(gpfloat7),
+                    gpfloat8(gpfloat8),
+                    gpfloat9(gpfloat9),
+                    gpmatrix4f0(gpmatrix4f0),
+                    gpmatrix4f1(gpmatrix4f1),
+                    gpmatrix4f2(gpmatrix4f2),
+                    gpmatrix4f3(gpmatrix4f3),
+                    gpmatrix4f4(gpmatrix4f4),
+                    gpmatrix4f5(gpmatrix4f5),
+                    gpmatrix4f6(gpmatrix4f6),
+                    gpmatrix4f7(gpmatrix4f7),
+                    gpmatrix4f8(gpmatrix4f8),
+                    gpmatrix4f9(gpmatrix4f9){
     cout << "Webserv Constructing"<<endl;
 
     type_name = "Webserv";
@@ -110,6 +201,7 @@ void Webserv::jonas_reply(HttpServer::Response& response,
                           shared_ptr<HttpServer::Request> request)
 {
   string path=request->path;
+  std::cout << "R: " << path << "\n";
   if(path=="/head/off")
     showHead->setValue(1);
   if(path=="/head/on")
@@ -129,7 +221,38 @@ void Webserv::jonas_reply(HttpServer::Response& response,
     string deg = path.substr(16,string::npos);
     double rad = atoi(deg.c_str()) * 3.1415/180.0;
     teethRotation->setValue(Rotation(0,1,0,float(rad)));
+  }
 
+  string num = "0123456789";
+  string xyz = "xyz";
+  std::auto_ptr<H3D::SFVec3f>* var[] = { &gpvec3f0, &gpvec3f1, &gpvec3f2, &gpvec3f3, &gpvec3f4, &gpvec3f5, &gpvec3f6, &gpvec3f7, &gpvec3f8, &gpvec3f9};
+
+  for(int n=0;n<10;++n){
+      for(int c=0;c<3;++c){
+          std::string p = std::string("/gpvec")+num.at(n)+std::string("/")+xyz.at(c)+std::string("/");
+          if(path.find(p) != string::npos){
+              std::cout << "IN: " << p << "        [" << path.substr(10,string::npos) << "]\n";
+            Vec3f v = (*var[n])->getValue();
+            v.x = c==0? atof(path.substr(10,string::npos).c_str()) : v.x;
+            v.y = c==1? atof(path.substr(10,string::npos).c_str()) : v.y;
+            v.z = c==2? atof(path.substr(10,string::npos).c_str()) : v.z;
+            (*var[n])->setValue(v);
+          }
+       }
+  }
+
+
+  std::auto_ptr<H3D::SFFloat>* var2[] = { &gpfloat0, &gpfloat1, &gpfloat2, &gpfloat3, &gpfloat4, &gpfloat5, &gpfloat6, &gpfloat7, &gpfloat8, &gpfloat9};
+  for(int n=0;n<10;++n){
+      for(int c=0;c<3;++c){
+          std::string p = std::string("/gpfloat")+num.at(n)+std::string("/");
+          if(path.find(p) != string::npos){
+              std::cout << (*var2[n])->getValueAsString() << "\n";
+              std::cout << "IN: " << p << "        [" << path.substr(10,string::npos) << "]\n";
+            (*var2[n])->setValue(atof(path.substr(10,string::npos).c_str()));
+              std::cout << (*var2[n])->getValueAsString() << "\n";
+          }
+       }
   }
 
 
@@ -345,6 +468,7 @@ void Webserv::initialize()
 
     webservThread = std::thread(&FS::Webserv::start,this);
     cout<<"Webserv Node Initialized"<<endl;
+    cout<<"gpvec3f: " << gpvec3f0->getValueAsString()<<endl;
 
 
     return;

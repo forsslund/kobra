@@ -13,6 +13,7 @@
 #include <H3D/SFFloat.h>
 #include <H3D/SFRotation.h>
 #include <H3D/SFVec3f.h>
+#include <H3D/SFMatrix4f.h>
 
 #include <thread>
 
@@ -67,7 +68,38 @@ namespace FS
                 Inst< SFRotation> teethRotation = 0,
                 Inst< SFBool> doPlayback = 0,
                 Inst< SFVec3f> adrillforce_force = 0,
-                Inst<SFString> textout = 0);
+                Inst<SFString> textout = 0,
+                Inst< SFVec3f> gpvec3f0 = 0,
+                Inst< SFVec3f> gpvec3f1 = 0,
+                Inst< SFVec3f> gpvec3f2 = 0,
+                Inst< SFVec3f> gpvec3f3 = 0,
+                Inst< SFVec3f> gpvec3f4 = 0,
+                Inst< SFVec3f> gpvec3f5 = 0,
+                Inst< SFVec3f> gpvec3f6 = 0,
+                Inst< SFVec3f> gpvec3f7 = 0,
+                Inst< SFVec3f> gpvec3f8 = 0,
+                Inst< SFVec3f> gpvec3f9 = 0,
+                Inst< SFFloat> gpfloat0 = 0,
+                Inst< SFFloat> gpfloat1 = 0,
+                Inst< SFFloat> gpfloat2 = 0,
+                Inst< SFFloat> gpfloat3 = 0,
+                Inst< SFFloat> gpfloat4 = 0,
+                Inst< SFFloat> gpfloat5 = 0,
+                Inst< SFFloat> gpfloat6 = 0,
+                Inst< SFFloat> gpfloat7 = 0,
+                Inst< SFFloat> gpfloat8 = 0,
+                Inst< SFFloat> gpfloat9 = 0,
+                Inst< SFMatrix4f> gpmatrix4f0 = 0,
+                Inst< SFMatrix4f> gpmatrix4f1 = 0,
+                Inst< SFMatrix4f> gpmatrix4f2 = 0,
+                Inst< SFMatrix4f> gpmatrix4f3 = 0,
+                Inst< SFMatrix4f> gpmatrix4f4 = 0,
+                Inst< SFMatrix4f> gpmatrix4f5 = 0,
+                Inst< SFMatrix4f> gpmatrix4f6 = 0,
+                Inst< SFMatrix4f> gpmatrix4f7 = 0,
+                Inst< SFMatrix4f> gpmatrix4f8 = 0,
+                Inst< SFMatrix4f> gpmatrix4f9 = 0
+                );
         virtual ~Webserv();
 
         /**
@@ -101,6 +133,39 @@ namespace FS
         auto_ptr<SFBool> doPlayback;
         auto_ptr<SFVec3f> adrillforce_force;
         auto_ptr<SFString> textout;
+
+        auto_ptr<SFVec3f> gpvec3f0;
+        auto_ptr<SFVec3f> gpvec3f1;
+        auto_ptr<SFVec3f> gpvec3f2;
+        auto_ptr<SFVec3f> gpvec3f3;
+        auto_ptr<SFVec3f> gpvec3f4;
+        auto_ptr<SFVec3f> gpvec3f5;
+        auto_ptr<SFVec3f> gpvec3f6;
+        auto_ptr<SFVec3f> gpvec3f7;
+        auto_ptr<SFVec3f> gpvec3f8;
+        auto_ptr<SFVec3f> gpvec3f9;
+        auto_ptr<SFFloat> gpfloat0;
+        auto_ptr<SFFloat> gpfloat1;
+        auto_ptr<SFFloat> gpfloat2;
+        auto_ptr<SFFloat> gpfloat3;
+        auto_ptr<SFFloat> gpfloat4;
+        auto_ptr<SFFloat> gpfloat5;
+        auto_ptr<SFFloat> gpfloat6;
+        auto_ptr<SFFloat> gpfloat7;
+        auto_ptr<SFFloat> gpfloat8;
+        auto_ptr<SFFloat> gpfloat9;
+        auto_ptr<SFMatrix4f> gpmatrix4f0;
+        auto_ptr<SFMatrix4f> gpmatrix4f1;
+        auto_ptr<SFMatrix4f> gpmatrix4f2;
+        auto_ptr<SFMatrix4f> gpmatrix4f3;
+        auto_ptr<SFMatrix4f> gpmatrix4f4;
+        auto_ptr<SFMatrix4f> gpmatrix4f5;
+        auto_ptr<SFMatrix4f> gpmatrix4f6;
+        auto_ptr<SFMatrix4f> gpmatrix4f7;
+        auto_ptr<SFMatrix4f> gpmatrix4f8;
+        auto_ptr<SFMatrix4f> gpmatrix4f9;
+
+
 
         void jonas_reply (HttpServer::Response& response, shared_ptr<HttpServer::Request> request);
 

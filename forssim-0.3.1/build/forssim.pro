@@ -29,7 +29,7 @@ win32 {
 
     VS_VER = 14  # Visual studio version according to H3D (Ver. 2.3->13, Trunk->14)
 
-    dlltarget.path = c:/h3d/bin64
+    dlltarget.path = F:/h3d/bin64
     INSTALLS += dlltarget
 }
 
@@ -124,13 +124,13 @@ unix: {
 INCLUDEPATH += ../src
 
 win32 {
-    INCLUDEPATH += c:/h3d/h3dutil/include \
-                   c:/h3d/h3dapi/include  \
-                   c:/h3d/hapi/include    \
-                   c:/h3d/external/include/pthread \
-                   c:/h3d/external/include
-    LIBS += -Lc:/h3d/lib64 \
-            -Lc:/h3d/external/lib64
+    INCLUDEPATH += f:/h3d/h3dutil/include \
+                   f:/h3d/h3dapi/include  \
+                   f:/h3d/hapi/include    \
+                   f:/h3d/external/include/pthread \
+                   f:/h3d/external/include
+    LIBS += -Lf:/h3d/lib64 \
+            -Lf:/h3d/external/lib64
 }
 
 CONFIG(release, debug|release){
