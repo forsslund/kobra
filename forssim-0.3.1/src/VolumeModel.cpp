@@ -179,6 +179,8 @@ void VolumeModel::initialize()
         double h = imageData->height() * (imageData->pixelSize()).y;
         double d = imageData->depth() * (imageData->pixelSize()).z;
         double* space = materialSegmentationField->spaceOrigin;
+        if(isnan(space[0])) // For old nrrd files
+            space[0]=0; space[1]=0; space[2]=0;
         nrrdOffset->setValue(Vec3f(float(w/2+space[0]),
                                    float(h/2+space[1]),
                                    float(d/2+space[2])));

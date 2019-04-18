@@ -35,7 +35,7 @@ namespace WebservInternals
     H3D::FIELDDB_ELEMENT( Webserv, forbidden_segmentNameField, INPUT_OUTPUT );
     H3D::FIELDDB_ELEMENT( Webserv, forbidden_noOfVoxelsBoredByUser, INPUT_OUTPUT );
     H3D::FIELDDB_ELEMENT( Webserv, state, INPUT_OUTPUT );
-    H3D::FIELDDB_ELEMENT( Webserv, fractionUserExpertCurrentStep, INPUT_OUTPUT );
+    H3D::FIELDDB_ELEMENT( Webserv, expertFraction, INPUT_OUTPUT );
     H3D::FIELDDB_ELEMENT( Webserv, playback_isPlay, INPUT_OUTPUT );
     H3D::FIELDDB_ELEMENT( Webserv, playback_time, INPUT_OUTPUT );
     H3D::FIELDDB_ELEMENT( Webserv, showHead, INPUT_OUTPUT );
@@ -85,7 +85,7 @@ Webserv::Webserv(Inst<SFBool> pedal_0,
                  Inst< MFInt32> forbidden_noOfVoxelsBoredByUser,
                  Inst< SFInt32> state,
                  Inst< SFInt32> showHead,
-                 Inst< SFFloat> fractionUserExpertCurrentStep,
+                 Inst< MFFloat> expertFraction,
                  Inst< SFBool> playback_isPlay,
                  Inst< SFFloat> playback_time,
                  Inst< SFBool> saveVolume,
@@ -133,7 +133,7 @@ Webserv::Webserv(Inst<SFBool> pedal_0,
                     forbidden_noOfVoxelsBoredByUser(forbidden_noOfVoxelsBoredByUser),
                     state(state),
                     showHead(showHead),
-                    fractionUserExpertCurrentStep(fractionUserExpertCurrentStep),
+                    expertFraction(expertFraction),
                     playback_isPlay(playback_isPlay),
                     playback_time(playback_time),
                     saveVolume(saveVolume),
@@ -233,9 +233,9 @@ void Webserv::jonas_reply(HttpServer::Response& response,
           if(path.find(p) != string::npos){
               std::cout << "IN: " << p << "        [" << path.substr(10,string::npos) << "]\n";
             Vec3f v = (*var[n])->getValue();
-            v.x = c==0? atof(path.substr(10,string::npos).c_str()) : v.x;
-            v.y = c==1? atof(path.substr(10,string::npos).c_str()) : v.y;
-            v.z = c==2? atof(path.substr(10,string::npos).c_str()) : v.z;
+            v.x = c==0? float(atof(path.substr(10,string::npos).c_str())) : v.x;
+            v.y = c==1? float(atof(path.substr(10,string::npos).c_str())) : v.y;
+            v.z = c==2? float(atof(path.substr(10,string::npos).c_str())) : v.z;
             (*var[n])->setValue(v);
           }
        }
@@ -249,7 +249,7 @@ void Webserv::jonas_reply(HttpServer::Response& response,
           if(path.find(p) != string::npos){
               std::cout << (*var2[n])->getValueAsString() << "\n";
               std::cout << "IN: " << p << "        [" << path.substr(10,string::npos) << "]\n";
-            (*var2[n])->setValue(atof(path.substr(10,string::npos).c_str()));
+            (*var2[n])->setValue(float(atof(path.substr(10,string::npos).c_str())));
               std::cout << (*var2[n])->getValueAsString() << "\n";
           }
        }
@@ -301,9 +301,14 @@ void Webserv::jonas_reply(HttpServer::Response& response,
     }
     content << "],";
 
+    std::string fractions = "[";
+    for (auto f : expertFraction->getValue()) {
+        fractions += std::to_string(f) + ", ";
+    }
+    fractions += "]";
+
     content << "\"current_state\": " << state->getValue() << ",";
-    content << "\"fraction_user_expert_current_step\": " <<
-               fractionUserExpertCurrentStep->getValue() << ",";
+    content << "\"expertFraction\": " << fractions << ",";
     content << "\"playback_is_play\": " << (playback_isPlay->getValue()? 1:0) << ",";
     content << "\"playback_time\": " << playback_time->getValue() << ",";
     content << "\"showHead\": " << showHead->getValue() << ",";

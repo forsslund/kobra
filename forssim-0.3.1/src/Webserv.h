@@ -9,6 +9,7 @@
 #include <H3D/SFBool.h>
 #include <H3D/MFInt32.h>
 #include <H3D/MFString.h>
+#include <H3D/MFFloat.h>
 #include <H3D/SFInt32.h>
 #include <H3D/SFFloat.h>
 #include <H3D/SFRotation.h>
@@ -61,7 +62,7 @@ namespace FS
                 Inst< MFInt32> forbidden_noOfVoxelsBoredByUser = 0,
                 Inst< SFInt32> state = 0,
                 Inst< SFInt32> showHead = 0,
-                Inst< SFFloat> fractionUserExpertCurrentStep = 0,
+                Inst< MFFloat> expertFraction = 0,
                 Inst< SFBool> playback_isPlay = 0,
                 Inst< SFFloat> playback_time = 0,
                 Inst< SFBool> saveVolume = 0,
@@ -125,7 +126,7 @@ namespace FS
         auto_ptr<MFInt32> forbidden_noOfVoxelsBoredByUser;
         auto_ptr<SFInt32> state;
         auto_ptr<SFInt32> showHead;
-        auto_ptr<SFFloat> fractionUserExpertCurrentStep;
+        auto_ptr<MFFloat> expertFraction;
         auto_ptr<SFBool> playback_isPlay;
         auto_ptr<SFFloat> playback_time;
         auto_ptr<SFBool> saveVolume;
