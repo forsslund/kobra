@@ -47,7 +47,11 @@ namespace HAPI {
 
     /// Constructor. device_index is the index of falcon device
     /// connected.
-    HaptikfabrikenHapticsDevice( unsigned int device_index = 0 );
+    //HaptikfabrikenHapticsDevice( unsigned int device_index = 0 );
+    HaptikfabrikenHapticsDevice( unsigned int device_index = 0,
+                                 bool wait_for_next_message=false,
+                                 std::string configuration="");
+
 
     /// Destructor.
     virtual ~HaptikfabrikenHapticsDevice();
@@ -91,6 +95,8 @@ namespace HAPI {
     // From HaptikfabrikenAPI
     //------------------------------------------------------------------------------
     std::auto_ptr <haptikfabriken::HaptikfabrikenInterface> hfab;
+    bool wait_for_next_message;
+    std::string configuration;
     //------------------------------------------------------------------------------
 
   };

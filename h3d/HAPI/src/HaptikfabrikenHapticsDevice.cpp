@@ -40,9 +40,13 @@ HaptikfabrikenHapticsDevice::device_registration
 
 /// Constructor. device_index is the index of falcon device
 /// connected. Should not be larger than getNrConnectedDevices() - 1.
-HaptikfabrikenHapticsDevice::HaptikfabrikenHapticsDevice( unsigned int device_index ):
+HaptikfabrikenHapticsDevice::HaptikfabrikenHapticsDevice(unsigned int device_index ,
+                                                         bool wait_for_next_message,
+                                                         std::string configuration):
   index( device_index ),
-  hfab( 0 ) { // maybe new
+  hfab( 0 ),
+  wait_for_next_message(wait_for_next_message),
+  configuration(configuration){ // maybe new
   
   max_stiffness = 1500;
 
@@ -50,10 +54,15 @@ HaptikfabrikenHapticsDevice::HaptikfabrikenHapticsDevice( unsigned int device_in
 }
 
 HaptikfabrikenHapticsDevice::~HaptikfabrikenHapticsDevice() {
+    //hfab->close();
 }
 
 bool HaptikfabrikenHapticsDevice::initHapticsDevice( int _thread_frequency ) {
-  hfab.reset(new HaptikfabrikenInterface()); // Default settings and kinematics model used
+    std::cout << "HaptikfabrikenHapticsDevice::initHapticsDevice (" << configuration << ")\n";
+  Kinematics::configuration c = configuration.length() > 0 ? fromJSON(configuration):
+                                Kinematics::configuration::polhem_v2();
+  hfab.reset(new HaptikfabrikenInterface(wait_for_next_message,
+                                         c));
   if(hfab->open()) {
     std::stringstream s;
     s << "Cannot open Haptikfabriken device (index " << index << ") - Error: "

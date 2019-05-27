@@ -38,7 +38,7 @@ H3DNodeDatabase HaptikfabrikenDevice::database( "HaptikfabrikenDevice",
                                           typeid( HaptikfabrikenDevice ),
                                           &H3DHapticsDevice::database ); 
 namespace HaptikfabrikenDeviceInternals {
-  FIELDDB_ELEMENT( HaptikfabrikenDevice, kinematicsType, INITIALIZE_ONLY )
+  FIELDDB_ELEMENT( HaptikfabrikenDevice, configuration, INITIALIZE_ONLY )
 }
 
 /// Constructor.
@@ -65,7 +65,7 @@ HaptikfabrikenDevice::HaptikfabrikenDevice(
                Inst< SFHapticsRendererNode > _hapticsRenderer,
                Inst< MFVec3f         > _proxyPositions,
                Inst< SFBool          > _followViewpoint,
-               Inst< SFString        > _kinematicsType) :
+               Inst< SFString        > _configuration) :
   H3DHapticsDevice( _devicePosition, _deviceOrientation, _trackerPosition,
               _trackerOrientation, _positionCalibration, 
               _orientationCalibration, _proxyPosition,
@@ -73,19 +73,19 @@ HaptikfabrikenDevice::HaptikfabrikenDevice(
               _secondaryButton, _buttons,_force, _torque, _inputDOF,
               _outputDOF, _hapticsRate, _desiredHapticsRate, _stylus,
               _hapticsRenderer, _proxyPositions, _followViewpoint ),
-  kinematicsType( _kinematicsType ) {
+  configuration( _configuration ) {
 
   type_name = "HaptikfabrikenDevice";
   database.initFields( this );
   hapi_device.reset(0);
-  kinematicsType->setValue( "WoodenHaptics 1.5" );
+  //configuration->setValue("");
 }
 
 void HaptikfabrikenDevice::initialize() {
   H3DHapticsDevice::initialize();
 
 #ifdef HAVE_HAPTIKFABRIKENAPI
-    hapi_device.reset( new HAPI::HaptikfabrikenHapticsDevice(0) ); // TODO: change to kinematicstype for example
+    hapi_device.reset( new HAPI::HaptikfabrikenHapticsDevice(0,false,configuration->getValue()) );
 #else
     Console(LogLevel::Error) << "Cannot use HaptikfabrikenDevice. HAPI compiled without"
                << " Haptikfabriken support. Recompile HAPI with "
@@ -97,6 +97,7 @@ void HaptikfabrikenDevice::initialize() {
 
 H3DHapticsDevice::ErrorCode HaptikfabrikenDevice::initDevice() {
   HAPI::HAPIHapticsDevice::ErrorCode e = H3DHapticsDevice::initDevice();
+  std::cout << "In H3D::HaptikfabrikenDevice::initDevice()\n";
 #ifdef HAVE_HAPTIKFABRIKENAPI
 
   /*

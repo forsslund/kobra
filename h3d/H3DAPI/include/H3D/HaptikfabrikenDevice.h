@@ -87,7 +87,7 @@ namespace H3D {
     ///
     /// <b>Access type:</b> initializeOnly \n
     /// <b>Default value:</b> "" \n
-    auto_ptr< SFString > kinematicsType;
+    auto_ptr< SFString > configuration;
 
 
     /// Node database entry
