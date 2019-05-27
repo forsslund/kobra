@@ -36,18 +36,18 @@ namespace PedalNodeInternals
 PedalNode::PedalNode(H3D::Inst< H3D::SFBool  > pedal_0,
                      H3D::Inst< H3D::SFBool  > pedal_1,
              H3D::Inst< H3D::SFBool  > pedal_2,
-             H3D::Inst< H3D::SFBool  > noCombo                     )
+             H3D::Inst< H3D::SFBool  > _noCombo                     )
 :pedal_0(pedal_0),
 pedal_1(pedal_1),
 pedal_2(pedal_2),
-  noCombo(noCombo), fd(0)
+  noCombo(_noCombo), fd(0)
 {
 	cout << "Pedal Node Constructing"<<endl;
 
 	type_name = "PedalNode";
 	database.initFields( this );
 
-
+    noCombo->setValue(true);
 
 	cout << "Pedal Node Constructed"<<endl;
 }
@@ -79,7 +79,7 @@ void PedalNode::traverseSG( H3D::TraverseInfo&){
         if (rcount > 0 && rcount==sizeof(struct hiddev_event)) {
             state[(event.hid & 0xFF)-1] = event.value;
             foundMessage = true;
-        } 
+        }
 
     }
 #endif
@@ -87,6 +87,18 @@ void PedalNode::traverseSG( H3D::TraverseInfo&){
     // Return already if no message, useful if no pedal is hooked up
     // and we instead control the pedal states virtually (through route in)
     if(!foundMessage) return;
+
+
+
+    // New ordering of pedals 2019-04-27. Middle is first
+    if(state[1] == 1){ // Priority middle pedal controling drill
+        pedal_0->setValue(true);
+        pedal_1->setValue(false);
+        pedal_2->setValue(false);
+        return;
+    }
+    else
+        pedal_0->setValue(false);
 
 
     // Check for multiple pedals activated
@@ -98,14 +110,13 @@ void PedalNode::traverseSG( H3D::TraverseInfo&){
         if(num_pedals_on>1) return;
     }
 
+    // Left pedal (usually controlling moving around)
     if(state[0] == 1)
-        pedal_0->setValue(true);
-    else
-        pedal_0->setValue(false);
-    if(state[1] == 1)
         pedal_1->setValue(true);
     else
         pedal_1->setValue(false);
+
+    // Right pedal (usually controlling elevator)
     if(state[2] == 1)
         pedal_2->setValue(true);
     else

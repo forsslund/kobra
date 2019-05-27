@@ -305,6 +305,7 @@ void Webserv::jonas_reply(HttpServer::Response& response,
     for (auto f : expertFraction->getValue()) {
         fractions += std::to_string(f) + ", ";
     }
+    fractions = fractions.substr(0, fractions.length() - 2);
     fractions += "]";
 
     content << "\"current_state\": " << state->getValue() << ",";
