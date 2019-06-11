@@ -531,6 +531,18 @@ void GLUTWindow::glutMouseCallback( int button, int state,
                                      state == GLUT_DOWN ?
                                      MouseSensor::DOWN : MouseSensor::UP );
         break;
+
+      // ------------------------------------------------------------------------
+      // Modification 2019-06-11 by Jonas Forsslund
+      // Sometimes (always?) with glut in Linux the mouse wheel is implemented
+      // as buttons 3 and 4 (0 is left, 1 is middle/wheel push, 2 is right).
+      case 3:
+        window->onMouseWheelAction( MouseSensor::FROM);
+        break;
+      case 4:
+        window->onMouseWheelAction( MouseSensor::TOWARDS);
+        break;
+      // ------------------------------------------------------------------------
       default: {}
     }
   }
