@@ -60,9 +60,9 @@ HaptikfabrikenHapticsDevice::~HaptikfabrikenHapticsDevice() {
 bool HaptikfabrikenHapticsDevice::initHapticsDevice( int _thread_frequency ) {
     std::cout << "HaptikfabrikenHapticsDevice::initHapticsDevice (" << configuration << ")\n";
   Kinematics::configuration c = configuration.length() > 0 ? fromJSON(configuration):
-                                Kinematics::configuration::polhem_v2();
+                                Kinematics::configuration::polhem_v3();
   hfab.reset(new HaptikfabrikenInterface(wait_for_next_message,
-                                         c));
+                                         c,HaptikfabrikenInterface::USB));
   if(hfab->open()) {
     std::stringstream s;
     s << "Cannot open Haptikfabriken device (index " << index << ") - Error: "

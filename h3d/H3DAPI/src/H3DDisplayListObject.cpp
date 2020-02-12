@@ -89,7 +89,7 @@ bool H3DDisplayListObject::DisplayList::tryBuildDisplayList( bool cache_broken )
     // create the new display list if the displayLists we are dependent 
     if( have_all_needed_display_lists ) {
       //display_list = glGenLists( 1 ); 
-      glNewList( display_list, GL_COMPILE_AND_EXECUTE );
+      glNewList( display_list, GL_COMPILE);
       GLuint err = glGetError();
       if( err != GL_NO_ERROR ) {
         Console(LogLevel::Error) << "OpenGL error in glNewList() Error: \"" << gluErrorString( err ) 
@@ -98,6 +98,7 @@ bool H3DDisplayListObject::DisplayList::tryBuildDisplayList( bool cache_broken )
       }
       owner->render();
       glEndList();
+	  glCallList(display_list);
       err = glGetError();
       if( err != GL_NO_ERROR ) {
         Console(LogLevel::Error) << "OpenGL error in glEndList() Error: \"" << gluErrorString( err ) 

@@ -12,9 +12,9 @@ handleRenamingVariablesBackwardCompatibility( NEW_VARIABLE_NAMES HaptikfabrikenA
                                                           "Path to haptikfabrikenDLL.lib library." )
 
 get_filename_component( module_file_path ${CMAKE_CURRENT_LIST_FILE} PATH )
-
-set( haptikfabrikenapi_include_search_paths "" )
-set( haptikfabrikenapi_lib_search_paths "" )
+MESSAGE("${module_file_path}/../../../../haptikfabrikenapi/winbin")
+set( haptikfabrikenapi_include_search_paths "${module_file_path}/../../../../haptikfabrikenapi/winbin" )
+set( haptikfabrikenapi_lib_search_paths "${module_file_path}/../../../../haptikfabrikenapi/winbin" )
 if( NOT MSVC14 )
   include( H3DCommonFindModuleFunctions )
   getExternalSearchPathsH3D( haptikfabrikenapi_include_search_paths haptikfabrikenapi_lib_search_paths ${module_file_path} )

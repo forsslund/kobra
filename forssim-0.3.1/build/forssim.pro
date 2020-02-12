@@ -29,7 +29,7 @@ win32 {
 
     VS_VER = 14  # Visual studio version according to H3D (Ver. 2.3->13, Trunk->14)
 
-    dlltarget.path = F:/h3d/bin64
+    dlltarget.path = ../../h3d/bin64
     INSTALLS += dlltarget
 }
 
@@ -38,8 +38,8 @@ unix {
 
     # Install Boost:
     # in /usr/local
-    #  sudo tar -xjvf boost_1_63_0.tar.bz2 boost_1_63_0/
-    #  cd boost_1_63_0/
+    #  sudo tar -xjvf boost_1_62_0.tar.bz2 boost_1_63_0/
+    #  cd boost_1_62_0/
     #
     #  sudo ./bootstrap.sh 
     #  sudo ./b2 address-model=64
@@ -81,6 +81,7 @@ SOURCES += \
 
 
 HEADERS += \
+    ../../../fs_polhem/haptikfabrikenapi-polhem/polhem.h \
     ../src/WilhelmsenProjection.h \
     ../src/Volumes.h \
     ../src/VolumeModel.h \
@@ -124,13 +125,13 @@ unix: {
 INCLUDEPATH += ../src
 
 win32 {
-    INCLUDEPATH += f:/h3d/h3dutil/include \
-                   f:/h3d/h3dapi/include  \
-                   f:/h3d/hapi/include    \
-                   f:/h3d/external/include/pthread \
-                   f:/h3d/external/include
-    LIBS += -Lf:/h3d/lib64 \
-            -Lf:/h3d/external/lib64
+    INCLUDEPATH += ../../h3d/h3dutil/include \
+                   ../../h3d/h3dapi/include  \
+                   ../../h3d/hapi/include    \
+                   ../../h3d/external/include/pthread \
+                   ../../h3d/external/include
+    LIBS += -L../../h3d/lib64 \
+            -L../../h3d/external/lib64
 }
 
 CONFIG(release, debug|release){
@@ -178,8 +179,8 @@ webserv {
         LIBS += $${A}\chrono$${B}
     }
     unix {
-        #INCLUDEPATH += /usr/local/boost_1_63_0
-	#LIBS += -L/usr/local/boost_1_63_0/stage/lib
+        #INCLUDEPATH += /usr/local/boost_1_62_0
+        #LIBS += -L/usr/local/boost_1_62_0/stage/lib
 
         LIBS +=  -lboost_system -lboost_date_time -lboost_regex -lboost_context -lboost_coroutine -lboost_thread -lboost_chrono
     }

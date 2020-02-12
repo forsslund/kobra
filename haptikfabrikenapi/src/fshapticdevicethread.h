@@ -11,6 +11,8 @@
 #include <vector>
 #include <iomanip>
 #include <fstream>
+#include <bitset>
+#include <set>
 
 #include "kinematics.h"
 //#include <chai3d.h>
@@ -22,6 +24,7 @@
 #include <boost/chrono.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
+#include <thread>
 
 namespace  haptikfabriken {
 
@@ -37,31 +40,39 @@ using boost::asio::ip::udp;
 class FsHapticDeviceThread
 {
 public:
-    FsHapticDeviceThread(bool wait_for_next_message=false,
-                         Kinematics::configuration c=Kinematics::configuration::polhem_v1());
+    FsHapticDeviceThread(Kinematics::configuration c=Kinematics::configuration::polhem_v1());
     void server(boost::asio::io_service& io_service, unsigned short port);
+    virtual ~FsHapticDeviceThread() {}
     virtual void thread();
+    void event_thread();
     virtual void close(){
+        std::cout << "FsHapticDeviceThread close()\n";
         running=false;
         m_thread->join();
+        sem_getpos.post(); // unlock potential block in event thread.
+        m_event_thread->join();
     }
-    int open() {
+    virtual int open() {
         running=true;
-        m_thread = new boost::thread(boost::bind(&FsHapticDeviceThread::thread, this)); return 0;}
+        std::cout << "Open in fshapticdevicetherad\n";
+        m_thread = new boost::thread(boost::bind(&FsHapticDeviceThread::thread, this));
+        m_event_thread = new boost::thread(boost::bind(&FsHapticDeviceThread::event_thread, this));
+        return 0;
+    }
     virtual std::string getErrorCode() { return std::string("Something went wrong"); }
 
     boost::interprocess::interprocess_semaphore sem_force_sent;
-    bool newforce;
-    const bool wait_for_next_message;
+    boost::interprocess::interprocess_semaphore sem_getpos;
     Kinematics kinematics;
     chrono::steady_clock::time_point app_start;
 
+    bitset<5> latestSwitchesState; // Up to 5 switches supported.
     bool running;
     fsVec3d latestPos;
     fsVec3d latestBodyAngles;
     int latestCommandedMilliamps[3];
-    int num_sent_messages;
-    int num_received_messages;
+    int num_sent_messages=0;
+    int num_received_messages=0;
     fsRot latestRot;
     int latestEnc[6];
     fsVec3d currentForce;
@@ -69,14 +80,36 @@ public:
     fsVec3d nextCurrent;
     bool useCurrentDirectly{false};
 
+    int offset_encoders[6];
+    virtual void calibrate() {}
+
     boost::mutex mtx_pos;
     boost::mutex mtx_force;
+    boost::mutex mtx_getpos;
+    int num_getpos{0};
+
+    void addEventListener(HapticListener* listener){
+        listener_mutex.lock();
+        listeners.insert(listener);
+        listener_mutex.unlock();
+    }
+    void removeEventListener(HapticListener* listener){
+        listener_mutex.lock();
+        listeners.erase(listener);
+        listener_mutex.unlock();
+    }
 
     inline void getEnc(int a[]){
         mtx_pos.lock();
         for(int i=0;i<6;++i)
             a[i]=latestEnc[i];
         mtx_pos.unlock();
+    }
+    inline fsVec3d getCurrentForce(){
+        mtx_pos.lock();
+        fsVec3d f = currentForce;
+        mtx_pos.unlock();
+        return f;
     }
     inline fsVec3d getBodyAngles(){
         mtx_pos.lock();
@@ -105,7 +138,19 @@ public:
         return r;
     }
 
-    inline fsVec3d getPos() {
+    inline fsVec3d getPos(bool blocking=false) {
+        //blocking=false;
+        if(blocking){
+            //sem_getpos.wait();
+            //while(sem_getpos.try_wait());
+            while(num_getpos==0 && running){
+                //using namespace std::chrono;
+                //std::chrono::duration<int, std::micro> microsecond{1};
+                //this_thread::sleep_for(100*microsecond);
+                this_thread::yield();
+            }
+            num_getpos=0;
+        }
         mtx_pos.lock();
         fsVec3d p = latestPos;
         mtx_pos.unlock();
@@ -117,28 +162,25 @@ public:
         mtx_pos.unlock();
         return r;
     }
+    inline std::bitset<5> getSwitchesState(){
+        std::bitset<5> b;
+        mtx_pos.lock();
+        b = latestSwitchesState;
+        mtx_pos.unlock();
+        return b;
+    }
 
     inline void setForce(fsVec3d f){
         useCurrentDirectly = false;
         mtx_force.lock();
         nextForce = f;
-        newforce = true;
         mtx_force.unlock();
-
-        // wait until at least one new force message has been sent (received a new package)
-        if(wait_for_next_message)
-            sem_force_sent.wait();
     }
     inline void setCurrent(fsVec3d amps){
         useCurrentDirectly = true;
         mtx_force.lock();
         nextCurrent = amps;
-        newforce = true;
         mtx_force.unlock();
-
-        // wait until at least one new force message has been sent (received a new package)
-        if(wait_for_next_message)
-            sem_force_sent.wait();
     }
 
 
@@ -211,6 +253,10 @@ public:
         return double(chrono::duration <double, micro> (diff).count());
     }
 
+    int getPosCounter;
+    int getPosOldCounter;
+    fsVec3d oldPosition;
+
 
 
 
@@ -224,12 +270,16 @@ public:
 
     boost::asio::io_service* io_service;
 
-    int max_milliamps = 1000;
+    short max_milliamps = 6000;
 
 
 
 
-    boost::thread* m_thread = 0;
+    boost::thread* m_thread = nullptr;
+    boost::thread* m_event_thread = nullptr;
+
+    std::set<HapticListener*> listeners;
+    boost::mutex listener_mutex;
 
 
 

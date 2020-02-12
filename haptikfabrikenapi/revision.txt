@@ -1,2 +1,2 @@
-Imported from api.haptikfabriken.com version 0.1
+Imported from github version 2020-02-12
 

@@ -19,7 +19,7 @@ class Webserv
 public:
     Webserv();
     virtual ~Webserv();
-    void initialize();
+    void initialize(int port=8088);
 
 
     int fd;
@@ -29,15 +29,19 @@ public:
 
 
     void setMessage(string s);
+    int getEnc5();
+    bool activeEnc5();
 
 private:
     thread webservThread;
     HttpServer* server;
     void start() { server->start(); }
+    int enc5;
 
     string message;
     std::mutex message_mutex;
 
+    std::chrono::high_resolution_clock::time_point lastEnc5message;
 
 };
 

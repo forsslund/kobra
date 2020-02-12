@@ -1628,7 +1628,7 @@ void MCWithRange::OctTreeNode::render(  ) {
     glCallList( cache );
   } else if ( isLeaf() ) {
     cache = glGenLists(1);
-    glNewList( cache, GL_COMPILE_AND_EXECUTE );
+    glNewList( cache, GL_COMPILE );
     
     if ( vvertex.size() > 0 ) {
 		if (vcolour.size() > 0) {		
@@ -1676,6 +1676,7 @@ void MCWithRange::OctTreeNode::render(  ) {
 		}
     }
     glEndList();
+    glCallList(cache);
   } else {
     for( int i=0; i<8; ++i )
       children[i]->render();

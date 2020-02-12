@@ -1,4 +1,4 @@
-#include "kinematics.h"
+#include "haptikfabrikenapi.h"
 #include "fshapticdevicethread.h"
 
 #include <boost/thread.hpp>
@@ -9,9 +9,10 @@
 #include <cstdlib>
 #include <iostream>
 #include <boost/asio.hpp>
-#include <boost/chrono.hpp>
 #include <string>
 
+#include <chrono>
+#include <thread>
 
 namespace haptikfabriken {
 
@@ -34,12 +35,6 @@ void FsHapticDeviceThread::server(boost::asio::io_service& io_service, unsigned 
     udp::endpoint sender_endpoint;
     size_t length = sock.receive_from(
         boost::asio::buffer(data, max_length), sender_endpoint);
-    mtx_force.lock();
-    if(wait_for_next_message && newforce){
-        sem_force_sent.post();
-        newforce=false;
-    }
-    mtx_force.unlock();
 
 
 /*
@@ -71,14 +66,6 @@ void FsHapticDeviceThread::server(boost::asio::io_service& io_service, unsigned 
         int rot[]  = {in->getEnc(3), in->getEnc(4), in->getEnc(5)};
         fsRot r = kinematics.computeRotation(base,rot);
         fsVec3d angles = kinematics.computeBodyAngles(base);
-/*
-        std::cout << "Ch readings: " << ch_a << ", " << ch_b << ", " << ch_c << "      " << rot[0] << "," << rot[1] << "," << rot[2] << "\n";
-        //std::cout << in->toString() << "\n";
-        std::cout << "Computed position: " << pos.x() << "," << pos.y() << "," << pos.z() << "\n";
-        std::cout << "Computed rotation: [" << r.m[0][0] << " " << r.m[0][1] << " " << r.m[0][2] << "\n"
-                                            << r.m[1][0] << " " << r.m[1][1] << " " << r.m[1][2] << "\n"
-                                            << r.m[2][0] << " " << r.m[2][1] << " " << r.m[2][2] << " ]\n\n";
-                                            */
         mtx_pos.lock();
         latestBodyAngles = angles;
         latestPos = pos;
@@ -214,14 +201,16 @@ void FsHapticDeviceThread::server(boost::asio::io_service& io_service, unsigned 
 }
 }
 
-FsHapticDeviceThread::FsHapticDeviceThread(bool wait_for_next_message, Kinematics::configuration c):
-    sem_force_sent(0),newforce(false),wait_for_next_message(wait_for_next_message), kinematics(Kinematics(c))
+FsHapticDeviceThread::FsHapticDeviceThread(Kinematics::configuration c):
+    sem_force_sent(0),sem_getpos(0),kinematics(Kinematics(c))
 {
     std::cout << "FsHapticDeviceThread::FsHapticDeviceThread()\n";
     app_start = chrono::steady_clock::now();
 
-    for(int i=0;i<6;++i)
+    for(int i=0;i<6;++i){
         latestEnc[i]=0;
+        offset_encoders[i]=0;
+    }
 
 }
 
@@ -235,6 +224,92 @@ void FsHapticDeviceThread::thread()
   catch (std::exception& e){
     std::cerr << "Exception in FsHapticDeviceThread::thread(): " << e.what() << "\n";
   }
+
+}
+
+void FsHapticDeviceThread::event_thread()
+{
+    using namespace std::chrono;
+    std::chrono::duration<int, std::micro> microsecond{1};
+    high_resolution_clock::time_point t1,t2;
+
+    t1 = high_resolution_clock::now();
+
+    high_resolution_clock::time_point listeners_t1,listeners_t2;
+    high_resolution_clock::time_point total_t1,total_t2;
+    double listeners_dt=0;
+    int listeners_count=0;
+
+    total_t1=high_resolution_clock::now();
+
+    while(running){
+        if(listeners.size() == 0){
+            this_thread::sleep_for(1000*microsecond);
+            continue; // Wait for added listener
+        }
+
+        HapticValues hv;
+        hv.position = getPos(true);
+        bool readyContinue=false;
+        while(!readyContinue && running){
+            t2 = high_resolution_clock::now();
+            duration<double> dt = duration_cast<duration<double>>(t2 - t1);
+            if(listeners.size() == 0){
+                this_thread::sleep_for(1000*microsecond);
+                continue; // Wait for added listener
+            }
+
+            listener_mutex.lock();
+
+            for(auto listener : listeners){
+                // Ready to call? (1/time since last time > hz)
+                if(dt.count() > (1.0/listener->maxHapticListenerFrequency)){
+                    hv.position = getPos();
+                    hv.orientation = getRot();
+                    hv.currentForce = getCurrentForce();
+                    hv.nextForce = currentForce;
+
+                    // stats
+                    listeners_count++;
+                    listeners_t1=high_resolution_clock::now();
+
+
+                    listener->positionEvent(hv);
+
+                    // stats cont.
+                    listeners_t2=high_resolution_clock::now();
+                    duration<double> time_span = duration_cast<duration<double>>(listeners_t2 - listeners_t1);
+                    listeners_dt += time_span.count();
+
+                    double gain = 1.0;
+                    setForce(gain*hv.nextForce);
+                    readyContinue=true;
+                }
+            }
+            listener_mutex.unlock();
+
+            if(listeners_count==10000){
+                total_t2=high_resolution_clock::now();
+                duration<double> total_time_span = duration_cast<duration<double>>(total_t2 - total_t1);
+
+                std::cout << "\nCalled positionEvent() " << listeners_count
+                          << " times in " << total_time_span.count()
+                          << " s (" << listeners_count/total_time_span.count() << " hz) "
+                          << " with avarage execution time of " << listeners_count*listeners_dt/listeners_count << " ms\n\n";
+                listeners_count = 0;
+                listeners_dt=0;
+                total_t1 = total_t2=high_resolution_clock::now();;
+            }
+
+
+
+            // Add a tiny sleep if maxFrequency not reached
+            if(!readyContinue){
+                this_thread::sleep_for(10*microsecond); //100khz max
+            }
+        }
+        t1=t2;
+    }
 
 }
 

@@ -59,6 +59,7 @@
 using namespace std;
 using namespace H3D;
 
+#ifdef LINUX
 // To quit gracefully in Linux
 #include <signal.h>
 Scene::CallbackCode exitLater ( void* data ) {
@@ -70,6 +71,7 @@ void term(int signum)
   std::cout << "SIGTERM Called. Quitting.\n";
   Scene::addCallback ( exitLater, NULL );
 }
+#endif
 
 class ChangeViewport : public PeriodicUpdate< SFInt32> { 
   public:
@@ -312,6 +314,8 @@ string GET_ENV_INI_DEFAULT_FILE( INIFile &ini_file,
 
 
 int main(int argc, char* argv[]) {
+
+#ifdef LINUX
   // To quit gracefully in Linux on SIGTERM (by normal kill or QT Process Terminate)
   // https://airtower.wordpress.com/2010/06/16/catch-sigterm-exit-gracefully/
   // Added by Jonas Forsslund 2019-04-24
@@ -319,6 +323,7 @@ int main(int argc, char* argv[]) {
   memset(&action, 0, sizeof(struct sigaction));
   action.sa_handler = term;
   sigaction(SIGTERM, &action, NULL);
+#endif
 
 
 #ifdef H3DAPI_LIB

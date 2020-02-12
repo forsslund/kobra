@@ -9,10 +9,18 @@
 <Viewpoint position="0.0 0.0 0.6" description="Default H3D Viewpoint"/>
 
 <DeviceInfo>
-  <HaptikfabrikenDevice positionCalibration="1 0 0 0
-  0 1 0 0
-  0 0 1 0
-  0 0 0 1" >
+  <!--HaptikfabrikenDevice followViewpoint="false" positionCalibration="
+   1.00000   0.00000   0.00000   0.00000
+   0.00000   0.50000  -0.86603   0.05000
+   0.00000   0.86603   0.50000   0.08660
+   0.00000   0.00000   0.00000   1.00000
+" DEF="device"-->
+  <HaptikfabrikenDevice followViewpoint="false" positionCalibration="
+   1.00000   0.00000   0.00000   0.15000
+   0.00000   1.00000   0.0       -0.0500
+   0.00000   0.0       1.00000   -0.3000
+   0.00000   0.00000   0.00000   1.00000
+" DEF="device">
 	<GodObjectRenderer/>
       <Group containerField="stylus">
 	  <Shape>
@@ -22,6 +30,7 @@
 	    <Sphere DEF="PROXY" radius="0.025"/>
 	  </Shape>
 <!--Transform rotation="1 0 0 3.1415"-->
+
 	  <Transform translation="0 0 0.08" rotation="1 0 0 1.570796" >
 	    <Shape>
 	      <Appearance>
@@ -46,16 +55,35 @@
 	      <Box size="0.01 0.15 0.01"/>
 	    </Shape>
 </Transform>
-<!--/Transform-->
+
 	</Group>
   </HaptikfabrikenDevice>
 
 
 </DeviceInfo>
 
+	  <Shape>
+<Rectangle2D size="1 0.001"/>
+	  </Shape>
+	  <Shape>
+<Rectangle2D size="0.001 1"/>
+	  </Shape>
 
 
+<!-- Draw cardboard box -->
+<Transform translation="0 0 0">
+		  <Shape>
+		    <Appearance>
+		      <Material diffuseColor="0.0 0.6 0.6" transparency="0"/>
+<SmoothSurface stiffness="0.9" damping="0.0" />
 
+		    </Appearance>
+			<Box size="0.15 0.15 0.2"/>
+		  </Shape>
+ </Transform>
+
+
+<QTransform DEF="still">
 	  <Shape>
 	    <Appearance>
 	      <Material diffuseColor="0 1 0"/>
@@ -87,12 +115,13 @@
 	      <Box size="0.01 0.15 0.01"/>
 	    </Shape>
 </Transform>
+</QTransform>
 <!--/Transform-->
 
+<!--ROUTE fromNode="device" fromField="trackerPosition" toNode="still" toField="translation"/--> 
 
 
-
-<ForceField force="0 0 1"/>
+<ForceField force="0 0 0"/>
 <Transform translation="0.05 0 0">
 
     <FitToBoxTransform boxCenter="0 0 0" boxSize="0.03 0.03 0.03"
@@ -110,7 +139,28 @@
       </Shape>
     </FitToBoxTransform>
 </Transform>	
-    
+
+<Transform translation="-0.3 0.22 0">
+          <Switch DEF="MATSWITCH">
+    <Shape>
+     <Box size="0.03 0.03 0.03"/>
+    <Appearance>
+ 	          <Material diffuseColor="0.7 1 0.7"/>
+    </Appearance>
+    </Shape>
+    <Shape>
+     <Box size="0.03 0.03 0.03"/>
+ 
+
+   <Appearance>
+ 	          <Material diffuseColor="1 0.2 0.2"/>
+    </Appearance>
+    </Shape>
+          </Switch>
+</Transform>
+
+
+    <ROUTE fromNode="device" fromField="buttons" toNode="MATSWITCH" toField="whichChoice"/> 
     <PROGRAM_SETTING node="SS" field="ss1_m" name="ss1_m" section="SuperShape node parameters" />
     <PROGRAM_SETTING node="SS" field="ss1_a" name="ss1_a" section="SuperShape node parameters" />
     <PROGRAM_SETTING node="SS" field="ss1_b" name="ss1_b" section="SuperShape node parameters" />

@@ -21,16 +21,18 @@ using namespace boost::property_tree;
 
 /// Add this node to the H3DNodeDatabase system.
 Webserv::Webserv(){
+    enc5=0;
     cout << "Webserv Constructing"<<endl;
 }
 
 Webserv::~Webserv()
 {
     cout<<"Webserv Stopping Server"<<endl;
+    server->stop();
     if(webservThread.joinable()){
-        server->stop();
         webservThread.join();
     }
+    delete server; // Works but theoretically undefined behaviour. New ASIO lib may fix.
     cout<<"Webserv Node Destructed"<<endl;
 }
 
@@ -62,6 +64,17 @@ void Webserv::jonas_reply(HttpServer::Response& response,
 
   }*/
 
+  // Get encoder
+  //enc5 = 0;
+  if(path.find("/setencoder/5/") != string::npos){
+    string s = path.substr(14,string::npos);
+    message_mutex.lock();
+    enc5 = atoi(s.c_str());
+    message_mutex.unlock();
+
+    // Clock our last message
+    lastEnc5message = chrono::high_resolution_clock::now();
+  }
 
   message_mutex.lock();
   string latest_message = message;
@@ -145,13 +158,32 @@ void Webserv::setMessage(string s)
     message_mutex.unlock();
 }
 
-void Webserv::initialize()
+int Webserv::getEnc5()
+{
+    int r;
+    message_mutex.lock();
+    r = enc5;
+    message_mutex.unlock();
+    return r;
+}
+
+bool Webserv::activeEnc5()
+{
+    using namespace chrono;
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+    duration<double> time_span = duration_cast<duration<double>>(t2 - lastEnc5message);
+
+    // True if we got a message within the last second
+    return time_span.count() < 1;
+}
+
+void Webserv::initialize(int port)
 {
     cout<<"Webserv Initializing"<<endl;
 
 
-    //HTTP-server at port 8088 using 4 threads
-    server = new HttpServer(8088, 1);
+    //HTTP-server at port 8088 using 2 threads
+    server = new HttpServer(port, 2);
 
     using namespace std::placeholders;
 

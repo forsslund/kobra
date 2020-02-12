@@ -370,7 +370,8 @@ extern "C" {
 			@returns
 				This function returns 0 on success and -1 on error.
 		*/
-		int HID_API_EXPORT_CALL hid_get_indexed_string(hid_device *device, int string_index, wchar_t *string, size_t maxlen);
+        // NOT USED AND NOT IMPLEMENTED ANYWAY
+        //int HID_API_EXPORT_CALL hid_get_indexed_string(hid_device *device, int string, wchar_t *, size_t);
 
 		/** @brief Get a string describing the last error which occurred.
 
@@ -381,7 +382,8 @@ extern "C" {
 				This function returns a string containing the last error
 				which occurred or NULL if none has occurred.
 		*/
-		HID_API_EXPORT const wchar_t* HID_API_CALL hid_error(hid_device *device);
+        // NOT USED AND NOT IMPLEMENTED ANYWAY
+        //HID_API_EXPORT const wchar_t* HID_API_CALL hid_error(hid_device *);
 
 #ifdef __cplusplus
 }

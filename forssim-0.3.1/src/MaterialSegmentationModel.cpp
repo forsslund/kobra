@@ -13,7 +13,7 @@ namespace MaterialSegmentationModelInternals
 	H3D::FIELDDB_ELEMENT( MaterialSegmentationModel, segmentNameField, 				INPUT_OUTPUT );
 	H3D::FIELDDB_ELEMENT( MaterialSegmentationModel, segmentHardnessField, 		INPUT_OUTPUT );
 	H3D::FIELDDB_ELEMENT( MaterialSegmentationModel, segmentForceRateField, 		INPUT_OUTPUT );
-	H3D::FIELDDB_ELEMENT(MaterialSegmentationModel, noOfVoxelsBoredByUser, OUTPUT_ONLY);
+    H3D::FIELDDB_ELEMENT(MaterialSegmentationModel, noOfVoxelsBoredByUser, INPUT_OUTPUT);
 	H3D::FIELDDB_ELEMENT(MaterialSegmentationModel, segmentMaxValueField, INPUT_OUTPUT);
 }
 
