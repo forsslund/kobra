@@ -149,20 +149,22 @@ endif()
 #c:\kobra\haptikfabrikenapi\winbin\s826.lib
 #setupapi.lib
 
-find_package( HaptikfabrikenAPI )
-if( HaptikfabrikenAPI_FOUND )
-  set( HAVE_HAPTIKFABRIKENAPI 1 )
-  include_directories( ${HaptikfabrikenAPI_INCLUDE_DIRS} )
-  set( HAPI_optionalLibs ${HAPI_optionalLibs} ${HaptikfabrikenAPI_LIBRARIES} )
-  set( HAPI_optionalLibs ${HAPI_optionalLibs} "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_system-vc140-mt-1_62.lib" 
-                         "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_date_time-vc140-mt-1_62.lib"
-						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_regex-vc140-mt-1_62.lib"
-						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_thread-vc140-mt-1_62.lib"
-						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_chrono-vc140-mt-1_62.lib"
-						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_context-vc140-mt-1_62.lib"
-						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_coroutine-vc140-mt-1_62.lib"
-						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/s826.lib" "setupapi.lib")
-endif()
+# 2020-12-01 Always find this header-only api now
+set( HAVE_HAPTIKFABRIKENAPI 1 )
+#find_package( HaptikfabrikenAPI )
+#if( HaptikfabrikenAPI_FOUND )
+#  set( HAVE_HAPTIKFABRIKENAPI 1 )
+#  include_directories( ${HaptikfabrikenAPI_INCLUDE_DIRS} )
+#  set( HAPI_optionalLibs ${HAPI_optionalLibs} ${HaptikfabrikenAPI_LIBRARIES} )
+#  set( HAPI_optionalLibs ${HAPI_optionalLibs} "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_system-vc140-mt-1_62.lib" 
+#                         "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_date_time-vc140-mt-1_62.lib"
+#						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_regex-vc140-mt-1_62.lib"
+#						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_thread-vc140-mt-1_62.lib"
+#						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_chrono-vc140-mt-1_62.lib"
+#						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_context-vc140-mt-1_62.lib"
+#						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/libboost_coroutine-vc140-mt-1_62.lib"
+#						 "${HaptikfabrikenAPI_INCLUDE_DIRS}/s826.lib" "setupapi.lib")
+#endif()
 
 find_package( EntactAPI )
 if( EntactAPI_FOUND )

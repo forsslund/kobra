@@ -33,7 +33,9 @@
 #include <HAPI/HAPIHapticsDevice.h>
 
 #ifdef HAVE_HAPTIKFABRIKENAPI
-#include <haptikfabrikenapi.h>
+namespace haptikfabriken {
+    class HaptikfabrikenInterface;
+}
 
 
 namespace HAPI {

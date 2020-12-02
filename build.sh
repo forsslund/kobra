@@ -7,14 +7,16 @@ sh install.sh
 cd ../../
 
 # Build haptikfabriken api
-cd haptikfabrikenapi
-sh dependencies.sh
-sh install_usb_permissions.sh
-qmake
-make -j5
-sudo make install
-sudo ldconfig
-cd ../
+#cd haptikfabrikenapi
+#sh dependencies.sh
+#sh install_usb_permissions.sh
+#qmake
+#make -j5
+#sudo make install
+#sudo ldconfig
+#cd ../
+
+# Put uhaptikfabriken.h in /usr/local/include
 
 # Build h3d
 cd h3d/build

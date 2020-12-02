@@ -35,14 +35,17 @@ win32 {
 
 unix {
     CONFIG += webserv
+    INCLUDEPATH += /usr/local/boost_1_62_0
+    LIBS += -L/usr/local/boost_1_62_0/stage/lib/
 
     # Install Boost:
     # in /usr/local
-    #  sudo tar -xjvf boost_1_62_0.tar.bz2 boost_1_63_0/
+    #  sudo tar -xjvf boost_1_62_0.tar.bz2 boost_1_62_0/
     #  cd boost_1_62_0/
     #
     #  sudo ./bootstrap.sh 
     #  sudo ./b2 address-model=64
+    #  sudo ./b2 install
 }
 
 

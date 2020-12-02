@@ -28,6 +28,7 @@
 
 #include <HAPI/HaptikfabrikenHapticsDevice.h>
 #ifdef HAVE_HAPTIKFABRIKENAPI
+#include <uhaptikfabriken.h>
 #include <sstream>
 
 using namespace HAPI;
@@ -59,10 +60,8 @@ HaptikfabrikenHapticsDevice::~HaptikfabrikenHapticsDevice() {
 
 bool HaptikfabrikenHapticsDevice::initHapticsDevice( int _thread_frequency ) {
     std::cout << "HaptikfabrikenHapticsDevice::initHapticsDevice (" << configuration << ")\n";
-  Kinematics::configuration c = configuration.length() > 0 ? fromJSON(configuration):
-                                Kinematics::configuration::polhem_v3();
-  hfab.reset(new HaptikfabrikenInterface(wait_for_next_message,
-                                         c,HaptikfabrikenInterface::USB));
+  hfab.reset(new HaptikfabrikenInterface());
+  HaptikfabrikenInterface::findUSBSerialDevices();
   if(hfab->open()) {
     std::stringstream s;
     s << "Cannot open Haptikfabriken device (index " << index << ") - Error: "
@@ -92,6 +91,8 @@ void HaptikfabrikenHapticsDevice::updateDeviceValues( DeviceValues &dv,
 
   fsVec3d p = hfab->getPos();
 
+  // Adjust offset to match Taiwan Kobra standard
+  p = p + fsVec3d(0.3415, -0.182, 0.0542);
 
   fsRot r = hfab->getRot();
 
@@ -143,7 +144,8 @@ void HaptikfabrikenHapticsDevice::updateDeviceValues( DeviceValues &dv,
 
 
   calculateVelocity(dv, dt);
-  dv.button_status = hfab->getSwitchesState().to_ulong(); // bitmask to be filled
+  // TODO: Implement switches
+  //dv.button_status = hfab->getSwitchesState().to_ulong(); // bitmask to be filled
 }
 
 void HaptikfabrikenHapticsDevice::sendOutput( DeviceOutput &dv,
