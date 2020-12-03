@@ -34,9 +34,9 @@ win32 {
 }
 
 unix {
-    CONFIG += webserv
-    INCLUDEPATH += /usr/local/boost_1_62_0
-    LIBS += -L/usr/local/boost_1_62_0/stage/lib/
+    #CONFIG += webserv
+    #INCLUDEPATH += /usr/local/boost_1_62_0
+    #LIBS += -L/usr/local/boost_1_62_0/stage/lib/
 
     # Install Boost:
     # in /usr/local
