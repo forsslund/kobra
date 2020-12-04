@@ -1,6 +1,6 @@
 # Contains functionality that can be used by find modules to make it easier to write them.
 
-include( H3DUtilityFunctions)
+include( H3DUtilityFunctions )
 
 # This variable can be set after this file is included but before getExternalSearchPathsH3D function is called.
 # If set to true then then ExternalPath/include/ACKNOWLEDGMENTS file is checked if it corresponds to the current
@@ -61,7 +61,14 @@ endif()
 
 # Check the ACKNOWLEDGMENTS file of the given External directory for a specific string to know if the directory contains
 # libraries that are built for the current compiler.
-function( checkIfValidH3DWinExternal arg1 arg2 )
+# arg1 Will contain the result of the validation check.
+# arg2 Should contain the external base folder
+# if specified, arg3 Should be appended with a warning string if the located library directory is not sutiable for the current compiler being used
+function( checkIfValidH3DWinExternal arg1 arg2 arg3 )
+  if( ${arg3} )
+    # get existing msg from arg3 if any and put into validation_failure_msg 
+    set( validation_failure_msg ${${arg3}} )
+  endif()
   set( ${arg1} ON PARENT_SCOPE )
   if( check_if_h3d_external_matches_vs_version )
     set( ${arg1} OFF PARENT_SCOPE )
@@ -69,8 +76,16 @@ function( checkIfValidH3DWinExternal arg1 arg2 )
       file( STRINGS ${arg2}/include/ACKNOWLEDGEMENTS the_first_line LIMIT_COUNT 1 REGEX "[-][-][-][-] Compiled for ${h3d_external_base_dir_name} [-][-][-][-]" ) # Check if first line contains the correct vsx string.
       if( the_first_line )
         set( ${arg1} ON PARENT_SCOPE )
+      else( the_first_line )
+        if( ARGC GREATER 2 )
+          # append failure message
+          set( validation_failure_msg ${validation_failure_msg} "Library located in ${arg2} is not suitable for ${h3d_external_base_dir_name}" )
+        endif()
       endif()
     endif()
+  endif()
+  if( ARGC GREATER 2 AND validation_failure_msg )
+    set( ${arg3} "${validation_failure_msg}" PARENT_SCOPE )
   endif()
 endfunction()
 
@@ -87,6 +102,7 @@ endfunction()
 # arg3 Should contain FindXX.cmake module path or empty,
 # or basically additional base paths External is expected to possibly exists
 # like this relative to this path ../../../External
+# warning will be print out if either include or library directories are empty due to checkIfValidH3DWinExternal failure
 function( getExternalSearchPathsH3D arg1 arg2 arg3 )
   if( DEFINED CHECK_IF_H3D_EXTERNAL_MATCHES_VS_VERSION )
     message( AUTHOR_WARNING "The variable 'CHECK_IF_H3D_EXTERNAL_MATCHES_VS_VERSION' is deprecated and no longer used. Please use the variable 'check_if_h3d_external_matches_vs_version' instead which is most likely set in ${CMAKE_PARENT_LIST_FILE}" )
@@ -104,14 +120,14 @@ function( getExternalSearchPathsH3D arg1 arg2 arg3 )
     set( h3d_external_base_include_dirs "" )
     set( h3d_external_base_lib_dirs "" )
     foreach( h3d_ebd ${h3d_external_base_dirs} )
-      checkIfValidH3DWinExternal( add_dir ${h3d_ebd} )
+      checkIfValidH3DWinExternal( add_dir ${h3d_ebd} searched_path_not_valid_msg )
       if( add_dir )
         list( APPEND h3d_external_base_include_dirs ${h3d_ebd}/include )
         list( APPEND h3d_external_base_lib_dirs ${h3d_ebd}/${lib} )
       endif()
       if( h3d_external_base_dir_name )
         foreach( external_dir_name ${h3d_external_base_dir_name} )
-          checkIfValidH3DWinExternal( add_dir ${h3d_ebd}/${external_dir_name} )
+          checkIfValidH3DWinExternal( add_dir ${h3d_ebd}/${external_dir_name} searched_path_not_valid_msg )
           if( add_dir )
             list( APPEND h3d_external_base_include_dirs ${h3d_ebd}/${external_dir_name}/include )
             list( APPEND h3d_external_base_lib_dirs ${h3d_ebd}/${external_dir_name}/${lib} )
@@ -120,6 +136,11 @@ function( getExternalSearchPathsH3D arg1 arg2 arg3 )
       endif()
     endforeach()
     
+    if ( h3d_external_base_include_dirs STREQUAL "" OR h3d_external_base_lib_dirs STREQUAL "" AND searched_path_not_valid_msg )
+      foreach( line ${searched_path_not_valid_msg} )
+        message( WARNING "${line}" )
+      endforeach()
+    endif()
     set( tmp_include_dir_output "" )
     foreach( h3d_base_include_dir ${h3d_external_base_include_dirs} )
       list( APPEND tmp_include_dir_output ${h3d_base_include_dir} )
@@ -128,6 +149,7 @@ function( getExternalSearchPathsH3D arg1 arg2 arg3 )
       endforeach()
     endforeach()
     set( ${arg1} ${tmp_include_dir_output} PARENT_SCOPE )
+
     
     set( tmp_lib_dir_output "" )
     foreach( h3d_base_lib_dir ${h3d_external_base_lib_dirs} )

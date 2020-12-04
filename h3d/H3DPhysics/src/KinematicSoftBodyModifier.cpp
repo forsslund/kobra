@@ -131,8 +131,6 @@ void KinematicSoftBodyModifier::calculateForces ( H3DSoftBodyNodeParameters& sof
     traverseLock.unlock();
     UpdateForceFeedbackType::FeedbackType feedback= updateFeedbackType->getFeedbackType();
 
-    Matrix4f trans= accInv*rbOffset;
-
     Matrix4f devTrans ( H3DUtil::Rotation(hd.getOrientation()) );
     devTrans[0][3]= (H3DFloat)hd.getPosition().x;
     devTrans[1][3]= (H3DFloat)hd.getPosition().y;
@@ -225,7 +223,7 @@ void KinematicSoftBodyModifier::calculateForces ( H3DSoftBodyNodeParameters& sof
       p->setPosition ( position );
       p->setOrientation ( orientation );
 
-    } else 
+    } else {
       if ( feedback==UpdateForceFeedbackType::Feedback_SpringDamper ||
         feedback==UpdateForceFeedbackType::Feedback_SpringDamperProjected ) {
 
@@ -317,16 +315,18 @@ void KinematicSoftBodyModifier::calculateForces ( H3DSoftBodyNodeParameters& sof
             reactionForce->transferSprings( *hd.getThread() );
           }
 
-      } else
+      } else {
         if ( feedback==UpdateForceFeedbackType::Feedback_None ) {
           // Set the position and orientation of the kinematic deformer
           p->setKinematicControl ( true );
           p->setPosition ( position );
           p->setOrientation ( orientation );
         }
+      }
+    }
 
-        // Update rigid body parameters
-        softBodyParams.getEngine()->setRigidBodyParameters( bodyId, *p );
+    // Update rigid body parameters
+    softBodyParams.getEngine()->setRigidBodyParameters( bodyId, *p );
   }
 }
 

@@ -62,9 +62,10 @@ X3DTexture2DNode::X3DTexture2DNode(
   repeatT ( _repeatT  ),
   scaleToPowerOfTwo( _scaleToP2 ),
   textureProperties( _textureProperties ),
-  imageUpdated ( new Field ),
   updateTextureProperties( new UpdateTextureProperties ),
-  textureUpdated( new Field ) {
+  imageUpdated( new Field ),
+  textureUpdated( new Field ),
+  mip_mapping_used( false ) {
 
   type_name = "X3DTexture2DNode";
   texture_unit = GL_TEXTURE0_ARB ;
@@ -251,7 +252,8 @@ void X3DTexture2DNode::glTexImage( Image *i, GLenum _texture_target,
     glPixelTransferf( GL_ALPHA_BIAS, bias.w );
   }
 
-  if( texture_properties && texture_properties->generateMipMaps->getValue() ) {
+  mip_mapping_used = texture_properties && texture_properties->generateMipMaps->getValue();
+  if( mip_mapping_used && i->compressionType() == Image::NO_COMPRESSION ) {
     gluBuild2DMipmaps(  _texture_target, 
                         glInternalFormat( i ),
                         width,
@@ -260,6 +262,10 @@ void X3DTexture2DNode::glTexImage( Image *i, GLenum _texture_target,
                         glPixelComponentType( i ),
                         image_data );
   } else {
+    if( mip_mapping_used ) {
+      Console( LogLevel::Warning ) << "Mip maps are currently not supported for compressed images. Texture \"" << getName() << "\" will be installed without mip mapping."  << endl;
+      mip_mapping_used = false;
+    }
     H3DInt32 border_width = 
     texture_properties ? 
     texture_properties->borderWidth->getValue() : 0;
@@ -355,7 +361,7 @@ void X3DTexture2DNode::renderTextureProperties() {
 
   TextureProperties *texture_properties = textureProperties->getValue();
   if( texture_properties ) {
-    texture_properties->renderTextureProperties( texture_target );
+    texture_properties->renderTextureProperties( texture_target, mip_mapping_used );
   } else {
     // set up texture parameters 
     if( !repeatS->getValue() ) {

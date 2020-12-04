@@ -5,7 +5,7 @@
     <component name="H3DPhysics"/>
 
     <meta name='title' content='PhysX3CollidableOptions.x3d'/>
-    <meta name='description' content='A demonstration of PhysX3CollidableOptions from the H3DPhysics component.'/>
+    <meta name='description' content='A demonstration of PhysXCollidableOptions from the H3DPhysics component.'/>
     <meta name='author' content='SenseGraphics AB, 2013-2019'/>
   </head>
   <Scene>
@@ -52,7 +52,7 @@
 
         <CollidableShape DEF="CS2" containerField='collidables'>
           <Shape containerField='shape' USE='Shape2'/>
-          <PhysX3CollidableOptions 
+          <PhysXCollidableOptions 
             convex='false'
             convexDecomposition='true'
             cookedFilename='models/bunny.cooked'

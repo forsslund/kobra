@@ -96,13 +96,13 @@
         <CollidableShape DEF='C' containerField='collidables'>
           <Shape USE='S' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C1' containerField='collidables' translation='1 0 0'>
+        <CollidableShape DEF='C1' containerField='collidables' translation='0 0 0'>
           <Shape USE='S1' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C2' containerField='collidables' translation='2 0 0'>
+        <CollidableShape DEF='C2' containerField='collidables' translation='0 0 0'>
           <Shape USE='S2' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C3' containerField='collidables' translation='3 0 0'>
+        <CollidableShape DEF='C3' containerField='collidables' translation='0 0 0'>
           <Shape USE='S3' containerField='shape' />
         </CollidableShape>
       </CollisionCollection>

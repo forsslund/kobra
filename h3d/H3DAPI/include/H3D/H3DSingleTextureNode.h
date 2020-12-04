@@ -84,7 +84,7 @@ namespace H3D {
     virtual void setTextureDepth( int _depth ) { texture_depth = _depth; }
 
     /// Set the OpenGL texture id that is used for this texture.
-    virtual void setTextureId( GLuint id ) { texture_id=id; }
+    virtual void setTextureId( GLuint _id ) { texture_id=_id; }
 
     /// Set the OpenGL texture unit that is used for this texture.
     virtual void setTextureUnit( GLint unit ) {texture_unit=unit;}

@@ -641,7 +641,7 @@ namespace H3D {
 
     class SFMatrix3fRow : public Field {
     public:
-      SFMatrix3fRow() { }
+      SFMatrix3fRow() : sfmatrix( NULL ), row( 0 ) { }
       SFMatrix3fRow(SFMatrix3f* _sfmatrix, int _row) : row(_row), sfmatrix(_sfmatrix) { }
       SFMatrix3f* sfmatrix;
       int row;
@@ -753,7 +753,7 @@ namespace H3D {
 
     class SFMatrix4fRow : public Field {
     public:
-      SFMatrix4fRow() { }
+      SFMatrix4fRow() : sfmatrix( NULL ), row( 0 ) { }
       SFMatrix4fRow(SFMatrix4f* _sfmatrix, int _row) : row(_row), sfmatrix(_sfmatrix) { }
       SFMatrix4f* sfmatrix;
       int row;

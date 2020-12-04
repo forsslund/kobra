@@ -22,14 +22,14 @@
 //
 //
 /// \file PhysX3Joints.cpp
-/// \brief Source file for BulletJoint classes, which maintain a link between 
-/// RigidBodyPhysics joint types and their Bullet implementations
+/// \brief Source file for PhysX3Joint classes, which maintain a link between 
+/// RigidBodyPhysics joint types and their PhysX3 implementations
 ///
 //
 //////////////////////////////////////////////////////////////////////////////
 #include <H3D/H3DPhysics/PhysX3Joints.h>
 #include <H3D/H3DPhysics/PhysX3Callbacks.h>
-#include <H3D/H3DPhysics/PhysX3JointParameters.h>
+#include <H3D/H3DPhysics/PhysXJointParameters.h>
 
 #ifdef HAVE_PHYSX3
 
@@ -203,7 +203,7 @@ void PhysX3FixedJoint::setParameters( ConstraintParameters& jointParameters ) {
   FixedJointParameters* params = static_cast<FixedJointParameters*> (&jointParameters);
 
   if( params->haveEngineOptions() ) {
-    if( PhysX3JointParameters* options = dynamic_cast<PhysX3JointParameters*>(params->getEngineOptions()) ) {
+    if( PhysXJointParameters* options = dynamic_cast<PhysXJointParameters*>(params->getEngineOptions()) ) {
 
       PxFixedJoint* physx_joint = static_cast<PxFixedJoint*>(joint);
 
@@ -216,8 +216,8 @@ void PhysX3FixedJoint::setParameters( ConstraintParameters& jointParameters ) {
         }
       }
 
-      if( options->haveConstraintFlag() || options->haveEnabledProjection() ) {
-        string constraint_flag = options->getConstraintFlag();
+      if( options->haveProjectionFlag() || options->haveEnabledProjection() ) {
+        string constraint_flag = options->getProjectionFlag();
         if( constraint_flag == "ePROJECTION" ) {
           physx_joint->setConstraintFlag( PxConstraintFlag::ePROJECTION, options->getEnabledProjection() );
         } else if( constraint_flag == "ePROJECT_TO_ACTOR0" ) {
@@ -225,6 +225,10 @@ void PhysX3FixedJoint::setParameters( ConstraintParameters& jointParameters ) {
         } else if( constraint_flag == "ePROJECT_TO_ACTOR1" ) {
           physx_joint->setConstraintFlag( PxConstraintFlag::ePROJECT_TO_ACTOR1, options->getEnabledProjection() );
         }
+      }
+
+      if( options->haveEnabledCollision() ) {
+        physx_joint->setConstraintFlag( PxConstraintFlag::eCOLLISION_ENABLED, options->getEnabledCollision() );
       }
     }
   }
@@ -254,7 +258,7 @@ PhysX3BallJoint::PhysX3BallJoint( ConstraintParameters& jointParameters ) :
   setParameters( jointParameters );
 }
 
-// Set the bullet joint's parameters using the parameter values specified in jointParameters
+// Set the PhysX3 joint's parameters using the parameter values specified in jointParameters
 void PhysX3BallJoint::setParameters( ConstraintParameters& jointParameters ) {
   BallJointParameters* params = static_cast <BallJointParameters*> (&jointParameters);
 
@@ -264,7 +268,7 @@ void PhysX3BallJoint::setParameters( ConstraintParameters& jointParameters ) {
   }
 
   if( params->haveEngineOptions() ) {
-    if( PhysX3Joint6DOFLimitParameters* options = dynamic_cast<PhysX3Joint6DOFLimitParameters*>(params->getEngineOptions()) ) {
+    if( PhysXJoint6DOFLimitParameters* options = dynamic_cast<PhysXJoint6DOFLimitParameters*>(params->getEngineOptions()) ) {
 
       PxSphericalJoint* s_joint = static_cast<PxSphericalJoint*>(joint);
 
@@ -293,8 +297,8 @@ void PhysX3BallJoint::setParameters( ConstraintParameters& jointParameters ) {
         }
       }
 
-      if( options->haveConstraintFlag() || options->haveEnabledProjection() ) {
-        string constraint_flag = options->getConstraintFlag();
+      if( options->haveProjectionFlag() || options->haveEnabledProjection() ) {
+        string constraint_flag = options->getProjectionFlag();
         if( constraint_flag == "ePROJECTION" ) {
           s_joint->setConstraintFlag( PxConstraintFlag::ePROJECTION, options->getEnabledProjection() );
         } else if( constraint_flag == "ePROJECT_TO_ACTOR0" ) {
@@ -303,11 +307,15 @@ void PhysX3BallJoint::setParameters( ConstraintParameters& jointParameters ) {
           s_joint->setConstraintFlag( PxConstraintFlag::ePROJECT_TO_ACTOR1, options->getEnabledProjection() );
         }
       }
+
+      if( options->haveEnabledCollision() ) {
+        s_joint->setConstraintFlag( PxConstraintFlag::eCOLLISION_ENABLED, options->getEnabledCollision() );
+      }
     }
   }
 }
 
-// Modify the jointParameters argument to reflect the bullet joint's current parameters
+// Modify the jointParameters argument to reflect the PhysX3 joint's current parameters
 void PhysX3BallJoint::getParameters( ConstraintParameters& jointParameters ) {
   BallJointParameters* params = static_cast <BallJointParameters*> (&jointParameters);
 
@@ -346,7 +354,7 @@ PhysX3SingleAxisHingeJoint::PhysX3SingleAxisHingeJoint( ConstraintParameters& jo
   setParameters( jointParameters );
 }
 
-// Set the bullet joint's parameters using the parameter values specified in jointParameters
+// Set the PhysX3 joint's parameters using the parameter values specified in jointParameters
 void PhysX3SingleAxisHingeJoint::setParameters( ConstraintParameters& jointParameters ) {
   SingleAxisHingeJointParameters* params = static_cast <SingleAxisHingeJointParameters*> (&jointParameters);
   PxRevoluteJoint* revoluteJoint = static_cast<PxRevoluteJoint*>(joint);
@@ -398,7 +406,7 @@ void PhysX3SingleAxisHingeJoint::setParameters( ConstraintParameters& jointParam
   }
 
   if( params->haveEngineOptions() ) {
-    if( PhysX3JointParameters* options = dynamic_cast<PhysX3JointParameters*>(params->getEngineOptions()) ) {
+    if( PhysXJointParameters* options = dynamic_cast<PhysXJointParameters*>(params->getEngineOptions()) ) {
 
       // Projection for all locked dofs
       if( options->haveProjectionTolerance() ) {
@@ -410,8 +418,8 @@ void PhysX3SingleAxisHingeJoint::setParameters( ConstraintParameters& jointParam
         }
       }
 
-      if( options->haveConstraintFlag() || options->haveEnabledProjection() ) {
-        string constraint_flag = options->getConstraintFlag();
+      if( options->haveProjectionFlag() || options->haveEnabledProjection() ) {
+        string constraint_flag = options->getProjectionFlag();
         if( constraint_flag == "ePROJECTION" ) {
           revoluteJoint->setConstraintFlag( PxConstraintFlag::ePROJECTION, options->getEnabledProjection() );
         } else if( constraint_flag == "ePROJECT_TO_ACTOR0" ) {
@@ -420,11 +428,33 @@ void PhysX3SingleAxisHingeJoint::setParameters( ConstraintParameters& jointParam
           revoluteJoint->setConstraintFlag( PxConstraintFlag::ePROJECT_TO_ACTOR1, options->getEnabledProjection() );
         }
       }
+
+      if( options->haveEnabledCollision() ) {
+        revoluteJoint->setConstraintFlag( PxConstraintFlag::eCOLLISION_ENABLED, options->getEnabledCollision() );
+      }
+
+      if( PhysXSingleAxisHingeJointParameter* single_axis_parameters = dynamic_cast<PhysXSingleAxisHingeJointParameter*>(options) ) {
+        if( single_axis_parameters->haveDriveVelocity() ) {
+          revoluteJoint->setDriveVelocity( PxReal( single_axis_parameters->getDriveVelocity() ) );
+        }
+
+        if( single_axis_parameters->haveEnabledDrive() ) {
+          revoluteJoint->setRevoluteJointFlag( PxRevoluteJointFlag::eDRIVE_ENABLED, single_axis_parameters->getEnabledDrive() );
+        }
+
+        if( single_axis_parameters->haveDriveForceLimit() ) {
+          PxReal drive_force_limit( single_axis_parameters->getDriveForceLimit() );
+          if( drive_force_limit < 0 ) {
+            drive_force_limit = PX_MAX_F32;
+          }
+          revoluteJoint->setDriveForceLimit( drive_force_limit );
+        }
+      }
     }
   }
 }
 
-// Modify the jointParameters argument to reflect the bullet joint's current parameters
+// Modify the jointParameters argument to reflect the PhysX3 joint's current parameters
 void PhysX3SingleAxisHingeJoint::getParameters( ConstraintParameters& jointParameters ) {
   SingleAxisHingeJointParameters* params = static_cast <SingleAxisHingeJointParameters*> (&jointParameters);
 
@@ -482,7 +512,7 @@ void PhysX36DoFJoint::makeAxesPerpendicular() {
   newAxis2.normalizeSafe();
 
   if( axis2.dotProduct( newAxis2 ) < 1 - H3DUtil::Constants::f_epsilon ) {
-    Console(4) << "Warning: PhysX3 implemetation of joints only supports perpendicular axes!" << endl;
+    Console(4) << "Warning: PhysX3 implementation of joints only supports perpendicular axes!" << endl;
     axis2 = newAxis2;
   }
 }
@@ -507,7 +537,7 @@ PhysX3DoubleAxisHingeJoint::PhysX3DoubleAxisHingeJoint( ConstraintParameters& jo
   setParameters( jointParameters );
 }
 
-// Set the bullet joint's parameters using the parameter values specified in jointParameters
+// Set the PhysX3 joint's parameters using the parameter values specified in jointParameters
 void PhysX3DoubleAxisHingeJoint::setParameters( ConstraintParameters& jointParameters ) {
   DoubleAxisHingeJointParameters* params = static_cast <DoubleAxisHingeJointParameters*> (&jointParameters);
   PxD6Joint* d6Joint = static_cast<PxD6Joint*>(joint);
@@ -565,7 +595,7 @@ void PhysX3DoubleAxisHingeJoint::setParameters( ConstraintParameters& jointParam
   }
 
   if( params->haveEngineOptions() ) {
-    if( PhysX3JointParameters* options = dynamic_cast<PhysX3JointParameters*>(params->getEngineOptions()) ) {
+    if( PhysXJointParameters* options = dynamic_cast<PhysXJointParameters*>(params->getEngineOptions()) ) {
 
       // Projection for all locked dofs
       if( options->haveProjectionTolerance() ) {
@@ -577,8 +607,8 @@ void PhysX3DoubleAxisHingeJoint::setParameters( ConstraintParameters& jointParam
         }
       }
 
-      if( options->haveConstraintFlag() || options->haveEnabledProjection() ) {
-        string constraint_flag = options->getConstraintFlag();
+      if( options->haveProjectionFlag() || options->haveEnabledProjection() ) {
+        string constraint_flag = options->getProjectionFlag();
         if( constraint_flag == "ePROJECTION" ) {
           d6Joint->setConstraintFlag( PxConstraintFlag::ePROJECTION, options->getEnabledProjection() );
         } else if( constraint_flag == "ePROJECT_TO_ACTOR0" ) {
@@ -587,12 +617,16 @@ void PhysX3DoubleAxisHingeJoint::setParameters( ConstraintParameters& jointParam
           d6Joint->setConstraintFlag( PxConstraintFlag::ePROJECT_TO_ACTOR1, options->getEnabledProjection() );
         }
       }
+
+      if( options->haveEnabledCollision() ) {
+        d6Joint->setConstraintFlag( PxConstraintFlag::eCOLLISION_ENABLED, options->getEnabledCollision() );
+      }
     }
   }
 
 }
 
-// Modify the jointParameters argument to reflect the bullet joint's current parameters
+// Modify the jointParameters argument to reflect the PhysX3 joint's current parameters
 void PhysX3DoubleAxisHingeJoint::getParameters( ConstraintParameters& jointParameters ) {
   DoubleAxisHingeJointParameters* params = static_cast <DoubleAxisHingeJointParameters*> (&jointParameters);
 
@@ -665,7 +699,7 @@ PhysX3UniversalJoint::PhysX3UniversalJoint( ConstraintParameters& jointParameter
   setParameters( jointParameters );
 }
 
-// Set the bullet joint's parameters using the parameter values specified in jointParameters
+// Set the PhysX3 joint's parameters using the parameter values specified in jointParameters
 void PhysX3UniversalJoint::setParameters( ConstraintParameters& jointParameters ) {
   UniversalJointParameters* params = static_cast <UniversalJointParameters*> (&jointParameters);
   PxD6Joint* d6Joint = static_cast<PxD6Joint*>(joint);
@@ -720,7 +754,7 @@ void PhysX3UniversalJoint::setParameters( ConstraintParameters& jointParameters 
   }
 
   if( params->haveEngineOptions() ) {
-    if( PhysX3JointParameters* options = dynamic_cast<PhysX3JointParameters*>(params->getEngineOptions()) ) {
+    if( PhysXJointParameters* options = dynamic_cast<PhysXJointParameters*>(params->getEngineOptions()) ) {
 
       // Projection for all locked dofs
       if( options->haveProjectionTolerance() ) {
@@ -732,8 +766,8 @@ void PhysX3UniversalJoint::setParameters( ConstraintParameters& jointParameters 
         }
       }
 
-      if( options->haveConstraintFlag() || options->haveEnabledProjection() ) {
-        string constraint_flag = options->getConstraintFlag();
+      if( options->haveProjectionFlag() || options->haveEnabledProjection() ) {
+        string constraint_flag = options->getProjectionFlag();
         if( constraint_flag == "ePROJECTION" ) {
           d6Joint->setConstraintFlag( PxConstraintFlag::ePROJECTION, options->getEnabledProjection() );
         } else if( constraint_flag == "ePROJECT_TO_ACTOR0" ) {
@@ -742,12 +776,16 @@ void PhysX3UniversalJoint::setParameters( ConstraintParameters& jointParameters 
           d6Joint->setConstraintFlag( PxConstraintFlag::ePROJECT_TO_ACTOR1, options->getEnabledProjection() );
         }
       }
+
+      if( options->haveEnabledCollision() ) {
+        d6Joint->setConstraintFlag( PxConstraintFlag::eCOLLISION_ENABLED, options->getEnabledCollision() );
+      }
     }
   }
 
 }
 
-// Modify the jointParameters argument to reflect the bullet joint's current parameters
+// Modify the jointParameters argument to reflect the PhysX3 joint's current parameters
 void PhysX3UniversalJoint::getParameters( ConstraintParameters& jointParameters ) {
   UniversalJointParameters* params = static_cast <UniversalJointParameters*> (&jointParameters);
 
@@ -785,7 +823,8 @@ PhysX3SliderJoint::PhysX3SliderJoint( ConstraintParameters& jointParameters ) :
   physicsEngineThread( jointParameters.getEngine() ),
   initialized( false ),
   slider_force_mode( PxForceMode::eFORCE ),
-  body2_slider_force_scale( 1.0 ) {
+  body2_slider_force_scale( 1.0 ),
+  slider_force( 0 ) {
   PhysX3Callbacks::PhysX3SpecificData *physx_data =
     static_cast<PhysX3Callbacks::PhysX3SpecificData *>(jointParameters.getEngine()->getEngineSpecificData());
   SliderJointParameters* params = static_cast <SliderJointParameters*> (&jointParameters);
@@ -806,7 +845,7 @@ PhysX3SliderJoint::~PhysX3SliderJoint() {
   remove();
 }
 
-// Set the bullet joint's parameters using the parameter values specified in jointParameters
+// Set the PhysX3 joint's parameters using the parameter values specified in jointParameters
 void PhysX3SliderJoint::setParameters( ConstraintParameters& jointParameters ) {
   SliderJointParameters* params = static_cast <SliderJointParameters*> (&jointParameters);
   PxPrismaticJoint* prismaticJoint = static_cast<PxPrismaticJoint*>(joint);
@@ -830,8 +869,8 @@ void PhysX3SliderJoint::setParameters( ConstraintParameters& jointParameters ) {
     // First time the joint is added. Use mid point of the bodies as anchor point
     // else check the engine options.
     if( initialized && params->haveEngineOptions() ) {
-      if( PhysX3SliderJointParameters* options =
-          dynamic_cast<PhysX3SliderJointParameters*>(params->getEngineOptions()) ) {
+      if( PhysXSliderJointParameters* options =
+          dynamic_cast<PhysXSliderJointParameters*>(params->getEngineOptions()) ) {
 
         if( options->haveExplicitAnchorPoint() ) {
           use_explicit_anchor_point = true;
@@ -897,8 +936,8 @@ void PhysX3SliderJoint::setParameters( ConstraintParameters& jointParameters ) {
 
   if( params->haveEngineOptions() ) {
 
-    if( PhysX3SliderJointParameters* options =
-        dynamic_cast<PhysX3SliderJointParameters*>(params->getEngineOptions()) ) {
+    if( PhysXSliderJointParameters* options =
+        dynamic_cast<PhysXSliderJointParameters*>(params->getEngineOptions()) ) {
 
       if( options->haveBody2ForceScale() ) {
         body2_slider_force_scale = options->getBody2ForceScale();
@@ -924,8 +963,8 @@ void PhysX3SliderJoint::setParameters( ConstraintParameters& jointParameters ) {
         }
       }
 
-      if( options->haveConstraintFlag() || options->haveEnabledProjection() ) {
-        string constraint_flag = options->getConstraintFlag();
+      if( options->haveProjectionFlag() || options->haveEnabledProjection() ) {
+        string constraint_flag = options->getProjectionFlag();
         if( constraint_flag == "ePROJECTION" ) {
           prismaticJoint->setConstraintFlag( PxConstraintFlag::ePROJECTION, options->getEnabledProjection() );
         } else if( constraint_flag == "ePROJECT_TO_ACTOR0" ) {
@@ -933,6 +972,10 @@ void PhysX3SliderJoint::setParameters( ConstraintParameters& jointParameters ) {
         } else if( constraint_flag == "ePROJECT_TO_ACTOR1" ) {
           prismaticJoint->setConstraintFlag( PxConstraintFlag::ePROJECT_TO_ACTOR1, options->getEnabledProjection() );
         }
+      }
+
+      if( options->haveEnabledCollision() ) {
+        prismaticJoint->setConstraintFlag( PxConstraintFlag::eCOLLISION_ENABLED, options->getEnabledCollision() );
       }
     }
   }
@@ -969,7 +1012,7 @@ void PhysX3SliderJoint::setParameters( ConstraintParameters& jointParameters ) {
   //}
 }
 
-// Modify the jointParameters argument to reflect the bullet joint's current parameters
+// Modify the jointParameters argument to reflect the PhysX3 joint's current parameters
 void PhysX3SliderJoint::getParameters( ConstraintParameters& jointParameters ) {
   SliderJointParameters* params = static_cast <SliderJointParameters*> (&jointParameters);
 
@@ -1104,7 +1147,7 @@ void PhysX3DistanceJoint::setParameters( ConstraintParameters& jointParameters )
   distanceJoint->setDistanceJointFlags( distance_joint_flags );
 }
 
-// Modify the jointParameters argument to reflect the bullet joint's current parameters
+// Modify the jointParameters argument to reflect the PhysX3 joint's current parameters
 void PhysX3DistanceJoint::getParameters( ConstraintParameters& jointParameters ) {
   DistanceJointParameters* params = static_cast <DistanceJointParameters*> (&jointParameters);
   PxDistanceJoint* distanceJoint = static_cast<PxDistanceJoint*>(joint);
@@ -1131,7 +1174,19 @@ PhysX3Generic6DofJoint::PhysX3Generic6DofJoint( ConstraintParameters& jointParam
   PhysX36DoFJoint( jointParameters ),
   l_limit( PxJointLinearLimit( (PxReal)0.1, PxSpring( 100, 0 ) ) ),
   c_limit( PxJointLimitCone( (PxReal)0.1, (PxReal)0.1, PxSpring( 100, 0 ) ) ),
-  t_limit( PxJointAngularLimitPair( 0, (PxReal)1.8, PxSpring( 100, 0 ) ) ) {
+  t_limit( PxJointAngularLimitPair( 0, (PxReal)1.8, PxSpring( 100, 0 ) ) ),
+  maxAngle1( 1 ),
+  maxAngle2( 1 ),
+  maxAngle3( 1 ),
+  minAngle1( -1 ),
+  minAngle2( -1 ),
+  minAngle3( -1 ),
+  minLimit1( 0 ),
+  minLimit2( 0 ),
+  minLimit3( 0 ),
+  maxLimit1( 0 ),
+  maxLimit2( 0 ),
+  maxLimit3( 0 ){
 
   PxD6Joint* d6Joint = static_cast<PxD6Joint*>(joint);
 
@@ -1313,8 +1368,8 @@ void PhysX3Generic6DofJoint::setParameters( ConstraintParameters& jointParameter
   bool l_spring_updated = false;
   bool a_spring_updated = false;
   if( generic6DOFJointParameters->haveEngineOptions() ) {
-    if( PhysX3Joint6DOFLimitParameters* options =
-        dynamic_cast<PhysX3Joint6DOFLimitParameters*>(generic6DOFJointParameters->getEngineOptions()) ) {
+    if( PhysXJoint6DOFLimitParameters* options =
+        dynamic_cast<PhysXJoint6DOFLimitParameters*>(generic6DOFJointParameters->getEngineOptions()) ) {
 
       if( options->haveLinearSpring() ) {
         l_limit.stiffness = options->getLinearSpring().x;
@@ -1339,8 +1394,8 @@ void PhysX3Generic6DofJoint::setParameters( ConstraintParameters& jointParameter
         }
       }
 
-      if( options->haveConstraintFlag() || options->haveEnabledProjection() ) {
-        string constraint_flag = options->getConstraintFlag();
+      if( options->haveProjectionFlag() || options->haveEnabledProjection() ) {
+        string constraint_flag = options->getProjectionFlag();
         if( constraint_flag == "ePROJECTION" ) {
           d6Joint->setConstraintFlag( PxConstraintFlag::ePROJECTION, options->getEnabledProjection() );
         } else if( constraint_flag == "ePROJECT_TO_ACTOR0" ) {
@@ -1348,6 +1403,10 @@ void PhysX3Generic6DofJoint::setParameters( ConstraintParameters& jointParameter
         } else if( constraint_flag == "ePROJECT_TO_ACTOR1" ) {
           d6Joint->setConstraintFlag( PxConstraintFlag::ePROJECT_TO_ACTOR1, options->getEnabledProjection() );
         }
+      }
+
+      if( options->haveEnabledCollision() ) {
+        d6Joint->setConstraintFlag( PxConstraintFlag::eCOLLISION_ENABLED, options->getEnabledCollision() );
       }
     }
   }
@@ -1469,7 +1528,7 @@ void PhysX3Generic6DofJoint::setParameters( ConstraintParameters& jointParameter
 
     if( maxAngle3 == minAngle3 ) {
       d6Joint->setMotion( PxD6Axis::eSWING2, PxD6Motion::eLOCKED );
-      Console( 4 ) << "Rot3 locked" << endl;
+      //Console( 4 ) << "Rot3 locked" << endl;
     } else if( maxAngle3 > minAngle3 ) {
       d6Joint->setMotion( PxD6Axis::eSWING2, PxD6Motion::eLIMITED );
       if( d6Joint->getMotion( PxD6Axis::eSWING1 ) != PxD6Motion::eLIMITED ) {
@@ -1493,13 +1552,78 @@ void PhysX3Generic6DofJoint::setParameters( ConstraintParameters& jointParameter
 
 }
 
-// Modify the jointParameters argument to reflect the bullet joint's current parameters
+// Modify the jointParameters argument to reflect the PhysX3 joint's current parameters
 void PhysX3Generic6DofJoint::getParameters( ConstraintParameters& jointParameters ) {
   Generic6DOFJointParameters* params = static_cast <Generic6DOFJointParameters*> (&jointParameters);
   PxD6Joint* d6Joint = static_cast<PxD6Joint*>(joint);
 
+  // Body 1 anchor point
+  if( params->haveBody1AnchorPoint() ) {
+    params->setBody1AnchorPoint( getJointFrame( Body::A ).getTranslationPart() );
+  }
 
+  // Body 2 anchor point
+  if( params->haveBody2AnchorPoint() ) {
+    params->setBody2AnchorPoint( getJointFrame( Body::B ).getTranslationPart() );
+  }
 
+  // body1Axis output
+  if( params->haveBody1Axis() ) {
+    params->setBody1Axis( getJointFrame( Body::A ).getRotationPart()*Vec3f( 1, 0, 0 ) );
+  }
+
+  // body2Axis output
+  if( params->haveBody2Axis() ) {
+    params->setBody2Axis( getJointFrame( Body::B ).getRotationPart()*Vec3f( 0, 1, 0 ) );
+  }
+
+  // Hinge 1
+  if( params->haveHinge1Angle() || params->haveHinge1AngleRate() ) {
+    H3DFloat angle = d6Joint->getTwist();
+
+    // Angle
+    if( params->haveHinge1Angle() ) {
+      params->setHinge1Angle( angle );
+    }
+
+    // Angle rate
+    if( params->haveHinge1AngleRate() ) {
+      hinge1AngleRate.setCurrentValue( angle );
+      params->setHinge1AngleRate( hinge1AngleRate );
+    }
+  }
+
+  // Hinge 2
+  if( params->haveHinge2Angle() || params->haveHinge2AngleRate() ) {
+    H3DFloat angle = d6Joint->getSwingYAngle();
+
+    // Angle
+    if( params->haveHinge2Angle() ) {
+      params->setHinge2Angle( angle );
+    }
+
+    // Angle rate
+    if( params->haveHinge2AngleRate() ) {
+      hinge2AngleRate.setCurrentValue( angle );
+      params->setHinge2AngleRate( hinge2AngleRate );
+    }
+  }
+  
+  // Hinge 3
+  if( params->haveHinge3Angle() || params->haveHinge3AngleRate() ) {
+    H3DFloat angle = d6Joint->getSwingZAngle();
+
+    // Angle
+    if( params->haveHinge3Angle() ) {
+      params->setHinge3Angle( angle );
+    }
+
+    // Angle rate
+    if( params->haveHinge3AngleRate() ) {
+      hinge3AngleRate.setCurrentValue( angle );
+      params->setHinge3AngleRate( hinge3AngleRate );
+    }
+  }
 }
 
 

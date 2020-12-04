@@ -82,8 +82,16 @@ H3DUtil::PixelImage::PixelImage( unsigned int _width,
 H3DUtil::PixelImage::PixelImage( Image *image,
                         unsigned int new_width,
                         unsigned int new_height,
-                        unsigned int new_depth ) {
-  
+                        unsigned int new_depth ) :
+  w( 0 ),
+  h( 0 ),
+  d( 0 ),
+  bits_per_pixel( 0 ),
+  pixel_type( LUMINANCE ),
+  pixel_component_type( SIGNED ),
+  compression_type( NO_COMPRESSION ),
+  image_data( NULL ) {
+
   if( image && image->compressionType() == NO_COMPRESSION ) {
     unsigned int width = image->width ();
     unsigned int height = image->height();
@@ -135,3 +143,14 @@ H3DUtil::PixelImage::PixelImage( Image *image,
     }
   }
 }
+
+H3DUtil::PixelImage::PixelImage( PixelImage* other ) : PixelImage( other->width(),
+                                                                   other->height(),
+                                                                   other->depth(),
+                                                                   other->bitsPerPixel(),
+                                                                   other->pixelType(),
+                                                                   other->pixelComponentType(),
+                                                                   static_cast< unsigned char* >( other->getImageData() ),
+                                                                   true, //copy the data
+                                                                   other->pixelSize(),
+                                                                   other->compressionType() ) {}

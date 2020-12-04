@@ -1105,7 +1105,7 @@ bool H3D::Shaders::setGLSLUniformVariableValue( GLhandleARB program_handle,
 CGprofile H3D::Shaders::cgProfileFromString( const string &profile,
                                              const string &type ) {
   CGbool profile_supported = false;
-  CGprofile cg_profile;
+  CGprofile cg_profile( CG_PROFILE_UNKNOWN );
   if( profile == "CG_OPENGL_ARB" ) {
     if( type == "VERTEX" ) {
       profile_supported = cgGLIsProfileSupported(CG_PROFILE_ARBVP1);
@@ -1504,7 +1504,7 @@ void H3D::Shaders::renderTextures( H3DDynamicFieldsObject *dfo, H3DInt32* max_te
   if ( X3DProgrammableShaderObject::use_bindless_textures ) return;
 
   GLint nr_textures_supported;
-  GLint nr_images_supported;
+  GLint nr_images_supported = 0;
   if( max_texture&&max_image ) {
     nr_textures_supported = *max_texture;
     nr_images_supported = *max_image;

@@ -51,6 +51,7 @@ FrameBufferTexture::FrameBufferTexture(
   type( _type ),
   texture_id_initialized( false ),
   frame_buffer_id_initialized( false ),
+  fbo_id( 0 ),
   last_width( 0 ),
   last_height( 0 ),
   last_type( "COLOR" ) {

@@ -61,6 +61,9 @@ namespace H3DUtil {
       byte_alignment = 4;
       updateImageProperties();
     }
+
+    /// Constructor.
+    FreeImageImage( FreeImageImage* other );
     
     /// Destructor.
     virtual  ~FreeImageImage();
@@ -87,6 +90,9 @@ namespace H3DUtil {
         
     /// Returns a pointer to the raw image data. 
     virtual void *getImageData();
+
+    /// Returns the type of image.
+    virtual ImageType getImageType() const override { return ImageType::FREEIMAGE; };
     
     static FreeImageIO* getIStreamIO ();
 
@@ -105,6 +111,13 @@ namespace H3DUtil {
     // this is used to avoid retrieving the properties through bitmap
     // every time when they are need, which is inefficient
     void updateImageProperties();
+
+  private:
+
+    /// Returns a pointer to the internal bitmap.
+    FIBITMAP* getBitMap() const {
+      return bitmap;
+    }
   };
 
     

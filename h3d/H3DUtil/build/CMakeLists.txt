@@ -8,6 +8,7 @@ set( CMAKE_MODULE_PATH "${H3DUtil_SOURCE_DIR}/modules" )
 include( H3DCommonFunctions )
 setCommonH3DCMakePolicies()
 setupRPathForLib()
+enableCpp11( FAIL_MESSAGE "Enabling C++11 support. This compiler lacks such support." )
 
 # Add the directory to INCLUDE_DIRECTORIES before any other statement to make sure that this header file is found first.
 # This assumes that we always use "#include <path/include_header.h>" in our code even if the file is actually found in
@@ -213,7 +214,7 @@ elseif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMP
     set( H3D_DEBUG ON )
   endif()
 
-  addCommonH3DGNUCompileFlags( H3DUTIL_COMPILE_FLAGS )
+  addCommonH3DGNUCompileFlags( H3DUTIL_COMPILE_FLAGS TRUE )
   
 endif()
 

@@ -79,9 +79,9 @@ NavigationInfo::NavigationInfo( Inst< SFSetBind > _set_bind,
   transitionType( _transitionType  ),
   type( _type ),
   visibilityLimit( _visibilityLimit ),
+  nearVisibilityLimit( _nearVisibilityLimit ),
   transitionComplete( _transitionComplete ),
-  headlightShadows( _headlightShadows ),
-  nearVisibilityLimit( _nearVisibilityLimit ) {
+  headlightShadows( _headlightShadows ) {
   
   type_name = "NavigationInfo";
   database.initFields( this );

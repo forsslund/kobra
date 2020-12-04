@@ -73,6 +73,9 @@ namespace H3DUtil {
                 unsigned int new_height,
                 unsigned int new_depth );
 
+    /// Constructor
+    PixelImage( PixelImage* image );
+
     ~PixelImage() {
       if( image_data )
         delete[] image_data;
@@ -170,6 +173,9 @@ namespace H3DUtil {
         image_data = data;
       }
     }
+
+    /// Returns the type of image.
+    virtual ImageType getImageType() const override { return ImageType::PIXELIMAGE; };
 
   protected:
     unsigned int w, h, d;

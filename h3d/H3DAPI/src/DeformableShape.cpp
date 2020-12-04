@@ -65,7 +65,8 @@ DeformableShape::DeformableShape(
   origCoord( _origCoord ),
   restingCoord( _restingCoord ), 
   deformedCoord( _deformedCoord ),
-  deformer( _deformer ) {
+  deformer( _deformer ),
+  last_ti( NULL ) {
 
   type_name = "DeformableShape";
   database.initFields( this );

@@ -198,8 +198,8 @@ class MyApp: public wxApp
 {
 public:
   MyApp():
-    theWxFrame( NULL ),
-    startupTime(TimeStamp()){
+    startupTime(TimeStamp()),
+    theWxFrame( NULL ) {
       window_height = -1;
       window_width = -1;
       window_pos_x = -1;
@@ -308,8 +308,7 @@ protected:
   DECLARE_EVENT_TABLE()
 };
 
-void MyApp::GenerateReport(wxDebugReport::Context ctx)
-{
+void MyApp::GenerateReport(wxDebugReport::Context /*ctx*/) {
   wxDebugReportCompress *report = new wxDebugReportCompress;
   wxString dumpPath = wxGetCwd() + wxString("\\log", wxConvUTF8);
 
@@ -347,7 +346,14 @@ BEGIN_EVENT_TABLE(MyApp, wxApp)
   EVT_IDLE(MyApp::OnIdle)
 END_EVENT_TABLE()
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 void MyApp::OnIdle(wxIdleEvent& event) {
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
   for( set< Scene * >::iterator i = Scene::scenes.begin();
     i != Scene::scenes.end();
     ++i ) {
@@ -480,16 +486,6 @@ bool MyApp::OnInit()
         theWxFrame->clearData();
         theWxFrame->loadFile(toStr(cmd_line_filename));
     }
-  
-
-    //This next line is used to set the icon file h3d.ico, when created.
-    //theWxframe->SetIcon(wxIcon(_T("h3d_icn")));
-    
-    
-    // Using this line instead of the two previous lines will make
-    // WxWidgetsWindow create an instance of a wxframe with no menus and use
-    // this as parent to the canvas.
-    // WxWidgetsWindow *glwindow = new WxWidgetsWindow();
 
   } catch (const Exception::H3DException &e) {
     Console(LogLevel::Error) << e << endl;

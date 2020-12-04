@@ -15,6 +15,7 @@ include( H3DCommonFunctions )
 handleCommonCacheVar( CMAKE_INSTALL_PREFIX ${H3DViewer_SOURCE_DIR}/../../.. GENERATE_H3D_PACKAGE_PROJECT )
 
 setupRPathForLib()
+enableCpp11( FAIL_MESSAGE "Enabling C++11 support. This compiler lacks such support." )
 
 set( H3DViewer_MAJOR_VERSION "2" )
 set( H3DViewer_MINOR_VERSION "4" )
@@ -65,9 +66,6 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR}/include )
 
 # Add required libs to this variable.
 set( required_libs )
-
-include( StripAndAddLibraryDirectories )
-
 
 set( tmp_h3d_include_dirs )
 findIncludeDirsAndLibrariesForH3DProjects ( PROJECT_NAMES H3DUtil HAPI H3DAPI
@@ -130,6 +128,17 @@ if( DirectX_FOUND )
   set( HAVE_DX9 1 )
   include_directories( ${DirectX_INCLUDE_DIRS} )
   set( required_libs ${required_libs} ${DirectX_LIBRARIES} )
+endif()
+
+# Optional extra library.
+findPython2Or3( python_include_dirs python_libs have_python_debug_library have_python_os_framework python_definitions )
+add_definitions( ${python_definitions} )
+if( python_include_dirs AND python_libs )
+  set( HAVE_PYTHON 1 )
+  set( HAVE_PYTHON_OSX_FRAMEWORK ${have_python_os_framework} )
+  set( HAVE_PYTHON_DEBUG_LIBRARY ${have_python_debug_library} )
+  include_directories( ${python_include_dirs} )
+  set( optional_libs ${optional_libs} ${python_libs} )
 endif()
 
 # Create build files.
@@ -221,7 +230,7 @@ if( MSVC )
   set_target_properties( H3DViewer PROPERTIES FOLDER "H3D" )
   
 elseif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-  addCommonH3DGNUCompileFlags( H3DViewer_COMPILE_FLAGS )
+  addCommonH3DGNUCompileFlags( H3DViewer_COMPILE_FLAGS TRUE )
 endif()
 
 set_target_properties( H3DViewer PROPERTIES COMPILE_FLAGS "${H3DViewer_COMPILE_FLAGS}" )
@@ -246,6 +255,7 @@ if( APPLE )
            LIBRARY DESTINATION ${default_lib_install}
            RUNTIME DESTINATION ${default_bin_install}
            BUNDLE DESTINATION ${H3DViewer_OSX_BUNDLE_INSTALL_DESTINATION}
+           PERMISSIONS GROUP_READ GROUP_EXECUTE
            COMPONENT H3DAPI_cpack_runtime )
 else()
   set( H3DViewer_package_install_dir "" )
@@ -261,6 +271,14 @@ else()
   install( TARGETS H3DViewer
            LIBRARY DESTINATION ${default_lib_install}
            RUNTIME DESTINATION ${H3DViewer_package_install_dir}${default_bin_install} COMPONENT ${H3DVIEWER_INSTALL_COMPONENT_NAME} )
+  if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
+    include( GNUInstallDirs )
+    configure_file( ${H3DViewer_SOURCE_DIR}/H3DViewer.desktop.cmake ${CMAKE_CURRENT_BINARY_DIR}/H3DViewer.desktop )
+    install( FILES ${H3DViewer_SOURCE_DIR}/H3DViewer.svg
+             DESTINATION ${CMAKE_INSTALL_DATADIR}/H3D )
+    install( FILES ${CMAKE_CURRENT_BINARY_DIR}/H3DViewer.desktop
+             DESTINATION ${CMAKE_INSTALL_DATADIR}/applications )
+  endif()
 endif()
 
 if( GENERATE_H3DViewer_PACKAGE_PROJECT )

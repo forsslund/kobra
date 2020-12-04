@@ -85,6 +85,9 @@ namespace H3D {
                    Inst< SFString        > _buttonMode      = 0,
                    Inst< SFInt32         > _buttonGroup     = 0 );
 
+    /// Destructor
+    ~H3DButtonNode();
+
     /// Initialize puts the button in the specified buttonGroup.
     virtual void initialize();
 

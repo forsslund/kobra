@@ -292,6 +292,8 @@ namespace H3D {
       return 0;
     }
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// Get the value of the data copied into a memory buffer.
     /// \param data Buffer to copy the data into.
     /// \param nr_elements This parameter will be set to the nr of values
@@ -320,7 +322,8 @@ namespace H3D {
         data_ptr[i] = value[i];
       }
       return sz * nr_elements;
-    } 
+    }
+H3D_POP_WARNINGS()
 
     /// Returns the size in bytes of the value type the mfield encapsulates.
     inline virtual unsigned int valueTypeSize() {
@@ -508,7 +511,7 @@ namespace H3D {
     
     
     /// Erase the first element equal to a.
-    inline virtual void erase( const Type &a, int id = 0 ) {
+    inline virtual void erase( const Type &a, int /*id*/ = 0 ) {
       iterator i = std::find( this->value.begin(), this->value.end(), a );
       if( i != this->value.end() ) {
         this->value.erase( i );

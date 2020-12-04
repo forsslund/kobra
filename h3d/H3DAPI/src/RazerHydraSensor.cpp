@@ -195,6 +195,10 @@ RazerHydraSensor::~RazerHydraSensor() {
   enabled->setValue( false );
 }
 
+#ifndef HAVE_SIXENSE
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void RazerHydraSensor::EnableHydraSensor::onValueChange( const bool &new_value ) {
 #ifdef HAVE_SIXENSE
 #ifdef H3D_WINDOWS
@@ -242,6 +246,9 @@ void RazerHydraSensor::EnableHydraSensor::onValueChange( const bool &new_value )
 #endif
 #endif
 }
+#ifndef HAVE_SIXENSE
+H3D_POP_WARNINGS()
+#endif
 
 void RazerHydraSensor::traverseSG( TraverseInfo &ti ) {
   X3DSensorNode::traverseSG( ti );

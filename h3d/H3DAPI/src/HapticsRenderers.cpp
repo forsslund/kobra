@@ -158,6 +158,10 @@ void RuspiniRenderer::AlwaysFollowSurface::onValueChange( const bool &b ) {
   }
 }
 
+#ifndef HAVE_OPENHAPTICS
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void OpenHapticsRenderer::ShapeType::onValueChange( const string &v ) {
 #ifdef HAVE_OPENHAPTICS
   OpenHapticsRenderer *oh_node = 
@@ -205,6 +209,9 @@ void OpenHapticsRenderer::CameraView::onValueChange( const bool &v ) {
   }
 #endif
 }
+#ifndef HAVE_OPENHAPTICS
+H3D_POP_WARNINGS()
+#endif
 
 HAPI::HAPIHapticsRenderer *OpenHapticsRenderer::getNewHapticsRenderer() {
 #ifdef HAVE_OPENHAPTICS
@@ -272,8 +279,8 @@ public:
     HAPI::HAPIHapticsDevice * _hapi_device,
     HAPI::HAPIHapticsRenderer * _current_renderer ) :
     index( _index ),
-    current_renderer( _current_renderer ),
-    hapi_device( _hapi_device )
+    hapi_device( _hapi_device ),
+    current_renderer( _current_renderer )
   {
   }
 

@@ -219,8 +219,8 @@ namespace H3D {
 
     // Called to generate isOver events if they should be
     // generated.
-    virtual void onIsOver( NodeIntersectResult *result = 0, unsigned int closest_index = 0,
-                           Matrix4f *global_to_local = 0 ) {
+    virtual void onIsOver( NodeIntersectResult * /*result*/ = 0, unsigned int /*closest_index*/ = 0,
+                           Matrix4f * /*global_to_local*/ = 0 ) {
       if( is_enabled && ( isActive->getValue() || number_of_active == 0 ) ) {
         if( new_value != isOver->getValue() )
           isOver->setValue( new_value, id );
@@ -256,9 +256,9 @@ namespace H3D {
     // _enabled - Should be treated as enabled->getValue().
     // from - The start of the line segment for which to intersect with.
     // to - The end of the line segment for which to intersect with.
-    virtual void setDragOutputEvents( bool _enabled,
-                                      const Vec3f &from,
-                                      const Vec3f &to ) {};
+    virtual void setDragOutputEvents( bool /*_enabled*/,
+                                      const Vec3f &/*from*/,
+                                      const Vec3f &/*to*/ ) {};
 
   private:
     // The instances of X3DPointingDeviceSensorNode that has been created.

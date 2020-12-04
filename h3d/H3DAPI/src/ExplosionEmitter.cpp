@@ -65,7 +65,7 @@ ExplosionEmitter::ExplosionEmitter(
 
 void ExplosionEmitter::generateParticles( ParticleSystem *ps,
                                           H3DTime last_time,
-                                          H3DTime now,
+                                          H3DTime /*now*/,
                                           list< Particle > &particles ) {
   if( last_time == 0 ) {
     H3DInt32 particles_to_emit = ps->maxParticles->getValue();

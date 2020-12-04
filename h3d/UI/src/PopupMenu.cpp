@@ -128,9 +128,6 @@ void PopupMenu::SFButtonNode::onAdd( Node *n ) {
   }
 }
 
-void PopupMenu::SFButtonNode::onRemove( Node * n) {
-}
-
 void PopupMenu::SFFrame::onAdd( Node *n ) {
   TypedSFNode< Frame >::onAdd( n );
   Frame *frame = static_cast< Frame * >( n );

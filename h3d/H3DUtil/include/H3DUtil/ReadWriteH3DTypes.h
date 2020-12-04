@@ -47,6 +47,32 @@ namespace H3DUtil {
   }
 
   /// \ingroup HelpFunctions
+  /// Write a H3DUInt32 binary to an ostream ( such as an ofstream ).
+  /// \param output The ostream to write data to.
+  /// \param data The data to write to stream.
+  inline void writeH3DType( std::ostream &output, H3DUInt32 data ) {
+    output.write( (char *)&(data), sizeof( H3DUInt32 ) );
+  }
+
+  /// \ingroup HelpFunctions
+  /// Write a H3DUInt64 binary to an ostream ( such as an ofstream ).
+  /// \param output The ostream to write data to.
+  /// \param data The data to write to stream.
+  inline void writeH3DType( std::ostream &output, H3DUInt64 data ) {
+    output.write( (char *)&(data), sizeof( H3DUInt64 ) );
+  }
+
+  /// \ingroup HelpFunctions
+  /// Write a char vector binary to an ostream ( such as an ofstream ).
+  /// \param output The ostream to write data to.
+  /// \param data The data to write to stream.
+  inline void writeH3DType( std::ostream &output, std::vector<char> data ) {
+    H3DUInt64 data_size = data.size();
+    writeH3DType( output, data_size );
+    output.write( data.data(), data_size );
+  }
+
+  /// \ingroup HelpFunctions
   /// Write a float binary to an ostream ( such as an ofstream ).
   /// The reason for not using H3DFloat is that H3DFloat and H3DDouble might
   /// both be defined to be double or both are float and in that case this
@@ -260,6 +286,33 @@ namespace H3DUtil {
   /// \param data The variable in which to put the read data.
   inline void readH3DType( std::istream &input, H3DInt32 &data ) {
     input.read( (char *)&(data), sizeof( H3DInt32 ) );
+  }
+
+  /// \ingroup HelpFunctions
+  /// Read a H3DUInt32 binary from an istream ( such as an ifstream ).
+  /// \param input The istream to read data from.
+  /// \param data The variable in which to put the read data.
+  inline void readH3DType( std::istream &input, H3DUInt32 &data ) {
+    input.read( (char *)&(data), sizeof( H3DUInt32 ) );
+  }
+
+  /// \ingroup HelpFunctions
+  /// Read a H3DUInt64 binary from an istream ( such as an ifstream ).
+  /// \param input The istream to read data from.
+  /// \param data The variable in which to put the read data.
+  inline void readH3DType( std::istream &input, H3DUInt64 &data ) {
+    input.read( (char *)&(data), sizeof( H3DUInt64 ) );
+  }
+
+  /// \ingroup HelpFunctions
+  /// Read a char vector binary from an istream ( such as an ifstream ).
+  /// \param input The istream to read data from.
+  /// \param data The variable in which to put the read data.
+  inline void readH3DType( std::istream &input, std::vector<char> &data ) {
+    H3DUInt64 data_size;
+    readH3DType( input, data_size );
+    data.resize( size_t(data_size) );
+    input.read( data.data(), data_size );
   }
 
   /// \ingroup HelpFunctions

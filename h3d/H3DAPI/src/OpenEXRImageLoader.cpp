@@ -31,7 +31,13 @@
 #include <H3D/OpenEXRImageLoader.h>
 
 #ifdef HAVE_OPENEXR
+#ifdef _MSC_VER
+#pragma warning( disable:4515 ) // namespace uses itself in ImfNamespace.h
+#endif
 #include <OpenEXR/ImfTestFile.h>
+#ifdef _MSC_VER
+#pragma warning( default:4515 )
+#endif
 
 using namespace H3D;
 

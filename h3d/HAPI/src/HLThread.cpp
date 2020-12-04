@@ -130,10 +130,9 @@ void HLThread::setActive( bool _active ) {
     threads.push_back( this );
     sg_lock.unlock();
 #ifdef HAVE_OPENHAPTICS
-    HDSchedulerHandle hd_callback_handle = 
-      hdScheduleAsynchronous( mainCallback,
-                              this,
-                              HD_DEFAULT_SCHEDULER_PRIORITY );
+    hdScheduleAsynchronous( mainCallback,
+                            this,
+                            HD_DEFAULT_SCHEDULER_PRIORITY );
 #endif
     asynchronousCallback( setThreadId, this );
   } else if( !_active && is_active ) {

@@ -65,7 +65,7 @@ CollidableSelectionGroup::~CollidableSelectionGroup() {
 
 void CollidableSelectionGroup::traverseSG( H3D::TraverseInfo &ti ) {
   X3DChildNode::traverseSG( ti );
-  H3D::PhysicsEngineThread *pt;
+  H3D::PhysicsEngineThread *pt = NULL;
   ti.getUserData( "PhysicsEngine", (void * *)&pt );
   if( pt ) {
 

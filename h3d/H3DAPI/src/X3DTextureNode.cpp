@@ -290,9 +290,9 @@ GLenum X3DTextureNode::glPixelFormat( Image *i ) {
 
 GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
   switch( i->pixelType() ) {
-  case Image::LUMINANCE: 
+  case Image::LUMINANCE: {
     switch( i->pixelComponentType() ) {
-    case Image::UNSIGNED: 
+    case Image::UNSIGNED: {
       switch( i->bitsPerPixel() ) {
       case 8:  return GL_UNSIGNED_BYTE;
       case 16: return GL_UNSIGNED_SHORT;
@@ -304,7 +304,8 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
           << " bit UNSIGNED LUMINANCE value.";
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION ); 
       }
-    case Image::SIGNED:
+    }
+    case Image::SIGNED: {
       switch( i->bitsPerPixel() ) {
       case 8:  return GL_BYTE;
       case 16: return GL_SHORT;
@@ -316,8 +317,9 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
           << " bit SIGNED LUMINANCE value.";
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION ); 
       }
+    }
     case Image::RATIONAL:
-    case Image::RATIONAL_UNSIGNED:
+    case Image::RATIONAL_UNSIGNED: {
       switch( i->bitsPerPixel() ) {
       case 32: return GL_FLOAT;
       default: 
@@ -328,9 +330,12 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION ); 
       }
     }
-  case Image::LUMINANCE_ALPHA:
+    }
+    break;
+  }
+  case Image::LUMINANCE_ALPHA: {
     switch( i->pixelComponentType() ) {
-    case Image::UNSIGNED: 
+    case Image::UNSIGNED: {
       switch( i->bitsPerPixel() ) {
       case 16:  return GL_UNSIGNED_BYTE;
       case 32: return GL_UNSIGNED_SHORT;
@@ -342,7 +347,8 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
           << " bit UNSIGNED LUMINANCE_ALPHA value.";
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION );
       }
-    case Image::SIGNED:
+    }
+    case Image::SIGNED: {
       switch( i->bitsPerPixel() ) {
       case 16:  return GL_BYTE;
       case 32: return GL_SHORT;
@@ -354,8 +360,9 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
           << " bit SIGNED LUMINANCE_ALPHA value.";
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION );
       }
+    }
     case Image::RATIONAL:
-    case Image::RATIONAL_UNSIGNED:
+    case Image::RATIONAL_UNSIGNED: {
       switch( i->bitsPerPixel() ) {
       case 64: return GL_FLOAT;
       default: 
@@ -367,10 +374,13 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
 
       }
     }
+    }
+    break;
+  }
   case Image::RGB:
-  case Image::BGR:
+  case Image::BGR: {
     switch( i->pixelComponentType() ) {
-    case Image::UNSIGNED: 
+    case Image::UNSIGNED: {
       switch( i->bitsPerPixel() ) {
       case 24:  return GL_UNSIGNED_BYTE;
       case 48: return GL_UNSIGNED_SHORT;
@@ -382,7 +392,8 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
           << " bit UNSIGNED RGB value.";
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION );
       }
-    case Image::SIGNED:
+    }
+    case Image::SIGNED: {
       switch( i->bitsPerPixel() ) {
       case 24:  return GL_BYTE;
       case 48: return GL_SHORT;
@@ -395,8 +406,9 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION );
 
       }
+    }
     case Image::RATIONAL:
-    case Image::RATIONAL_UNSIGNED:
+    case Image::RATIONAL_UNSIGNED: {
       switch( i->bitsPerPixel() ) {
       case 96: return GL_FLOAT;
       default: 
@@ -407,12 +419,14 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION );
 
       }
-    }       
-
+    }
+    }
+    break;
+  }
   case Image::RGBA:
-  case Image::BGRA:
+  case Image::BGRA: {
     switch( i->pixelComponentType() ) {
-    case Image::UNSIGNED: 
+    case Image::UNSIGNED: {
       switch( i->bitsPerPixel() ) {
       case 32:  return GL_UNSIGNED_BYTE;
       case 64:  return GL_UNSIGNED_SHORT;
@@ -424,7 +438,8 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
           << " bit UNSIGNED RGBA value.";
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION );
       }
-    case Image::SIGNED:
+    }
+    case Image::SIGNED: {
       switch( i->bitsPerPixel() ) {
       case 32:  return GL_BYTE;
       case 64: return GL_SHORT;
@@ -436,8 +451,9 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
           << " bit SIGNED RGBA value.";
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION );
       }
+    }
     case Image::RATIONAL:
-    case Image::RATIONAL_UNSIGNED:
+    case Image::RATIONAL_UNSIGNED: {
       switch( i->bitsPerPixel() ) {
       case 64: return GL_HALF_FLOAT;
       case 128: return GL_FLOAT;
@@ -449,9 +465,12 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION );
       }
     }
-  case Image::R:
-    switch( i->pixelComponentType() ){
-    case Image::UNSIGNED:
+    }
+    break;
+  }
+  case Image::R: {
+    switch( i->pixelComponentType() ) {
+    case Image::UNSIGNED: {
       switch( i->bitsPerPixel() ){
       case 8: return GL_UNSIGNED_BYTE;
       case 16: return GL_UNSIGNED_SHORT;
@@ -463,7 +482,8 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
           << " bit UNSIGNED R value.";
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION );
       }
-    case Image::SIGNED:
+    }
+    case Image::SIGNED: {
       switch(i->bitsPerPixel()){
       case 8: return GL_BYTE;
       case 16: return GL_SHORT;
@@ -475,8 +495,9 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
           << " bit SIGNED R value.";
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION );
       }
+    }
     case Image::RATIONAL:
-    case Image::RATIONAL_UNSIGNED:
+    case Image::RATIONAL_UNSIGNED: {
       switch ( i->bitsPerPixel() )
       {
       case 16: return GL_HALF_FLOAT;
@@ -489,10 +510,13 @@ GLenum X3DTextureNode::glPixelComponentType( Image *i ) {
         throw UnsupportedPixelComponentType( s.str(), H3D_FULL_LOCATION );
       }
     }
-  default:
-    throw UnsupportedPixelType( i->pixelType() );
+    }
+    break;
+  }
+  default: {}
   }
 
+  throw UnsupportedPixelType( i->pixelType() );
 }
 
 X3DTextureNode::X3DTextureNode( 

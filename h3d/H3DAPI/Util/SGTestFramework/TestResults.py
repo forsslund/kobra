@@ -65,7 +65,7 @@ class TestResults ( object ):
         else:
           return None
       except Exception as e:
-        print "Parsing profiling data line failed: " + str(e) + '\nLine was: ' + profiling_line
+        print("Parsing profiling data line failed: " + str(e) + '\nLine was: ' + profiling_line)
         return None
 
     found_h3d_timer = False
@@ -95,7 +95,7 @@ class TestResults ( object ):
   def getRenderingResult(self, baseline_path, output_path, fuzz, threshold):
     valid, diff_path, error, error_type, diff_pixels = self._validate_rendering(baseline_path.replace('\\', '/'), output_path.replace('\\', '/'), fuzz, threshold)
     for line in error:
-      print line
+      print(line)
     return TestResults.RenderingResultTuple(error_type, valid, baseline_path, output_path, diff_path, diff_pixels, threshold), error
   
   def getCustomResult(self, baseline_path, output):
@@ -104,7 +104,7 @@ class TestResults ( object ):
     else:
       valid, diff, error, error_type = self._validate_text(baseline_path, output)
       for line in error:
-        print line
+        print(line)
       return TestResults.CustomResultTuple(error_type, valid, baseline_path, output, diff)
 
   def getConsoleResult(self, baseline_path, output):
@@ -113,8 +113,26 @@ class TestResults ( object ):
     else:
       valid, diff, error, error_type  = self._validate_text(baseline_path, output)
       for line in error:
-        print line
+        print(line)
       return TestResults.ConsoleResultTuple(error_type, valid, baseline_path, output, diff)
+
+  def _getImageMagickCompare( self ):
+    """ Returns the appropriate command for the version of ImageMagick compare on this system.
+
+        Raises OSError if none is installed.
+    """
+
+    devnull = open( os.devnull, 'w' )
+
+    try:
+      # Version 7 has the magick prefix while earlier versions don't
+      version_7 = [ "magick", "compare" ]
+      subprocess.call( version_7, stdout=devnull, stderr=devnull )
+      return version_7
+    except OSError:
+      version_6 = [ "compare" ]
+      subprocess.call( version_6, stdout=devnull, stderr=devnull )
+      return version_6
 
   def _validate_rendering(self, baseline_path='.', rendering_path='.', fuzz=2, threshold=20):
     """ Compare renderings """
@@ -140,10 +158,12 @@ class TestResults ( object ):
       baselinerendering= max(g, key= os.path.getmtime)
       try:
         process= subprocess.Popen(
-          [ "magick", "compare",
+          self._getImageMagickCompare() + [
             "-fuzz","%d%%"%fuzz,
             "-metric","AE",
-            baseline_path,rendering_path, os.path.split(rendering_path)[0] + '\\diff_' + os.path.split(rendering_path)[1]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            baseline_path, rendering_path,
+            os.path.join( os.path.split( rendering_path )[ 0 ], "diff_" + os.path.split( rendering_path )[ 1 ] ) ],
+          stdout=subprocess.PIPE, stderr=subprocess.PIPE )
       except Exception as E:
         error_type = "CASE_STDERR"
         error.append("WARNING: Image comparison not available! Probably Imagemagick is not installed, or not in the path, or one of the following files do not exist:\n" +
@@ -201,7 +221,7 @@ class TestResults ( object ):
       delta = differ.compare(baseline, output_list)
       try:
         while True:
-          line = delta.next()
+          line = next(delta)
           if line[0] != ' ':
             valid = False
           diff += line + '\n'
@@ -212,7 +232,7 @@ class TestResults ( object ):
           error_type = "CONTENT_MISMATCH"
         return valid, diff, error, error_type #This is where we end up if going through the entire diff worked (even if the test failed)
     except Exception as e:
-        print str(e)
+        print(str(e))
         error.append(str(e))
     return False, diff, error, "CASE_STDERR" # We only get here if we got some breaking exception
 
@@ -252,7 +272,8 @@ class TestResults ( object ):
           elif line == 'screenshot':
             # Screenshot format: One line that says screenshot, one line with output screenshot path
             screenshot_path = self.getNextLine(f)
-            res, render_error = self.getRenderingResult(baseline_folder + '\\' + os.path.split(screenshot_path)[1], screenshot_path, fuzz, threshold)
+            res, render_error = self.getRenderingResult(
+              os.path.join( baseline_folder, os.path.split( screenshot_path )[ 1 ] ), screenshot_path, fuzz, threshold )
             success = success and res.success
             results.append(res)
             if (len(render_error) > 0) and res.error_type != "SIZE_MISMATCH":
@@ -261,7 +282,9 @@ class TestResults ( object ):
             # Image format: One line that says image, one line with output image path, one line with fuzz and threshold, separated by a comma
             image_path = self.getNextLine(f)
             fuzz, threshold = self.getNextLine(f).split(',')
-            res, render_error = self.getRenderingResult(baseline_folder + '\\' + testcase.name+"_"+step_name+".png", image_path, int(fuzz), int(threshold))
+            res, render_error = self.getRenderingResult(
+              os.path.join( baseline_folder, testcase.name + "_" + step_name + ".png" ),
+              image_path, int( fuzz ), int( threshold ) )
             success = success and res.success
             results.append(res)
             if len(render_error) > 0:
@@ -273,7 +296,7 @@ class TestResults ( object ):
             while line != 'performance_end':
               output.append(line + '\n')
               line = self.getNextLine(f)
-            res = self.getPerformanceResult(string.join(output))
+            res = self.getPerformanceResult(" ".join(output))
             #success = success and res.success
             results.append(res)
           elif line == 'console':
@@ -291,11 +314,12 @@ class TestResults ( object ):
                 break
               else:
                 output.append(err_line + '\n')
-            console_f = open(text_output_folder +'\\' + testcase.name + '_' + step_name + '_console.txt', 'w')
+            console_f = open( os.path.join( text_output_folder, testcase.name + '_' + step_name + '_console.txt' ), 'w' )
             console_f.writelines(output)
             console_f.flush()
             console_f.close()            
-            res = self.getConsoleResult(baseline_folder + '\\' + testcase.name + '_' + step_name + "_console.txt", output)
+            res = self.getConsoleResult(
+              os.path.join( baseline_folder, testcase.name + '_' + step_name + "_console.txt" ), output )
             success = success and res.success
             results.append(res)
           elif line == 'custom_start':
@@ -304,7 +328,8 @@ class TestResults ( object ):
             while line != 'custom_end':
               output.append(line + '\n')
               line = self.getNextLine(f, IgnoreNewline = False)
-            res = self.getCustomResult(baseline_folder + '\\' + testcase.name + '_' + step_name+"_custom.txt", output)
+            res = self.getCustomResult(
+              os.path.join( baseline_folder, testcase.name + '_' + step_name + "_custom.txt" ), output)
             success = success and res.success
             results.append(res)
           else: # If we get anything else then we've reached the end of the current step and the start of the next one!

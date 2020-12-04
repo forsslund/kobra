@@ -70,13 +70,13 @@ void MedX3DDemoBoundaryEnhancementVolumeStyleOptions::OnRetainedOpacityScroll( w
   wxGetApp().style_dialog->setStyleModified( true );
 }
 
-void MedX3DDemoBoundaryEnhancementVolumeStyleOptions::OnBoundaryOpacityText( wxCommandEvent& event )
+void MedX3DDemoBoundaryEnhancementVolumeStyleOptions::OnBoundaryOpacityText( wxCommandEvent& /*event*/ )
 {
   
   wxGetApp().style_dialog->setStyleModified( true );
 }
 
-void MedX3DDemoBoundaryEnhancementVolumeStyleOptions::OnOpacityFactorText( wxCommandEvent& event )
+void MedX3DDemoBoundaryEnhancementVolumeStyleOptions::OnOpacityFactorText( wxCommandEvent& /*event*/ )
 {
   wxString value = OpacityFactorText->GetValue();
   wxGetApp().style_dialog->setStyleModified( true );

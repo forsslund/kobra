@@ -114,12 +114,12 @@ MedX3DDemoMainDialog::MedX3DDemoMainDialog( wxWindow* parent )
 
 }
 
-void MedX3DDemoMainDialog::OnIdle( wxIdleEvent& event )
+void MedX3DDemoMainDialog::OnIdle( wxIdleEvent& /*event*/ )
 {
 }
 
 
-void MedX3DDemoMainDialog::OnLoadButton( wxCommandEvent& event )
+void MedX3DDemoMainDialog::OnLoadButton( wxCommandEvent& /*event*/ )
 {
   wxFileDialog *openFileDialog( new wxFileDialog ( this,
                                                    wxT("Open file"),
@@ -135,7 +135,7 @@ void MedX3DDemoMainDialog::OnLoadButton( wxCommandEvent& event )
   }
 }
 
-void MedX3DDemoMainDialog::OnLoadRawButton( wxCommandEvent& event )
+void MedX3DDemoMainDialog::OnLoadRawButton( wxCommandEvent& /*event*/ )
 {
   wxFileDialog *openFileDialog( new wxFileDialog ( this,
                                                    wxT("Open file"),
@@ -156,7 +156,7 @@ void MedX3DDemoMainDialog::OnLoadRawButton( wxCommandEvent& event )
   }
 }
 
-void MedX3DDemoMainDialog::OnSaveAsNrrdButton( wxCommandEvent& event )
+void MedX3DDemoMainDialog::OnSaveAsNrrdButton( wxCommandEvent& /*event*/ )
 {
   wxFileDialog *saveFileDialog( new wxFileDialog ( this,
                                                    wxT("Save file"),
@@ -195,7 +195,7 @@ void MedX3DDemoMainDialog::showVolumeInfo( bool v ) {
   Layout();
 }
 
-void MedX3DDemoMainDialog::OnSaveAsX3DButton( wxCommandEvent& event ) {
+void MedX3DDemoMainDialog::OnSaveAsX3DButton( wxCommandEvent& /*event*/ ) {
    auto_ptr< wxFileDialog > saveFileDialog( new wxFileDialog ( this,
                                                                wxT("Save file"),
                                                                wxT(""),
@@ -476,7 +476,7 @@ void MedX3DDemoMainDialog::updateSelectedRenderStyle() {
  }
 }
 
-void MedX3DDemoMainDialog::OnRenderStyleChoice( wxCommandEvent& event ) {
+void MedX3DDemoMainDialog::OnRenderStyleChoice( wxCommandEvent& /*event*/ ) {
   updateSelectedRenderStyle();
 }
 
@@ -487,7 +487,7 @@ void MedX3DDemoMainDialog::OnDataFilterChoice( wxCommandEvent& event ) {
   volume_data->filterType->setValue( string(event.GetString().mb_str() ) );
 }
 
-void MedX3DDemoMainDialog::OnRendererChoice( wxCommandEvent& event ) {
+void MedX3DDemoMainDialog::OnRendererChoice( wxCommandEvent& /*event*/ ) {
   // get the main volume data node.
   X3DVolumeNode *volume_data = wxGetApp().getVolumeDataNode();
 
@@ -562,7 +562,7 @@ void MedX3DDemoMainDialog::OnNrSlices( wxCommandEvent& event ) {
 }
 
 
-void MedX3DDemoMainDialog::OnShowStyleEditor( wxCommandEvent& event ) {
+void MedX3DDemoMainDialog::OnShowStyleEditor( wxCommandEvent& /*event*/ ) {
   wxString name = VolumeDataRenderStyleChoice->GetStringSelection();
   wxGetApp().style_dialog->setSelectedStyleName( name ); 
   wxGetApp().style_dialog->Show();
@@ -735,7 +735,7 @@ void MedX3DDemoMainDialog::copyCommonParameters( H3D::X3DVolumeNode *dest,
   dest->useStochasticJittering->setValue( src->useStochasticJittering->getValue() );
 }
 
-void MedX3DDemoMainDialog::OnLoadSegmentDataButton( wxCommandEvent& event ) {
+void MedX3DDemoMainDialog::OnLoadSegmentDataButton( wxCommandEvent& /*event*/ ) {
   auto_ptr< wxFileDialog > openFileDialog( new wxFileDialog ( this,
                                                               wxT("Open file"),
                                                               wxT(""),
@@ -905,7 +905,7 @@ void MedX3DDemoMainDialog::OnSurfaceToleranceChange( wxCommandEvent& event ) {
   }
 }
 
-void MedX3DDemoMainDialog::OnCloseDialog( wxCloseEvent& event ) {
+void MedX3DDemoMainDialog::OnCloseDialog( wxCloseEvent& /*event*/ ) {
   MedX3DDemoMainFrame * parent =
     static_cast< MedX3DDemoMainFrame * >( GetParent() );
   parent->VolumeStyleMenuItem->Check( false );

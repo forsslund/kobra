@@ -365,8 +365,6 @@ void SliderBar::resize( const Vec3f &new_size ) {
   BoxBound *bb =
     dynamic_cast< BoxBound *>( marker_transform->bound->getValue() );
   if( bb ) {
-    const Vec3f &bound_size = bb->size->getValue();
-
     // Switch x and y for marker scale value in order to be able to use
     // size when resizing instead of the default behaviour of changing the
     // scale for the entire widget. The reason for this is that some
@@ -407,7 +405,6 @@ void SliderBar::resize( const Vec3f &new_size ) {
              bound_size.z > Constants::f_epsilon &&
              bound_size.z > new_size.z ?
              new_size.z / bound_size.z: 1 );
-    H3DFloat min_scale = H3DMin( s.x, H3DMin( s.y, s.z ) );
     Vec3f center(0,0,0);
     if( _text ) {
       X3DFontStyleNode *font = _text->fontStyle->getValue();

@@ -65,7 +65,7 @@ namespace H3D {
 
     class MEDX3D_API FVAContainer {
       public:
-      FVAContainer() : needs_update( true ), vbo_id( NULL ) {}
+      FVAContainer() : vbo_id( NULL ), nr_components( 0 ), needs_update( true ) {}
       void updateFVAVertexBufferObject();
       void render( GLint attrib_index, const RenderMode &render_mode );
       void disable( GLint attrib_index );
@@ -226,16 +226,23 @@ namespace H3D {
     /// regenerate triangles for the entire dataset.
     struct MEDX3D_API OctTreeNode : public RefCountedClass {
       /// Constructor.
-      OctTreeNode():
-        cache(0),
-        value_min(0),
-        value_max( 1000 ),
+      OctTreeNode( int _x_min, int _y_min, int _z_min, int _x_max, int _y_max, int _z_max ):
         parent( NULL ),
         next( NULL ),
+        value_min(0),
+        value_max( 1000 ),
+        x_min( _x_min ),
+        x_max( _x_max ),
+        y_min( _y_min ),
+        y_max( _y_max ),
+        z_min( _z_min ),
+        z_max( _z_max ),
+        cache( 0 ),
         vbo_id( NULL ),
         rebuild_vbo( true ) {
-        for( int i=0; i<8; ++i )
+        for( int i = 0; i < 8; ++i ) {
           children[i] = NULL;
+        }
       }
 
       ~OctTreeNode();
@@ -509,7 +516,6 @@ namespace H3D {
                                 unsigned int y, 
                                 unsigned int z ) {
 #ifdef GRADIENTS_ON_THE_FLY
-        int index = ( z*y_points + y ) * x_points +x;
         Vec3f gradient;
 
         if (x==0)  {
@@ -653,6 +659,7 @@ namespace H3D {
     /// Wrapper class to translate string to enum
     class MEDX3D_API SFNormalRenderMode : public OnValueChangeSField< SFString > {
     public:
+      SFNormalRenderMode() : normal_render_mode( OctTreeNode::GRADIENT ) {}
       inline OctTreeNode::NormalRenderMode getNormalRenderMode() {
         getValue();
         return normal_render_mode;

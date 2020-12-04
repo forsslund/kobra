@@ -52,7 +52,7 @@ public:
   // Add the style to the composable node adding a gui as well. The 
   // position is the position to put it in. If -1 it is added to the end.
   void insertStyle( H3D::X3DComposableVolumeRenderStyleNode *s, 
-                    unsigned int pos = -1 );
+                    int pos = -1 );
                     
   // Remove the style option panel given. 
   void removeStyleOption( wxPanel *s );                  

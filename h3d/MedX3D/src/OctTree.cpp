@@ -60,8 +60,9 @@ OctTree::OctTree(   Inst< MFChild      > _highRes,
   X3DChildNode(_metadata),
   X3DBoundedObject(_bound, _bboxCenter, _bboxSize), 
   H3DDisplayListObject( _displayList ),
+  use_union_bound( false ),
   highRes( _highRes), lowRes(_lowRes), 
-  lowResActive(_lowResActive), center(_center), range(_range) 
+  lowResActive(_lowResActive), center(_center), range(_range)
 {
 
   type_name = "OctTree";
@@ -174,7 +175,6 @@ void OctTree::SFBound::update() {
 
 void OctTree::closestPoint( const Vec3f &p,
                             NodeIntersectResult &result ) {
-  Bound *the_bound = bound->getValue();
   if( lowResActive->getValue() ) {
     lowRes->getValue()->closestPoint( p, result );
   }
@@ -213,7 +213,6 @@ bool OctTree::lineIntersect(
                   const Vec3f &to,
                   LineIntersectResult &result ) {
   bool intersect = false;
-  bool traverse_children = false;
   Bound * the_bound = bound->getValue();
 
   if( !the_bound ||
@@ -284,32 +283,33 @@ void OctTree::MFChild::onRemove( Node *n ) {
 }
 void OctTree::SFLowResNode::onAdd( Node *n ) {
   SFNodeBase::onAdd( n );
-  X3DGroupingNode *group_node = dynamic_cast< X3DGroupingNode* >( n );
-  X3DShapeNode *shape_node = dynamic_cast< X3DShapeNode* >( n );
-  X3DVolumeNode *volume_node = dynamic_cast< X3DVolumeNode* >( n );
-  OctTree *o = static_cast< OctTree* >( owner );
-  if (!( group_node || shape_node || volume_node)) {
-    Node *pi = getPrototypeNode( n );
-    if( !(dynamic_cast< X3DGroupingNode * >( pi ) ||
-      dynamic_cast< X3DShapeNode * >( pi ) || 
-      dynamic_cast< X3DVolumeNode * >( pi ) )) {
+  if( n ) {
+    X3DGroupingNode *group_node = dynamic_cast<X3DGroupingNode*>(n);
+    X3DShapeNode *shape_node = dynamic_cast<X3DShapeNode*>(n);
+    X3DVolumeNode *volume_node = dynamic_cast<X3DVolumeNode*>(n);
+    OctTree *o = static_cast<OctTree*>(owner);
+    if( !(group_node || shape_node || volume_node) ) {
+      Node *pi = getPrototypeNode( n );
+      if( !(dynamic_cast<X3DGroupingNode *>(pi) ||
+             dynamic_cast<X3DShapeNode *>(pi) ||
+             dynamic_cast<X3DVolumeNode *>(pi)) ) {
         stringstream s;
         s << "Expecting X3DGroupingNode, X3DShapeNode or X3DVolumeNode";
         throw InvalidNodeType( n->getTypeName(),
-          s.str(),
-          H3D_FULL_LOCATION );
-    }
-  }
-  else{
-    if( o->use_union_bound ) {
-      H3DBoundedObject *bo = 
-        dynamic_cast< H3DBoundedObject * >( n );
-      if( bo ) {
-        MatrixTransform *t = dynamic_cast< MatrixTransform *>( n );
-        if( t ) {
-          t->transformedBound->route( o->bound );
-        } else {
-          bo->bound->route( o->bound );
+                               s.str(),
+                               H3D_FULL_LOCATION );
+      }
+    } else {
+      if( o->use_union_bound ) {
+        H3DBoundedObject *bo =
+          dynamic_cast<H3DBoundedObject *>(n);
+        if( bo ) {
+          MatrixTransform *t = dynamic_cast<MatrixTransform *>(n);
+          if( t ) {
+            t->transformedBound->route( o->bound );
+          } else {
+            bo->bound->route( o->bound );
+          }
         }
       }
     }

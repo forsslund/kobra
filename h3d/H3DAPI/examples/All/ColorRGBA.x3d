@@ -8,9 +8,10 @@
   
   <Scene>
     <Viewpoint position='0.6 0 0.6' orientation='0 1 0 0.78' />
-    <Transform rotation='1 0 -1 0.6'>
-      <Shape>
-        <IndexedFaceSet
+    <Transform rotation='1 0 -1 0.9' translation="-0.12 0 0">
+      <Transform translation="-0.08 0 0.08" >
+        <Shape>
+          <IndexedFaceSet DEF="IFS"
             ccw='true' colorPerVertex='true' creaseAngle='0'
             convex='true' normalPerVertex='false' solid='false'
             colorIndex='3 0 0 0 -1 2 3 0 2 -1 2 2 2 0 -1
@@ -27,7 +28,17 @@
                         0.1  0.1 -0.1, -0.1  0.1 -0.1,
                        -0.1 -0.1 -0.1,  0.1 -0.1 -0.1' />
         </IndexedFaceSet>
-      </Shape>
+        </Shape>
+      </Transform>
+      
+      <Transform translation="0.2 0 -0.2" >
+        <Shape>
+          <IndexedFaceSet USE="IFS" />
+          <Appearance>
+            <Material/>
+          </Appearance>
+        </Shape>
+      </Transform>
     </Transform>
   </Scene>
 </X3D>

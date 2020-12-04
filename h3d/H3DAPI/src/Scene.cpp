@@ -36,11 +36,16 @@
 #include <H3D/DeviceInfo.h>
 #include <GL/glew.h>
 #ifdef HAVE_GLUT
+H3D_PUSH_WARNINGS()
+#ifdef _MSC_VER
+#pragma warning( disable:4505 ) // To get rid of warning about unused function in freeglut_std.h.
+#endif
 #ifdef MACOSX
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
+H3D_POP_WARNINGS()
 #ifdef FREEGLUT
 #include <GL/freeglut.h>
 #endif

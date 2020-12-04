@@ -281,12 +281,12 @@ class SFString( SField ):\n\
 typed_field_classes = {}\n\
 \n\
 def TypedField( base_class, type_info = None, opt_type_info = None ):\n\
-  class TypedBase( base_class ):\n\
-    pass\n\
   global typed_field_classes\n\
   if( (base_class, type_info, opt_type_info) in typed_field_classes ):\n\
     return typed_field_classes[(base_class, type_info, opt_type_info)]\n\
 \n\
+  class TypedBase( base_class ):\n\
+    pass\n\
   if type_info == None:\n\
     TypedBase.__type_info__ = ()\n\
   elif type( type_info ) != type(()):\n\
@@ -310,29 +310,28 @@ auto_update_classes = {}\n\
 \n\
 # AutoUpdate \"template\" as in C++\n\
 def AutoUpdate( base_class ):\n\
-  class AutoUpdateBase( base_class ):\n\
-    def __init__( self ):\n\
-      super(AutoUpdateBase, self).__init__(1)\n\
 \n\
   global auto_update_classes\n\
   if( base_class in auto_update_classes ):\n\
     return auto_update_classes[base_class]\n\
   else:\n\
+    class AutoUpdateBase( base_class ):\n\
+      def __init__( self ):\n\
+        super(AutoUpdateBase, self).__init__(1)\n\
     auto_update_classes[base_class] = AutoUpdateBase\n\
     return AutoUpdateBase\n\
 \n\
 periodic_update_classes = {}\n\
 \n\
 def PeriodicUpdate( base_class ):\n\
-  class PeriodicUpdateBase( base_class ):\n\
-    def __init__( self ):\n\
-      super(PeriodicUpdateBase, self).__init__(0)\n\
-      self.route( eventSink )\n\
-\n\
   global periodic_update_classes\n\
   if( base_class in periodic_update_classes ):\n\
     return periodic_update_classes[base_class]\n\
   else:\n\
+    class PeriodicUpdateBase( base_class ):\n\
+      def __init__( self ):\n\
+        super(PeriodicUpdateBase, self).__init__(0)\n\
+        self.route( eventSink )\n\
     periodic_update_classes[base_class] = PeriodicUpdateBase\n\
     return PeriodicUpdateBase\n\
 ";

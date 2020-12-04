@@ -1,7 +1,7 @@
-cmake_minimum_required( VERSION 2.8.7 )
-cmake_policy( VERSION 2.8.7 )
+cmake_minimum_required( VERSION 2.8.8 ) # PYTHONLIBS_VERSION_STRING requires version 2.8.8
+cmake_policy( VERSION 2.8.8 )
 
-if( POLICY CMP0054)
+if( POLICY CMP0054 )
   cmake_policy( SET CMP0054 NEW )
 endif()
 
@@ -60,6 +60,8 @@ endfunction()
 
 # Add common compile flags that are used by GNU (GCC/G++) compilers for H3D projects.
 # compile_flags_container Compile flags will be added here
+# Arg0 - Force deprecated declarations.
+# Arg1 - Set the warning level to the compile default (i.e. do not add any flags).
 function( addCommonH3DGNUCompileFlags compile_flags_container )
   
   # Versions of g++ greater than 6.0 have the c++ standard set to 14 by default.
@@ -67,6 +69,7 @@ function( addCommonH3DGNUCompileFlags compile_flags_container )
   # so deprecation warnings are switched off for these versions of g++.
   set( compile_flags_container_internal "" )
   execute_process( COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GPP_VERSION )
+
   set( force_deprecated_declarations )
   if( ${ARGC} GREATER 1 )
     list( GET ARGN 0 force_deprecated_declarations )
@@ -79,9 +82,17 @@ function( addCommonH3DGNUCompileFlags compile_flags_container )
     endif()
     message( WARNING ${warning_message} )
   endif()
-  
+
+  set( default_compiler_warning_level OFF )
+  if( ${ARGC} GREATER 2 )
+    list( GET ARGN 1 default_compiler_warning_level )
+  endif()
+  if( NOT default_compiler_warning_level )
+    set( compile_flags_container_internal "${compile_flags_container_internal} -Wall -Wextra -pedantic" )
+  endif()
+
   set( ${compile_flags_container} "${${compile_flags_container}} ${compile_flags_container_internal}" PARENT_SCOPE )
-  
+
 endfunction()
 
 # Iterates through a list of libraries and adds them to be delayloaded
@@ -89,7 +100,7 @@ endfunction()
 function( addDelayLoadFlags libraries_list link_flags_container )
   if( MSVC )
     set( link_flags_container_internal "" )
-    set( previous_str "")
+    set( previous_str "" )
     foreach( lib_path ${${libraries_list}} )
       get_filename_component( lib_name ${lib_path} NAME_WE )
       if( ( NOT "${lib_name}" STREQUAL "debug" ) AND ( NOT "${lib_name}" STREQUAL "optimized" ) )
@@ -318,12 +329,24 @@ function( setupResourceFile target_name )
     configure_file( ${setup_resource_file_RESOURCE_FILE_CMAKE_TEMPLATE} ${setup_resource_file_RESOURCE_FILE_OUTPUT_LOCATION} )
     
     if( USE_svn_info )
+      set( tmp_major_version 0 )
+      if( DEFINED ${setup_resource_file_VERSION_PREFIX}_MAJOR_VERSION )
+        set( tmp_major_version ${${setup_resource_file_VERSION_PREFIX}_MAJOR_VERSION} )
+      endif()
+      set( tmp_minor_version 0 )
+      if( DEFINED ${setup_resource_file_VERSION_PREFIX}_MINOR_VERSION )
+        set( tmp_minor_version ${${setup_resource_file_VERSION_PREFIX}_MINOR_VERSION} )
+      endif()
+      set( tmp_build_version 0 )
+      if( DEFINED ${setup_resource_file_VERSION_PREFIX}_BUILD_VERSION )
+        set( tmp_build_version ${${setup_resource_file_VERSION_PREFIX}_BUILD_VERSION} )
+      endif()
       add_custom_command( TARGET ${target_name}
                           PRE_BUILD
                           COMMAND ${setup_resource_file_UPDATERESOURCEFILE_EXE}
                           ARGS ${setup_resource_file_VERSION_PREFIX} ${setup_resource_file_RESOURCE_FILE_OUTPUT_LOCATION} ${setup_resource_file_RESOURCE_FILE_CMAKE_TEMPLATE}
-                          ${${setup_resource_file_VERSION_PREFIX}_MAJOR_VERSION} ${${setup_resource_file_VERSION_PREFIX}_MINOR_VERSION}
-                          ${${setup_resource_file_VERSION_PREFIX}_BUILD_VERSION} "${${setup_resource_file_VERSION_PREFIX}_SVN_VERSION}"
+                          ${tmp_major_version} ${tmp_minor_version}
+                          ${tmp_build_version} "${${setup_resource_file_VERSION_PREFIX}_SVN_VERSION}"
                           ${setup_resource_file_UPDATERESOURCEFILE_EXE_EXTRA_ARGS} )
     endif()
 
@@ -641,13 +664,271 @@ endfunction()
 
 # Add common compile flags that are used by various compilers for H3D projects.
 # compile_flags_container Compile flags will be added here.
+# Arg0 - Force deprecated declarations.
+# Arg1 - Set the warning level to the compile default (i.e. do not add any flags).
 function( addCommonH3DCompileFlags compile_flags_container )
+  set( force_deprecated_declarations OFF )
+  if( ${ARGC} GREATER 1 )
+    list( GET ARGN 0 force_deprecated_declarations )
+  endif()
+  set( default_compiler_warning_level OFF )
+  if( ${ARGC} GREATER 2 )
+    list( GET ARGN 1 default_compiler_warning_level )
+  endif()
+
   set( compile_flags_container_internal )
   addCommonH3DMSVCCompileFlags( compile_flags_container_internal )
   if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-    addCommonH3DGNUCompileFlags( compile_flags_container_internal )
+    addCommonH3DGNUCompileFlags( compile_flags_container_internal ${force_deprecated_declarations} ${default_compiler_warning_level} )
   endif()
   addCommonAppleClangCompileFlags( compile_flags_container_internal )
 
   set( ${compile_flags_container} "${${compile_flags_container}} ${compile_flags_container_internal}" PARENT_SCOPE )
+endfunction()
+
+# Setup an option to disable building with certain external features.
+# OPTION_PREFIX - The prefix of the option to toggle building with the given externals. The variable name will be
+#                 ${OPTION_PREFIX}_INCLUDE_ALL_EXTERNALS and it will default to OFF. That is, the cache variables
+#                 that should be checked are set to NOTFOUND.
+# OPTION_DEFAULT - The default value of the given option. If omitted then OFF is selected.
+# INCLUDE_DIR_PREFIXES - A list of prefix names for cache variables ending with _INCLUDE_DIR that
+# should be set to NOTFOUND or empty string according to the option.
+# EXTRA_CACHE_VARIABLES - A list of names for cache variables ending that
+# should be set to NOTFOUND or empty string according to the option.
+function( setupDisabledExternalsOption )
+  set( options )
+  set( one_value_args OPTION_PREFIX OPTION_DEFAULT )
+  set( multi_value_args INCLUDE_DIR_PREFIXES EXTRA_CACHE_VARIABLES )
+  include( CMakeParseArguments )
+  cmake_parse_arguments( setup_disabled_externals_option "${options}" "${one_value_args}" "${multi_value_args}" ${ARGN} )
+  if( setup_disabled_externals_option_UNPARSED_ARGUMENTS )
+    message( FATAL_ERROR "Unknown keywords given to setupDisabledExternalsOption(): \"${setup_disabled_externals_option_UNPARSED_ARGUMENTS}\"" )
+  endif()
+
+  set( required_args OPTION_PREFIX )
+  foreach( required_arg ${required_args} )
+    if( NOT setup_disabled_externals_option_${required_arg} )
+      message( FATAL_ERROR "The required argument ${required_arg} is missing when calling setupDisabledExternalsOption." )
+    endif()
+  endforeach()
+  
+  set( option_var_name ${setup_disabled_externals_option_OPTION_PREFIX}_INCLUDE_ALL_EXTERNALS )
+
+  # Option to include all available external libraries.
+  if( NOT DEFINED ${option_var_name} )
+    set( default_value OFF )
+    if( setup_disabled_externals_option_OPTION_DEFAULT )
+      set( default_value ${setup_disabled_externals_option_OPTION_DEFAULT} )
+    endif()
+    set( ${option_var_name} ${default_value} CACHE BOOL "Option to include all available external libraries. Must be OFF for release!" )
+    mark_as_advanced( ${option_var_name} )
+  endif()
+
+  set( cache_var_names ${setup_disabled_externals_option_EXTRA_CACHE_VARIABLES} )
+  foreach( include_dir_cache_name ${setup_disabled_externals_option_INCLUDE_DIR_PREFIXES} )
+    set( cache_var_names ${cache_var_names} ${include_dir_cache_name}_INCLUDE_DIR )
+  endforeach()
+
+  foreach( cache_var_name ${cache_var_names} )
+    if( ${option_var_name} )
+      if( ${cache_var_name} STREQUAL "" )
+        set( ${cache_var_name} "NOTFOUND" CACHE PATH "" FORCE )
+      endif()
+    else()
+      set( ${cache_var_name} "" CACHE PATH "" FORCE )
+    endif()
+  endforeach()
+endfunction()
+
+# Helper macro to function findPython2Or3.
+# Legacy code. Remove if we ever set required cmake version to be 3.12 or higher.
+# The macro is using FindPythonLibs which is deprecated as of CMake version 3.12.
+macro( findPython2Or3CMakeBelow3_12 )
+  # Check if the wrong version of python is located.
+  # If so, clear the cache variables FindPythonLibs-module uses otherwise it will complain and not find the right one
+  if( NOT (PYTHON_VER STREQUAL "UNDEFINED") )
+    if( USE_Python3 AND PYTHON_VER VERSION_LESS "3.0.0" )
+      unset(PYTHON_LIBRARY CACHE)
+      unset(PYTHON_INCLUDE_DIR CACHE)
+      unset(PYTHON_DEBUG_LIBRARY CACHE)
+    elseif( (NOT USE_Python3 ) AND ( PYTHON_VER VERSION_GREATER "3.0.0" OR PYTHON_VER VERSION_EQUAL "3.0.0") )
+      unset(PYTHON_LIBRARY CACHE)
+      unset(PYTHON_INCLUDE_DIR CACHE)
+      unset(PYTHON_DEBUG_LIBRARY CACHE)
+    endif()
+  endif()
+
+  if( USE_Python3 )
+    find_package( PythonLibs 3 )
+    if( NOT PYTHONLIBS_FOUND )
+      if( WIN32 )
+        # For all windows distributions: define which architectures can be used
+        if (CMAKE_SIZEOF_VOID_P)
+          # In this case, search only for 64bit or 32bit
+          math (EXPR _${_PYTHON_PREFIX}_ARCH "${CMAKE_SIZEOF_VOID_P} * 8")
+          set (_${_PYTHON_PREFIX}_ARCH2 ${_${_PYTHON_PREFIX}_ARCH})
+        else()
+          # architecture unknown, search for both 64bit and 32bit
+          set (_${_PYTHON_PREFIX}_ARCH 64)
+          set (_${_PYTHON_PREFIX}_ARCH2 32)
+        endif()
+
+        foreach(_CURRENT_VERSION ${_Python_VERSIONS})
+          string(REPLACE "." "" _CURRENT_VERSION_NO_DOTS ${_CURRENT_VERSION})
+          find_library(PYTHON_LIBRARY
+            NAMES
+              python${_CURRENT_VERSION_NO_DOTS}
+              python${_CURRENT_VERSION}mu
+              python${_CURRENT_VERSION}m
+              python${_CURRENT_VERSION}u
+              python${_CURRENT_VERSION}
+            NAMES_PER_DIR
+            PATHS
+              [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]/libs
+              [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]/libs
+              [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]/libs
+              [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]/libs
+          )
+        endforeach()
+        find_package( PythonLibs 3 )
+      endif()
+      if( NOT PYTHONLIBS_FOUND )
+        set( python_not_found_warning ${python3_not_found_warning} )
+      endif()
+    endif()
+  else()
+    find_package( PythonLibs 2 )
+    if( NOT PYTHONLIBS_FOUND )
+      set( python_not_found_warning ${python2_not_found_warning} )
+    endif()
+  endif()
+  
+  if( PYTHONLIBS_FOUND )
+    set( python_libs_local ${PYTHON_LIBRARIES} )
+    set( python_include_dirs_local ${PYTHON_INCLUDE_DIRS} )
+    set( python_ver_string ${PYTHONLIBS_VERSION_STRING} )
+    if( PYTHON_DEBUG_LIBRARY )
+      set( have_python_debug_library_local ON )
+    endif()
+    if( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND CMAKE_VERSION VERSION_LESS "3.12" AND NOT USE_Python3 )
+      # pyconfig.h is put in different directory from Ubuntu 13.04 (raring)
+      # and CMake FindPythonLibs module is not updated for this yet.
+      # Adding it explicitly here in the mean time.
+      set( python_include_dirs_local ${python_include_dirs_local} /usr/include/${CMAKE_LIBRARY_ARCHITECTURE}/python2.7 )
+    endif()
+  endif()
+endmacro()
+
+# Convenience function to be able to handle all the various ways one have to find python when wanting to switch between
+# them since none of the built in CMake modules can handle switching.
+# Will find python 2 or 3 depending on the USE_Python3 variable.
+# python_include_dirs - The include directories for python. Only set if python is found.
+# python_libs - The libraries for python. Only set if python is found.
+# have_python_debug_library - ON if the found python version also have a debug library.
+# have_python_os_framework - ON if the found python version is a python framework on OSX.
+# python_definitions - Contain definitions required to compile properly. (Use with add_definitions function).
+function( findPython2Or3 python_include_dirs python_libs have_python_debug_library have_python_os_framework python_definitions )
+  set( USE_Python3 "ON" CACHE BOOL "Check if you want to use Python 3 instead of 2" )
+  set( PYTHON_VER "UNDEFINED" CACHE STRING "Located python version" )
+
+  set( python3_not_found_warning "COULD NOT FIND PYTHON 3 - GENERATED PROJECT WILL HAVE ZERO PYTHON SUPPORT. UNCHECK USE_Python3 IF YOU WISH TO LOOK FOR PYTHON 2." )
+  set( python2_not_found_warning "COULD NOT FIND PYTHON 2 - GENERATED PROJECT WILL HAVE ZERO PYTHON SUPPORT." )
+  set( python_include_dirs_local )
+  set( python_libs_local )
+  set( have_python_debug_library_local OFF )
+  set( python_definitions_local )
+  set( python_not_found_warning )
+  set( python_ver_string )
+
+  if( APPLE )
+    set( CMAKE_FIND_FRAMEWORK FIRST )
+  endif()
+
+  # Whether or not a local python environment is available and should be used (virtual env or full distribution).
+  if( PYTHON_USE_LOCAL_ENV )
+    set( python_definitions_local -DPYTHON_USE_LOCAL_ENV=1 )
+  endif()
+
+  if( CMAKE_VERSION VERSION_LESS "3.12" )
+    findPython2Or3CMakeBelow3_12()
+  else()
+    # Use FindPython2 and FindPython3 and simply set an alias target
+    if( USE_Python3 )
+      find_package( Python3 COMPONENTS Development )
+      if( Python3_FOUND )
+        set( python_libs_local ${Python3_LIBRARIES} )
+        set( python_include_dirs_local ${Python3_INCLUDE_DIRS} )
+        set( python_ver_string ${Python3_VERSION} )
+        if( Python3_LIBRARY_DEBUG )
+          set( have_python_debug_library_local ON )
+        endif()
+      else()
+        set( python_not_found_warning ${python3_not_found_warning} )
+      endif()
+    else()
+      find_package( Python2 COMPONENTS Development )
+      if( Python2_FOUND )
+        set( python_libs_local ${Python2_LIBRARIES} )
+        set( python_include_dirs_local ${Python2_INCLUDE_DIRS} )
+        set( python_ver_string ${Python2_VERSION} )
+        if( Python2_LIBRARY_DEBUG )
+          set( have_python_debug_library_local ON )
+        endif()
+      else()
+        set( python_not_found_warning ${python2_not_found_warning} )
+      endif()
+    endif()
+  endif()
+
+  # Set the result variables or warn.
+  if( python_libs_local AND python_include_dirs_local )
+    set( ${python_include_dirs} ${python_include_dirs_local} PARENT_SCOPE )
+    set( ${python_libs} ${python_libs_local} PARENT_SCOPE )
+    set( ${have_python_debug_library} ${have_python_debug_library_local} PARENT_SCOPE )
+    set( PYTHON_VER ${python_ver_string} CACHE STRING "Located python version" FORCE )
+    set( ${have_python_os_framework} OFF PARENT_SCOPE )
+    if( APPLE )
+      foreach( dir ${python_include_dirs_local} )
+        if( dir MATCHES "/System/Library/Frameworks/Python[.]framework" )
+          set( ${have_python_os_framework} ON PARENT_SCOPE )
+          break()
+        endif()
+      endforeach()
+    endif()
+    if( PYTHON_VER VERSION_LESS "3.0.0" AND (CMAKE_COMPILER_IS_GNUCXX OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang") )
+      # Python 2.7 does not follow strict aliasing rules (pointers to objects
+      # of different types will never refer to the same memory location). So we
+      # must disable optimizations based on this assumption. Failing to do so
+      # gives warnings (with -Wall) and could give undefined results.
+      # This issue is fixed in Python 3. As far as I can see VS does not make
+      # such optimizations, so no action is required there.
+      # Also see: http://legacy.python.org/dev/peps/pep-3123/
+      set( python_definitions_local ${python_definitions_local} -fno-strict-aliasing )
+    endif()
+    set( ${python_definitions} ${python_definitions_local} PARENT_SCOPE )
+  else()
+    message( WARNING ${python_not_found_warning} )
+    set( PYTHON_VER "UNDEFINED" CACHE STRING "Located python version" FORCE )
+  endif()
+endfunction()
+
+# Embeds the specified shader source files as C++ strings in the specified shader library header file
+# shader_src_files - A list of shader source files relative to CMAKE_CURRENT_SOURCE_DIR
+# header_template  - The full path to A template file to use as the shader library header, the template string
+#                    shader_str_declarations will be replaced by the string declarations.
+# header_output    - The full path to the header file which will be generated.
+function( embedShaderLib shader_src_files header_template header_output )
+  set( shader_str_declarations "" )
+  foreach( shader_file ${shader_src_files} )
+    # this first configure_file() just creates a dependency on the shader source so that changing it will trigger
+    # re-embedding it
+    get_filename_component( cached_filename ${shader_file} NAME )
+    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/../${shader_file} ${CMAKE_CURRENT_BINARY_DIR}/${shader_file} )
+    get_filename_component( string_name ${shader_file} NAME_WE )
+    set( string_name "${string_name}_str" )
+    file( READ ${CMAKE_CURRENT_BINARY_DIR}/${shader_file} ${string_name} )
+    set( shader_str_declarations
+      "${shader_str_declarations}\nconst std::string ${string_name} = R\"GLSL(\n${${string_name}})GLSL\";\n" )
+  endforeach()
+  configure_file( ${header_template} ${header_output} )
 endfunction()

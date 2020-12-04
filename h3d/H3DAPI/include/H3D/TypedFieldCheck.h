@@ -78,6 +78,8 @@ namespace H3D {
         TypesType< Type >::checkTemplateArguments();
       }
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
       /// Check that a field is of the correct type.
       /// \param f The field to check the type of
       /// \param index The index of the field in the template
@@ -88,6 +90,7 @@ namespace H3D {
         TypesType< Type >::checkType( f );
       }
     };
+H3D_POP_WARNINGS()
 
     /// \internal
     /// Template specialization to handle the case when the AnyNumber 
@@ -491,6 +494,8 @@ namespace H3D {
       ///       
       static void checkTemplateArguments() {}
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
       /// Check that a field is of the correct type.
       /// \param f The field to check the type of
       /// \param field_index The index of the field in the template
@@ -508,6 +513,7 @@ namespace H3D {
         throw TypedFieldError( s.str() );
       }
     };
+H3D_POP_WARNINGS()
 
     /// \internal
     /// Template specialization to handle the case when the TypedFieldCheck 

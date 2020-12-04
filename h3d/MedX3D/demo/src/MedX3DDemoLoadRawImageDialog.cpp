@@ -38,13 +38,13 @@ LoadRawImageDialog( parent )
 
 }
 
-void MedX3DDemoLoadRawImageDialog::OnOKButtonPressed( wxCommandEvent& event )
+void MedX3DDemoLoadRawImageDialog::OnOKButtonPressed( wxCommandEvent& /*event*/ )
 {
   EndModal(  wxID_OK );
 
 }
 
-void MedX3DDemoLoadRawImageDialog::OnCancelButtonPressed( wxCommandEvent& event )
+void MedX3DDemoLoadRawImageDialog::OnCancelButtonPressed( wxCommandEvent& /*event*/ )
 {
   EndModal( wxID_CANCEL);
 }

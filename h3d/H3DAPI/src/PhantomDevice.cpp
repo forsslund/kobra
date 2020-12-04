@@ -93,7 +93,6 @@ PhantomDevice::PhantomDevice(
               _force, _torque, _inputDOF, _outputDOF, _hapticsRate,
               _desiredHapticsRate, _stylus ),
   deviceName( _deviceName ),
-  inInkwell( _inInkwell ),
   HDAPIVersion( new SFString ),
   deviceModelType( new SFString ),
   deviceDriverVersion( new SFString ),
@@ -108,9 +107,10 @@ PhantomDevice::PhantomDevice(
   gimbalAngles( new SFVec3f ),
   jointAngles( new SFVec3f ),
   needsCalibration( new SFBool ),
+  calibrate( new Calibrate ),
   motorTemperatures( new MFDouble ),
   encoderValues( new MFDouble ),
-  calibrate( new Calibrate ) { 
+  inInkwell( _inInkwell ) {
 
   type_name = "PhantomDevice";  
   database.initFields( this );
@@ -222,6 +222,10 @@ void PhantomDevice::updateDeviceValues() {
 #endif
 }
 
+#ifndef HAVE_OPENHAPTICS
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void PhantomDevice::Calibrate::onValueChange( const bool &new_value ) {
 #ifdef HAVE_OPENHAPTICS
   if( new_value ) {
@@ -233,6 +237,9 @@ void PhantomDevice::Calibrate::onValueChange( const bool &new_value ) {
   }
 #endif
 }
+#ifndef HAVE_OPENHAPTICS
+H3D_POP_WARNINGS()
+#endif
 
 void PhantomDevice::postInit() {
 #ifdef HAVE_OPENHAPTICS

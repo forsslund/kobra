@@ -134,7 +134,7 @@ namespace H3D {
       /// This is the definition of a component. What nodes belong in it
       /// per conformance level.
       struct myX3DComponent {
-        myX3DComponent() : max_level( 0 ), used_level( 0 ) {
+        myX3DComponent() : used_level( 0 ), max_level( 0 ) {
           conformance_level = 0;
         }
         std::map< int, myX3DNodeVector > nodes_per_level;

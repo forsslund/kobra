@@ -37,13 +37,14 @@ attrib_type( type ),
 attrib_size( 0 ),
 attrib_data( NULL ),
 vbo_GPUaddr( 0 ),
-use_bindless( false ){
+use_bindless( false ),
+bindless_supported_by_system( false ) {
   vboFieldsUpToDate->setName ( "vboFieldsUpToDate" );
   isDynamic->route ( vboFieldsUpToDate );
   isDynamic->setValue ( false );
   if ( GLEW_EXT_direct_state_access&&GL_NV_vertex_buffer_unified_memory )
   {
-    use_bindless = true;
+    bindless_supported_by_system = true;
   }
 }
 
@@ -64,6 +65,12 @@ void GLVertexAttributeObject::updateVertexBufferObject ( ){
   if ( !vboFieldsUpToDate->isUpToDate() ){
     vboFieldsUpToDate->upToDate ( );
     setAttributeData();
+    // using bindless is only possible if the attribute data is not null.
+    // If the attribute data is null then no data is transferred to the GPU and the adress
+    // of the data can not be obtained.
+    // There are cases in which the data is not specified here for example because it is supposed to
+    // be generated through the texture coordinate generator classes.
+    use_bindless = bindless_supported_by_system && attrib_data != nullptr;
     if ( !vbo_id ){
       vbo_id = new GLuint;
       glGenBuffersARB ( 1, vbo_id );

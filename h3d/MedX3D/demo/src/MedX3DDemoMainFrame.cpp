@@ -46,18 +46,18 @@ MainFrame( parent )
 
 }
 
-void MedX3DDemoMainFrame::OnClose( wxCloseEvent& event )
+void MedX3DDemoMainFrame::OnClose( wxCloseEvent& /*event*/ )
 {
   MedX3DDemoApp::h3d_scene.reset( NULL );
   MedX3DDemoApp::h3d_window.reset( NULL );
   Destroy();
 }
 
-void MedX3DDemoMainFrame::OnQuit( wxCommandEvent& event ) {
+void MedX3DDemoMainFrame::OnQuit( wxCommandEvent& /*event*/ ) {
   Close(true);
 }
 
-void MedX3DDemoMainFrame::OnIdle( wxIdleEvent& event )
+void MedX3DDemoMainFrame::OnIdle( wxIdleEvent& /*event*/ )
 {
    for( set< Scene * >::iterator i = Scene::scenes.begin();
        i != Scene::scenes.end();
@@ -67,7 +67,7 @@ void MedX3DDemoMainFrame::OnIdle( wxIdleEvent& event )
    }
 }
 
-void MedX3DDemoMainFrame::OnLoadVolumeData( wxCommandEvent& event )
+void MedX3DDemoMainFrame::OnLoadVolumeData( wxCommandEvent& /*event*/ )
 {
   auto_ptr< wxFileDialog > openFileDialog( new wxFileDialog ( this,
                                                               wxT("Open file"),
@@ -83,7 +83,7 @@ void MedX3DDemoMainFrame::OnLoadVolumeData( wxCommandEvent& event )
   }
 }
 
-void MedX3DDemoMainFrame::OnLoadRawData( wxCommandEvent& event )
+void MedX3DDemoMainFrame::OnLoadRawData( wxCommandEvent& /*event*/ )
 {
   auto_ptr< wxFileDialog > openFileDialog( new wxFileDialog ( this,
                                                               wxT("Open file"),
@@ -104,7 +104,7 @@ void MedX3DDemoMainFrame::OnLoadRawData( wxCommandEvent& event )
   }
 }
 
-void MedX3DDemoMainFrame::OnClearCurrentData( wxCommandEvent& event )
+void MedX3DDemoMainFrame::OnClearCurrentData( wxCommandEvent& /*event*/ )
 {
 }
 

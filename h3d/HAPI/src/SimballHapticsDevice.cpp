@@ -50,7 +50,7 @@ SimballHapticsDevice::device_registration(
 int SimballHapticsDevice::nr_found_devices = -1;
 int SimballHapticsDevice::nr_initialized_devices = 0;
 
-bool SimballHapticsDevice::initHapticsDevice( int _thread_frequency ) {
+bool SimballHapticsDevice::initHapticsDevice( int /*_thread_frequency*/ ) {
 #ifdef H3D_WINDOWS
   /// need to go check if the dll to support this haptic device can be correctly
   /// loaded
@@ -150,8 +150,8 @@ void SimballHapticsDevice::updateDeviceValues( DeviceValues &dv,
   }
 }
 
-void SimballHapticsDevice::sendOutput( DeviceOutput &dv,
-                                       HAPITime dt ) {
+void SimballHapticsDevice::sendOutput( DeviceOutput &/*dv*/,
+                                       HAPITime /*dt*/ ) {
 }
 
 #endif //HAVE_SIMBALLMEDICAL_API

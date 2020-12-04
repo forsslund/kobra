@@ -88,6 +88,14 @@ namespace H3DUtil {
       BC7_SRGB
     } CompressionType;
 
+    /// Type of image.
+    typedef enum {
+      PIXELIMAGE,
+      FREEIMAGE,
+      DICOMIMAGE,
+      DEFAULT
+    } ImageType;
+
     /// Returns the width of the image in pixels.
     virtual unsigned int width() = 0;
     /// Returns the height of the image in pixels.
@@ -282,6 +290,15 @@ namespace H3DUtil {
     /// It is the responsibility of the caller to free the memory of the returned
     /// pointer when it is finished with it.
     double *convertToNormalizedDoubleData();
+
+    /// Returns the type of image. The type is determined by the ImageType enum.
+    /// Mainly used to avoid dynamic casts. Current options are:
+    /// PIXELIMAGE,
+    /// FREEIMAGE,
+    /// DICOMIMAGE,
+    /// DEFAULT
+    virtual ImageType getImageType() const { return ImageType::DEFAULT; };
+
   protected:
     int byte_alignment;
   };

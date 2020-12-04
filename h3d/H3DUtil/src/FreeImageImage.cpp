@@ -44,6 +44,20 @@ using namespace H3DUtil;
   /// don't support.
   H3D_VALUE_EXCEPTION( FREE_IMAGE_TYPE, UnsupportedFreeImageImageType ); 
 
+
+  FreeImageImage::FreeImageImage( FreeImageImage* other ) :
+    pixel_type( other->pixelType() ),
+    pixel_component_type( other->pixelComponentType() ),
+    image_data( NULL ),
+    w( other->width() ),
+    h( other->height() ),
+    bits_per_pixel( other->bitsPerPixel() )
+  {
+    byte_alignment = other->byteAlignment();
+    bitmap = FreeImage_Clone( other->getBitMap() );
+    updateImageProperties();
+  }
+
 FreeImageImage::PixelComponentType FreeImageImage::pixelComponentType() {
 
   return pixel_component_type;
@@ -177,6 +191,15 @@ void FreeImageImage::updateImageProperties(){
   // update bit per pixel
   bits_per_pixel = FreeImage_GetBPP( bitmap );
 
+  // According to FreeImage.h FREEIMAGE_COLORORDER only affects FIT_BITMAP and so floating point images are always RGB(A)
+  // regardless of the value of FREEIMAGE_COLORORDER or system endianness
+  if( pixel_component_type == RATIONAL ) {
+    if( pixel_type == BGR ) {
+      pixel_type = RGB;
+    } else if( pixel_type == BGRA ) {
+      pixel_type = RGBA;
+    }
+  }
 }
 
 #endif

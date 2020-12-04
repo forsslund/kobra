@@ -40,7 +40,7 @@ H3DNodeDatabase SliceRenderer::database( "SliceRenderer",
 
 namespace SliceRendererInternals {
 
-  FIELDDB_ELEMENT( SliceRenderer, nrSlices, INPUT_OUTPUT );
+  FIELDDB_ELEMENT( SliceRenderer, nrSlices, INPUT_OUTPUT )
 
   const string vertexshader_slice =
     "//BEGIN UNIFORMS\n"

@@ -105,19 +105,19 @@
         <CollidableShape DEF='C' containerField='collidables'>
           <Shape USE='S' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C1' containerField='collidables' translation='1 0 0'>
+        <CollidableShape DEF='C1' containerField='collidables' translation='0 0 0'>
           <Shape USE='S1' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C2' containerField='collidables' translation='2 0 0'>
+        <CollidableShape DEF='C2' containerField='collidables' translation='0 0 0'>
           <Shape USE='S2' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C3' containerField='collidables' translation='3 0 0'>
+        <CollidableShape DEF='C3' containerField='collidables' translation='0 0 0'>
           <Shape USE='S3' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C4' containerField='collidables' translation='4 0 0'>
+        <CollidableShape DEF='C4' containerField='collidables' translation='0 0 0'>
           <Shape USE='S4' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C5' containerField='collidables' translation='5 0 0'>
+        <CollidableShape DEF='C5' containerField='collidables' translation='0 0 0'>
           <Shape USE='S5' containerField='shape' />
         </CollidableShape>
       </CollisionCollection>
@@ -180,7 +180,7 @@
       <!-- A suspensionForce greater than 0 is specified to avoid instabilities when using motor -->
       <DoubleAxisHingeJoint anchorPoint='0 -0.075 0' axis1='1 0 0' axis2='0 1 0'
                             maxTorque2='100' desiredAngularVelocity2='10'
-                            suspensionForce='1' >
+                            suspensionForce='0.01' >
         <RigidBody USE='R4' containerField='body1' />
         <RigidBody USE='R5' containerField='body2' />
       </DoubleAxisHingeJoint>

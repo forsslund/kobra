@@ -54,7 +54,8 @@ Fog::Fog( Inst< SFSetBind > _set_bind,
           Inst< SFString  > _fogType,
           Inst< SFFloat   > _visibilityRange ) :
   X3DBindableNode( "Fog", _set_bind, _metadata, _bindTime, _isBound ),
-  X3DFogObject( _color, _fogType, _visibilityRange ) {
+  X3DFogObject( _color, _fogType, _visibilityRange ),
+  scale_local_to_global( 1.f ) {
   
   type_name = "Fog";
   database.initFields( this );

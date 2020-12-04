@@ -28,7 +28,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <H3D/H3DPhysics/CollidableShape.h>
 #include <H3D/H3DPhysics/CollisionSpace.h>
-#include <H3D/H3DPhysics/PhysX3CollidableOptions.h>
+#include <H3D/H3DPhysics/PhysXCollidableOptions.h>
 #include <H3D/H3DPhysics/RigidBodyCollection.h>
 
 using namespace H3D;
@@ -113,9 +113,9 @@ CollidableShape::~CollidableShape() {
 void CollidableShape::render() {
   X3DShapeNode *s = dynamic_cast< X3DShapeNode * >(shape->getValue());
   if( s ) {
-    PhysX3CollidableOptions *options = NULL;
+    PhysXCollidableOptions *options = NULL;
     for( MFEngineOptions::const_iterator i = engineOptions->begin(); i != engineOptions->end() && options == NULL; i++ ) {
-      options = dynamic_cast< PhysX3CollidableOptions * >(*i );
+      options = dynamic_cast<PhysXCollidableOptions *>(*i);
     }
 
     glMatrixMode( GL_MODELVIEW );

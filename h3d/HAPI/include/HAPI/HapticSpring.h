@@ -46,9 +46,9 @@ namespace HAPI {
       position( Vec3( 0, 0, 0 ) ),
       spring_constant( 0 ),
       damping( 0 ),
-      first_time( true ),
       step_length( 0 ),
-      position_interpolation( 1 ) { }
+      position_interpolation( 1 ),
+      first_time( true ) { }
     
     /// Constructor
     HapticSpring( const Vec3 &_position,

@@ -5,7 +5,7 @@
     <component name="H3DPhysics"/>
 
     <meta name='title' content='PhysX3JointOptions.x3d'/>
-    <meta name='description' content='A demonstration the PhysX3JointOptions joint options from the H3DPhysics component.'/>
+    <meta name='description' content='A demonstration the PhysXJointOptions joint options from the H3DPhysics component.'/>
     <meta name='author' content='SenseGraphics AB, 2010-2019'/>
   </head>
   <Scene>
@@ -26,7 +26,7 @@
           <Appearance>
             <Material diffuseColor="1 1 1" />
           </Appearance>
-          <Text DEF="Text" string='"PhysX3JointOptions. Some fields are only placeholders for future" "options and are not yet implemented on the PhysX3 side."' solid="true">
+          <Text DEF="Text" string='"PhysXJointOptions. Some fields are only placeholders for future" "options and are not yet implemented on the PhysX3 or PhysX4 side."' solid="true">
             <FontStyle justify='"MIDDLE" "BEGIN"' size="0.015" spacing="1" />
           </Text>
         </Shape>
@@ -103,16 +103,16 @@
         <CollidableShape DEF='C' containerField='collidables'>
           <Shape USE='S' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C1' containerField='collidables' translation='1 0 0'>
+        <CollidableShape DEF='C1' containerField='collidables' translation='0 0 0'>
           <Shape USE='S1' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C2' containerField='collidables' translation='2 0 0'>
+        <CollidableShape DEF='C2' containerField='collidables' translation='0 0 0'>
           <Shape USE='S2' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C3' containerField='collidables' translation='3 0 0'>
+        <CollidableShape DEF='C3' containerField='collidables' translation='0 0 0'>
           <Shape USE='S3' containerField='shape' />
         </CollidableShape>
-        <CollidableShape DEF='C4' containerField='collidables' translation='4 0 0'>
+        <CollidableShape DEF='C4' containerField='collidables' translation='0 0 0'>
           <Shape USE='S4' containerField='shape' />
         </CollidableShape>
         
@@ -147,31 +147,31 @@
       <!-- Joints connecting rigid bodies together -->
       <SingleAxisHingeJoint anchorPoint='-0.15 0.05 0' axis='1 0 0' >
         <RigidBody USE='R' containerField='body1' />
-        <PhysX3JointOptions DEF="options_SingleAxisHingeJoint" projectionTolerance='1e-5 1e-5' enabledProjection='true' constraintFlag='ePROJECTION' />
+        <PhysXJointOptions DEF="options_SingleAxisHingeJoint" projectionTolerance='1e-5 1e-5' enabledProjection='true' projectionFlag='ePROJECTION' />
       </SingleAxisHingeJoint>
       
       <SingleAxisHingeJoint anchorPoint='-0.15 -0.05 0' axis='0 0 1' >
         <RigidBody USE='R' containerField='body1' />
         <RigidBody USE='R1' containerField='body2' />
-        <PhysX3JointOptions USE="options_SingleAxisHingeJoint" />
+        <PhysXJointOptions USE="options_SingleAxisHingeJoint" />
       </SingleAxisHingeJoint>
 
       <!-- Test a single body joint (anchored to space) using body2 field -->    
       <BallJoint anchorPoint='0.15 0.05 0' >
         <RigidBody USE='R2' containerField='body1' />
-        <PhysX3Joint6DOFLimitOptions DEF='PhysX3Joint6DOFLimitOptions' projectionTolerance='1e-5 1e-5' enabledProjection='true'  />
+        <PhysXJoint6DOFLimitOptions DEF='PhysXJoint6DOFLimitOptions' projectionTolerance='1e-5 1e-5' enabledProjection='true'  />
       </BallJoint>
 
       <BallJoint anchorPoint='0.15 -0.05 0' >
         <RigidBody USE='R2' containerField='body1' />
         <RigidBody USE='R3' containerField='body2' />
-        <PhysX3Joint6DOFLimitOptions USE='PhysX3Joint6DOFLimitOptions'/>
+        <PhysXJoint6DOFLimitOptions USE='PhysXJoint6DOFLimitOptions'/>
       </BallJoint>
 
       <!-- Single body joint with angle limits -->
       <SliderJoint DEF='Slider_J' axis='1 0.5 0.2' minSeparation='0.0' maxSeparation='0.1'>
         <RigidBody USE='R4' containerField='body1' />
-        <PhysX3SliderJointOptions projectionTolerance='1e-5 1e-5' enabledProjection='true'/>
+        <PhysXSliderJointOptions projectionTolerance='1e-5 1e-5' enabledProjection='true'/>
       </SliderJoint>
       
     </RigidBodyCollection>

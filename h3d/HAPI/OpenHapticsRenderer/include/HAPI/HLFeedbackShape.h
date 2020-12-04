@@ -62,7 +62,7 @@ namespace HAPI {
                      Collision::FaceType _touchable_face = 
                      Collision::FRONT_AND_BACK,
                      bool _use_haptic_camera = true,
-                     bool _use_adaptive_viewport = true,
+                     bool /*_use_adaptive_viewport*/ = true,
                      int _nr_vertices = -1,
                      void *_userdata = NULL,
                      int _shape_id = -1,
@@ -80,6 +80,8 @@ namespace HAPI {
     virtual void hlRender( HAPI::HAPIHapticsDevice *hd,
                            HLuint _shape_id );
   protected:
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// Must be defined in order to link correctly.
     virtual bool lineIntersectShape( const Vec3 &from, 
                                      const Vec3 &to,
@@ -110,6 +112,7 @@ namespace HAPI {
     /// Must be defined in order to link correctly.
     virtual void getTangentSpaceMatrixShape( const Vec3 &point,
                                              Matrix4 &result_mtx ) {}
+H3D_POP_WARNINGS()
 
     /// Must be defined in order to link correctly.
     virtual void glRenderShape() {}

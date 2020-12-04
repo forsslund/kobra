@@ -27,7 +27,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 #include <H3D/Script.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 #include <H3D/SpiderMonkeySAI.h>
 #include <fstream>
 
@@ -91,7 +91,7 @@ void Script::initialize() {
   
 }
 
-void Script::traverseSG( TraverseInfo &ti ) {
+void Script::traverseSG( TraverseInfo &/*ti*/ ) {
 #ifdef HAVE_SPIDERMONKEY
   if( !sai.isInitialized() ) {
     Scene::addCallback( initEngineCallback, this );

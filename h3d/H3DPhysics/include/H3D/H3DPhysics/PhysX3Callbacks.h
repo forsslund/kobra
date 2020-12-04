@@ -126,7 +126,10 @@ namespace H3D {
         scene( NULL ), 
         simulation_events ( NULL ), 
         cpu_dispatcher ( NULL ),
-        last_update_time ( 0 ) {
+        last_update_time ( 0 ),
+        default_material( NULL ),
+        contact_modifier( NULL ),
+        cooking( NULL ) {
       }
 
       PxFoundation* foundation;

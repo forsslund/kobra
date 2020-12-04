@@ -23,7 +23,7 @@ class KeyHandler ( AutoUpdate ( SFString ) ):
           devices= di.device.getValue()
           if len(devices)>0:
             linearJoint.anchorPoint.setValue ( devices[0].devicePosition.getValue() )
-            print "anchorPoint at: " + str(linearJoint.anchorPoint.getValue())
+            print("anchorPoint at: " + str(linearJoint.anchorPoint.getValue()))
       else:
         sbc.constraints.erase ( linearJoint )
         linearJoint= None

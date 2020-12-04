@@ -55,7 +55,7 @@ PlaybackHapticsDevice::StringList PlaybackHapticsDevice::readColumnNamesBinary (
   while ( c != '\0' ) {
     std::string field_name;
     while ( c != '\0' ) {
-      field_name+= c;
+      field_name+= static_cast< char >(c);
       c= playback_file.get();
     }
     fields.push_back ( field_name );

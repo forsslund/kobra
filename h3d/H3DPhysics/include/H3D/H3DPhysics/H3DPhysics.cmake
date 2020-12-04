@@ -85,6 +85,7 @@ extern "C" H3DPHYS_API H3D::LibraryInfo getLibraryInfo();
 
 #cmakedefine HAVE_PHYSX
 #cmakedefine HAVE_PHYSX3
+#cmakedefine HAVE_PHYSX4
 #cmakedefine HAVE_HACD
 
 #cmakedefine HAVE_BULLET

@@ -96,8 +96,6 @@ namespace H3D {
     void buildGeometryData( bool is_dir_light, int detail_level, H3DFloat radius, bool render_caps,
       Vec3f light_dir, Vec3f light_pos, std::vector<Vec4d>& coord, Matrix4f local_to_global = Matrix4f(), bool coords_in_global = false );
 
-    bool previous_render_caps;
-
     // copies of fields that are updated in traverse and are used in computation of shadow volumes
     // these are thread safe copies
     Matrix4f transform_matrix_ts;

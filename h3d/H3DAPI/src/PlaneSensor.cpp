@@ -66,8 +66,9 @@ PlaneSensor::PlaneSensor( Inst< SFBool >  _autoOffset,
   offset( _offset ),
   translation_changed( _translation_changed ),
   axisRotation( _axisRotation ),
-  new_plane( true ),
-  plane_normal( Vec3f( 0, 0, 1) ) {
+  plane_normal( Vec3f( 0, 0, 1) ),
+  plane_d( 0 ),
+  new_plane( true ) {
 
   type_name = "PlaneSensor";
   database.initFields( this );

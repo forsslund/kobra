@@ -223,7 +223,7 @@ namespace H3D {
 
     /// Render all OpenGL texture properties that are set by glTexParamter
     /// calls for the given texture_target.
-    virtual void renderTextureProperties( GLenum texture_target );
+    virtual void renderTextureProperties( GLenum texture_target, bool texture_provided_mip_maps );
 
 
     /// The anisotropicDegree field describes the minimum degree of anisotropy

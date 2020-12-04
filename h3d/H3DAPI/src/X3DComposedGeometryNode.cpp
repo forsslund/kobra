@@ -73,12 +73,12 @@ X3DComposedGeometryNode::X3DComposedGeometryNode(
   coord          ( _coord            ),
   normal         ( _normal           ),
   texCoord       ( _texCoord         ),
+  fogCoord         ( _fogCoord           ),
   ccw            ( _ccw              ),
   colorPerVertex ( _colorPerVertex   ),
   normalPerVertex( _normalPerVertex  ),
   solid          ( _solid            ),
-  attrib         ( _attrib           ),
-  fogCoord         ( _fogCoord           ){
+  attrib         ( _attrib           ){
 
   type_name = "X3DComposedGeometryNode";
 

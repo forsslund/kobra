@@ -153,6 +153,8 @@ namespace H3D {
 #ifdef __BORLANDC__
     friend class RefCountSFieldAutoRef;
 #endif
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// This function will be called when the value of RefCountSField
     /// changes. As soon as the value changes onRemove will
     /// be called on the old value and onAdd will be called
@@ -180,6 +182,7 @@ namespace H3D {
     /// The encapsulated value.
     RefCountSFieldAutoRef value;
   };
+H3D_POP_WARNINGS()
   
   template< class RefClass, class BaseField >
   void RefCountSField< RefClass, BaseField >::update() {

@@ -37,9 +37,9 @@ namespace H3D {
     public:
       PrototypeVector(): first_proto( NULL ) {}
 
-      ProtoDeclaration *getProtoDeclaration( const string & name ) {
+      ProtoDeclaration *getProtoDeclaration( const string & _name ) {
         for( PrototypeVector::const_iterator i = begin(); i != end(); ++i ) {
-          if( (*i)->getName() == name )
+          if( (*i)->getName() == _name )
             return *i;
         }
         return NULL;

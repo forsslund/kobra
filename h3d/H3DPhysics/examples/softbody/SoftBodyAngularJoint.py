@@ -15,10 +15,10 @@ class KeyHandler ( AutoUpdate ( SFString ) ):
       if not angularJoint:
         if key == 'y':
           angularJoint= createX3DNodeFromString ( "<SoftBodyAngularJoint axis='0 1 0' />" )[0]
-          print "Y axis joint"
+          print("Y axis joint")
         else:
           angularJoint= createX3DNodeFromString ( "<SoftBodyAngularJoint axis='0 0 1'/>" )[0]
-          print "Z axis joint"
+          print("Z axis joint")
         angularJoint.body1.setValue ( sb1 )
         angularJoint.body2.setValue ( sb2 )
         sbc.constraints.push_back ( angularJoint )

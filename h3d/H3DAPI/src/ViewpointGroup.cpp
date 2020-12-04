@@ -67,8 +67,9 @@ ViewpointGroup::ViewpointGroup(
   displayed( _displayed ),
   retainUserOffsets( _retainUserOffsets ),
   size( _size ),
-  in_scene_graph( false ),
-  is_top_level( false ) {
+  display_in_list( false ),
+  is_top_level( false ),
+  in_scene_graph( false ) {
   
   type_name = "ViewpointGroup";
   database.initFields( this );

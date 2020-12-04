@@ -46,7 +46,7 @@ endif()
 
 set( ThreadExample_COMPILE_FLAGS )
 
-addCommonH3DCompileFlags( ThreadExample_COMPILE_FLAGS )
+addCommonH3DCompileFlags( ThreadExample_COMPILE_FLAGS TRUE )
 
 set_target_properties( ThreadExample PROPERTIES COMPILE_FLAGS "${ThreadExample_COMPILE_FLAGS}" )
 

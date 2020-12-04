@@ -202,8 +202,8 @@ class GenerateGeometryFiles:
                                                     columns = 1001, \
                                                     rows = 501 ) )
 
-    print "All files successfully generated in " + str( time.time() - begin_time ) + " seconds."
-    print ""
+    print("All files successfully generated in " + str( time.time() - begin_time ) + " seconds.")
+    print("")
 
   # Generate xml syntax for IndexedTriangleSet and write to file.
   # Nr of triangles will be 2 * (columns - 1) * (rows - 1)
@@ -358,7 +358,7 @@ touchField = TouchField(the_node.%s)
       function_arguments.meta_description = "A file containing an IndexedTriangleSet with " + str( nr_triangles ) +" triangles" + meta_description_suffix + "."
     filename = self.sub_dir + filename
     if self.regenerate_if_exists or not os.path.isfile( filename ):
-      print "Generating file " + filename
+      print("Generating file " + filename)
       file_handle = open( filename, 'w' )
       function_arguments.file_handle = file_handle
       function_arguments.shape_function = self.generateShapeSyntax
@@ -370,7 +370,7 @@ touchField = TouchField(the_node.%s)
       function_arguments.meta_title = filename
       self.generateX3DSyntax( function_arguments )
       file_handle.close()
-      print "Done, took " + str( time.time() - before_time ) + "s\n"
+      print("Done, took " + str( time.time() - before_time ) + "s\n")
   
   # Generate IndexedFaceSet files.
   def generateIFSFile( self, function_arguments, with_phong = False, filename_suffix = "", meta_description_suffix = "" ):
@@ -384,7 +384,7 @@ touchField = TouchField(the_node.%s)
       function_arguments.meta_description = "A file containing an IndexedFaceSet with " + str( nr_triangles ) +" faces" + meta_description_suffix + "."
     filename = self.sub_dir + filename
     if self.regenerate_if_exists or not os.path.isfile( filename ):
-      print "Generating file " + filename
+      print("Generating file " + filename)
       file_handle = open( filename, 'w' )
       function_arguments.file_handle = file_handle
       function_arguments.shape_function = self.generateShapeSyntax
@@ -396,7 +396,7 @@ touchField = TouchField(the_node.%s)
       function_arguments.meta_title = filename
       self.generateX3DSyntax( function_arguments )
       file_handle.close()
-      print "Done, took " + str( time.time() - before_time ) + "s\n"
+      print("Done, took " + str( time.time() - before_time ) + "s\n")
 
   # Generate xml syntax for IndexedTriangleSet and write to file.
   # Nr of triangles will be 2 * (columns - 1) * (rows - 1)

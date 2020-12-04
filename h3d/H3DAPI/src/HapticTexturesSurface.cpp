@@ -103,37 +103,37 @@ HapticTexturesSurface::HapticTexturesSurface(
   dynamicFrictionMap->parameter_type =
     HAPI::HapticTexturesSurface::DYNAMIC_FRICTION;
 
-  maxStiffness->setValue( 1.0f );
-  maxStiffness->parameter_type = HAPI::HapticTexturesSurface::STIFFNESS;
+  maxStiffness->parameter_type = HAPI::HapticTexturesSurface::STIFFNESS; 
   maxStiffness->max_value = true;
-  minStiffness->setValue( 0.0f );
+  maxStiffness->setValue( 1.0f );
   minStiffness->parameter_type = HAPI::HapticTexturesSurface::STIFFNESS;
   minStiffness->max_value = false;
+  minStiffness->setValue( 0.0f );
 
-  maxDamping->setValue( 1.0f );
   maxDamping->parameter_type = HAPI::HapticTexturesSurface::DAMPING;
   maxDamping->max_value = true;
-  minDamping->setValue( 0.0f );
+  maxDamping->setValue( 1.0f );
   minDamping->parameter_type = HAPI::HapticTexturesSurface::DAMPING;
   minDamping->max_value = false;
+  minDamping->setValue( 0.0f );
 
-  maxStaticFriction->setValue( 1.0f );
   maxStaticFriction->parameter_type =
     HAPI::HapticTexturesSurface::STATIC_FRICTION;
   maxStaticFriction->max_value = true;
-  minStaticFriction->setValue( 0.0f );
+  maxStaticFriction->setValue( 1.0f );
   minStaticFriction->parameter_type =
     HAPI::HapticTexturesSurface::STATIC_FRICTION;
   minStaticFriction->max_value = false;
+  minStaticFriction->setValue( 0.0f );
 
-  maxDynamicFriction->setValue( 1.0f );
   maxDynamicFriction->parameter_type =
     HAPI::HapticTexturesSurface::DYNAMIC_FRICTION;
   maxDynamicFriction->max_value = true;
-  minDynamicFriction->setValue( 0.0f );
+  maxDynamicFriction->setValue( 1.0f );
   minDynamicFriction->parameter_type =
     HAPI::HapticTexturesSurface::DYNAMIC_FRICTION;
   minDynamicFriction->max_value = false;
+  minDynamicFriction->setValue( 0.0f );
 
   setStiffnessPtr->setOwner( this );
   setDampingPtr->setOwner( this );

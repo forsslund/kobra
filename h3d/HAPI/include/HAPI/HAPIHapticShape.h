@@ -131,10 +131,10 @@ namespace HAPI {
       surface( _surface ),
       have_transform( false ),
       have_inverse( false ),
+      non_uniform_scaling( false ),
       forced_dynamic( false ),
       first_use_time( -1 ),
-      clean_up_func( _clean_up_func ),
-      non_uniform_scaling( false ) {
+      clean_up_func( _clean_up_func ) {
         scale_factor = Vec3( 1.0, 1.0, 1.0 );
     }
 
@@ -222,6 +222,7 @@ namespace HAPI {
       surface( _surface ),
       have_transform( false ),
       have_inverse( false ),
+      non_uniform_scaling( false ),
       velocity( _velocity ),
       angular_velocity( _angular_velocity ),
       growth_rate( _growth_rate ),

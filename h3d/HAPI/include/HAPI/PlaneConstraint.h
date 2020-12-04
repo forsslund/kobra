@@ -175,7 +175,7 @@ namespace HAPI {
 
     // This function is not yet properly implemented.
     // It will only add the constraint to the end of the container.
-    inline void insert( iterator pos, iterator s, iterator e ) {
+    inline void insert( iterator /*pos*/, iterator s, iterator e ) {
       for( iterator i = s; i != e; ++i )
         push_back( *i );
     }

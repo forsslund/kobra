@@ -51,7 +51,7 @@ namespace H3D {
 
     /// Perform the OpenGL commands to render a color given the index
     /// of the color.
-    virtual void render( int index ) {}
+    virtual void render( int /*index*/ ) {}
     
     /// Perform the OpenGL commands to render all vertices as a vertex
     /// array.

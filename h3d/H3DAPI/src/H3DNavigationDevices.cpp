@@ -138,8 +138,8 @@ void MouseNavigation::motionUpdate( int x, int y ) {
 
 void MouseNavigation::scrollWheelUpdate( bool up ) {
   if( enabled && ( nav_type == "EXAMINE" || nav_type == "ANY" ) ) {
-    if( up ) move_dir += Vec3f( 0, 0, -0.01 );
-    else move_dir += Vec3f( 0, 0, 0.01 );
+    if( up ) move_dir += Vec3f( 0, 0, -1 );
+    else move_dir += Vec3f( 0, 0, 1 );
     zoom = true;
     shouldGetInfo->setValue( true );
   }

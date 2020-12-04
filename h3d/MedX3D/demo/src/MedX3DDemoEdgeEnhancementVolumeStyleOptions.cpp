@@ -38,7 +38,7 @@ MedX3DDemoEdgeEnhancementVolumeStyleOptions::MedX3DDemoEdgeEnhancementVolumeStyl
   EdgeEnhancementVolumeStyleOptions( parent ),
   edge_enhancement_style( style )
 {
-  RGB edge_color = edge_enhancement_style->edgeColor->getValue();
+  /*RGB edge_color = */edge_enhancement_style->edgeColor->getValue();
   H3DFloat gradient_threshold = 
     edge_enhancement_style->gradientThreshold->getValue();
 

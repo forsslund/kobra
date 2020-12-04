@@ -35,21 +35,31 @@
 PrototypeVector *VrmlDriver::global_proto_vector=NULL;
 
 VrmlDriver::VrmlDriver () : 
+  result( 0 ),
   trace_scanning ( false ), 
   trace_parsing ( false ), 
-  DEF_export( NULL ), 
   DEF_map( NULL ),
-  file_name( "" ),
-  old_char_no( 0 ),
+  DEF_export( NULL ),
+  vrml_line_no( 0 ),
   old_line_no( 0 ),
-  proto_vector( NULL ),
-  result( 0 ),
-  vrml_line_no( 0 ) {
+  old_char_no( 0 ),
+  file_name( "" ),
+  proto_vector( NULL ) {
 
   proto_instance = 0;
 }
 
 VrmlDriver::~VrmlDriver () {
+  for ( auto it = node_stack.begin(); it!=node_stack.end(); ++it)
+  {
+    delete *it;
+  }
+  node_stack.clear();
+  for (auto it = proto_declarations.begin(); it != proto_declarations.end(); it++)
+  {
+    delete *it;
+  }
+  proto_declarations.clear();
 }
 
 
@@ -100,7 +110,7 @@ int VrmlDriver::parse( istream *inp, const char *fn, DEFNodes *dn, DEFNodes
   return 1;
 }
 
-void VrmlDriver::error (const yy::location& l, const std::string& m) {
+void VrmlDriver::error (const yy::location& /*l*/, const std::string& m) {
   Console(LogLevel::Warning) << "VrmlParser error: " << getLocationString() << " - " << m << endl;
 }
 
@@ -144,7 +154,6 @@ void VrmlDriver::setFieldValue( const char *v ) {
     }
 
     // first remove all VRML comments from the string:
-    const char *p;
     if ( l != NULL ) p=l; else p=v;
     while( p && *p!='\0' && p!=r ) {
       if ( *p != '#' ) {
@@ -283,7 +292,7 @@ int yyFlexLexer::yylex() {
 bool VrmlDriver::addDynamicField( const string &name, 
           const string& type, 
           const Field::AccessType &access_type, 
-          const string & value ) {
+          const string & /*value*/ ) {
   if( node_stack.empty() ) return false;
   
   H3DDynamicFieldsObject *df = 

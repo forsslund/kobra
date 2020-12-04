@@ -92,12 +92,12 @@ namespace H3D {
 
     /// Returns true if the getTexCoord function is available for use.
     /// For a TextureCoordinate node it is
-    inline virtual bool supportsGetTexCoord( unsigned int texture_unit ) {
+    inline virtual bool supportsGetTexCoord( unsigned int /*texture_unit*/ ) {
       return true;
     }
 
     /// Gets texture coordinate of the given index and texture unit.
-    virtual Vec4f getTexCoord( int index, unsigned int texture_unit ) {
+    virtual Vec4f getTexCoord( int index, unsigned int /*texture_unit*/ ) {
       const Vec2f &p = point->getValueByIndex( index );
       return Vec4f( p.x, p.y, 0, 1 );
     }

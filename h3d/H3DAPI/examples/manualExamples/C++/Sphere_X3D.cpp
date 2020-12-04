@@ -22,7 +22,7 @@ protected:
   }
 };
 
-int main(int argc, char* argv[]) {
+int main(int /*argc*/, char* /*argv*/[]) {
   // Set up the scene graph by specifying a string 
   // and using createX3DNodeFromString
   string scene_graph_string = "<Group>"

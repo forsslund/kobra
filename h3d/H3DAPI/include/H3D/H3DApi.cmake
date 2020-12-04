@@ -126,6 +126,7 @@
 /// PythonScript node will then not be supported.
 #cmakedefine HAVE_PYTHON
 #cmakedefine HAVE_PYTHON_OSX_FRAMEWORK
+#cmakedefine HAVE_PYTHON_DEBUG_LIBRARY
 
 /// Undef if you do not have libcurl(http://sourceforge.net/projects/curl/)
 /// installed. URLs using protocols like http and ftp will then not be 
@@ -236,6 +237,12 @@
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 // disable dll-interface warnings for stl-exports
 #pragma warning( disable: 4251 )
+// Disable unreachable code warning. Most of the time it gives warning messages
+// at an unhelpful location (not stack just a note at the unreachable code).
+// Even in those cases where it is correct fixing it would mean that the code becomes
+// more prone to errors if someone is making changes before those lines.
+// Also, what if the compiler is wrong.
+#pragma warning( disable: 4702 )
 #endif
 
 #endif

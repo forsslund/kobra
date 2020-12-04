@@ -88,8 +88,8 @@ set( H3DAPI_NSIS_EXTRA_INSTALL_COMMANDS "\\n" CACHE INTERNAL "Extra install comm
 set( H3DAPI_NSIS_EXTRA_UNINSTALL_COMMANDS "\\n" CACHE INTERNAL "Extra uninstall commands for installing with nsi." )
 
 getDefaultH3DOutputDirectoryName( default_bin_install default_lib_install )
-set( h3dapi_external_bin "${H3D_EXTERNAL_ROOT}/${default_bin_install}" )
-set( h3dapi_external_lib "${H3D_EXTERNAL_ROOT}/${default_lib_install}" )
+file( TO_CMAKE_PATH "${H3D_EXTERNAL_ROOT}/${default_bin_install}" h3dapi_external_bin )
+file( TO_CMAKE_PATH "${H3D_EXTERNAL_ROOT}/${default_lib_install}" h3dapi_external_lib )
 
 if( H3DAPI_INCLUDE_DIRS AND H3D_EXTERNAL_ROOT )
   set( externals_to_look_for )
@@ -242,11 +242,6 @@ if( H3DAPI_INCLUDE_DIRS AND H3D_EXTERNAL_ROOT )
                                  "lib" "audiofile"
                                  "bin" "audiofile"
 
-                                 "#define HAVE_CG"
-                                 "include" "Cg"
-                                 "lib" "cgGL" "cg"
-                                 "bin" "cg" "cgGL"
-
                                  "#define HAVE_LIBOVR"
                                  "include" "libovr"
                                  "lib" "LibOVR"
@@ -264,9 +259,6 @@ if( H3DAPI_INCLUDE_DIRS AND H3D_EXTERNAL_ROOT )
                                  "#define HAVE_FREETYPE"
                                  "include" "freetype"
                                  "lib" "freetype"
-
-                                 "#define HAVE_FONTCONFIG"
-                                 "warning" "NOTE: H3DAPI compiled with font config support. Make sure font config features are included."
 
                                  "#define HAVE_3DXWARE"
                                  "warning" "NOTE: H3DAPI compiled with 3DXWare support. If 3DConnection drivers is not distributed together with the package then test that the application starts on a system without 3DConnection drivers installed"

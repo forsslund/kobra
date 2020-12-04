@@ -92,7 +92,7 @@ H3DWidgetNode::H3DWidgetNode( Inst< SFNode      > _metadata   ,
 }
 
 
-void H3DWidgetNode::traverseSG( TraverseInfo &ti ) {
+void H3DWidgetNode::traverseSG( TraverseInfo & ) {
   if( !parent ) 
     resize( desiredSize->getValue() );
 }

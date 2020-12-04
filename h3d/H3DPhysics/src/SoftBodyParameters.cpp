@@ -65,6 +65,9 @@ geometry ( NULL )
 {
 }
 
+H3DSoftBodyNodeParameters::~H3DSoftBodyNodeParameters() {
+}
+
 void H3DSoftBodyNodeParameters::onGetParametersPhysicsThread () {
   updateOutputs ();
 }

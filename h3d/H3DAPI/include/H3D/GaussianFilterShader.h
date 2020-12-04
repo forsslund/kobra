@@ -39,10 +39,10 @@ namespace H3D {
   /// This referes to how many pixels should be sampled in each direction.
   ///
   /// <b>Examples:</b>
-  ///   - <a href="../../../H3DAPI/examples/All/GaussionFilterShader.x3d">GaussionFilterShader.x3d</a>
-  ///     ( <a href="examples/GaussionFilterShader.x3d.html">Source</a> )
-  ///   - <a href="../../../H3DAPI/examples/All/GaussionFilterShader_postprocess.x3d">GaussionFilterShader_postprocess.x3d</a>
-  ///     ( <a href="examples/GaussionFilterShader_postprocess.x3d.html">Source</a> )
+  ///   - <a href="../../../H3DAPI/examples/All/GaussianFilterShader.x3d">GaussianFilterShader.x3d</a>
+  ///     ( <a href="examples/GaussianFilterShader.x3d.html">Source</a> )
+  ///   - <a href="../../../H3DAPI/examples/All/GaussianFilterShader_postprocess.x3d">GaussianFilterShader_postprocess.x3d</a>
+  ///     ( <a href="examples/GaussianFilterShader_postprocess.x3d.html">Source</a> )
   ///
   /// \par Internal routes:
   /// \dotfile GaussianFilterShader.dot

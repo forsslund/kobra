@@ -206,7 +206,7 @@ namespace H3D {
     ///
     /// <b>Access type:</b> inputOutput 
     ///
-    /// \dotfile NurbsCurve_closed.dot 
+    /// \dotfile NurbsCurve_controlPoint.dot 
     auto_ptr< SFCoordinateNode  >  controlPoint;
 
     /// The H3DNodeDatabase for this node.

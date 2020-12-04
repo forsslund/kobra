@@ -36,7 +36,7 @@ using namespace HAPI;
 DeviceLog::DeviceLog( const std::string &_log_file, 
                       const DeviceLog::LogTypeVector &_log_type,
                       int _freq, bool _binary, bool _use_ref_count_lock ) :
-  HAPIForceEffect( _use_ref_count_lock ), log_type( _log_type ), binary( _binary ) {
+  HAPIForceEffect( _use_ref_count_lock ), start_time( 0 ), log_type( _log_type ), binary( _binary ) {
 
   std::ios_base::openmode mode = std::ios::out | std::ios::trunc;
   if( binary )
@@ -162,6 +162,14 @@ void DeviceLog::writeLogRow ( const EffectInput &input, HAPITime log_time ) {
           H3DUtil::writeH3DType( log_file, TimeStamp() );
           break;
         }
+        case DOF7_ANGLE: {
+          H3DUtil::writeH3DType( log_file, cdv.dof7_angle );
+          break;
+        }
+        case DOF7_FORCE: {
+          H3DUtil::writeH3DType( log_file, cdv.dof7_force );
+          break;
+        }
         default: {}
       }
     }
@@ -221,6 +229,14 @@ void DeviceLog::writeLogRow ( const EffectInput &input, HAPITime log_time ) {
         }
         case TIMESTAMP: {
           log_file << TimeStamp();
+          break;
+        }
+        case DOF7_ANGLE: {
+          log_file << cdv.dof7_angle;
+          break;
+        }
+        case DOF7_FORCE: {
+          log_file << cdv.dof7_force;
           break;
         }
         default: {}
@@ -286,6 +302,14 @@ void DeviceLog::writeHeaderRow ( const EffectInput & /*input*/ ) {
           H3DUtil::writeH3DType( log_file, "TIMESTAMP" );
           break;
         }
+        case DOF7_ANGLE: {
+          H3DUtil::writeH3DType( log_file, "DOF7_ANGLE" );
+          break;
+        }
+        case DOF7_FORCE: {
+          H3DUtil::writeH3DType( log_file, "DOF7_FORCE" );
+          break;
+        }
         default: {}
       }
     }
@@ -347,6 +371,14 @@ void DeviceLog::writeHeaderRow ( const EffectInput & /*input*/ ) {
         }
         case TIMESTAMP: {
           log_file << "TIMESTAMP";
+          break;
+        }
+        case DOF7_ANGLE: {
+          log_file << "DOF7_ANGLE";
+          break;
+        }
+        case DOF7_FORCE: {
+          log_file << "DOF7_FORCE";
           break;
         }
         default: {}

@@ -14,9 +14,6 @@ from H3DInterface import *
 import H3DUtils
 import random
 import math
-import sys
-import os.path
-import thread
 
 bonustime=15
 
@@ -343,7 +340,7 @@ class SpaceTennisGame:
             self.dn["TX_BALL"].position.setValue( Vec3f(pos.x, pos.y, pos.z - 0.01 ) )
             self.dn["TX_BALL"].angularMomentum.setValue( Vec3f(playerPos.x - self.momIndex*75, playerPos.x + self.momIndex*75, playerPos.z ))
           self.momIncrease += 0.00001
-    except Exception, e:
+    except Exception as e:
       pass
 
   # Sets the ball to the start position

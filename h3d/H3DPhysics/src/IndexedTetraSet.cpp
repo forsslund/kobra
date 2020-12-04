@@ -79,7 +79,8 @@ IndexedTetraSet::IndexedTetraSet (
     vboFieldsUpToDate( new Field ),
     vbo_id( NULL ),
     autoTangent( new AutoTangent ),
-    render_tangents( false )
+    render_tangents( false ),
+    tex_coord_node( NULL )
 {
   // init fields
   type_name = "IndexedTetraSet";

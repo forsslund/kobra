@@ -46,7 +46,8 @@ PhysicsEngineThread::PhysicsEngineThread( const string & _engine,
                                           Priority thread_priority,
                                           int thread_frequency,
                                           bool _useMainThread,
-                                          bool _use_synchronization ):
+                                          bool _use_synchronization,
+                                          const H3DUInt32 _solver_type):
   PeriodicThread( thread_priority, thread_frequency ),
   engine( _engine ),
   simulation_running( false ),
@@ -61,8 +62,11 @@ PhysicsEngineThread::PhysicsEngineThread( const string & _engine,
   synchroniseTheThreads( false ),
   stepping_simulation( false ),
   use_synchronization( _use_synchronization ),
-  nr_physics_steps( 1 ) {
-  
+  nr_physics_steps( 1 ),
+  simulation_cb_handle( -1 ),
+  update_cb_handle( -1 ),
+  solver_type( _solver_type ) {
+
   // initialize the physics engine in use
   callbacks()->initEngine( this );  
 }

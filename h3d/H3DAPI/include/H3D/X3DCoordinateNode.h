@@ -56,7 +56,7 @@ namespace H3D {
 
     /// Perform the OpenGL commands to render a vertex given the index
     /// of the vertex.
-    virtual void render( int index ) {}
+    virtual void render( int /*index*/ ) {}
 
     /// Perform the OpenGL commands to render all vertices as a vertex
     /// array.
@@ -103,7 +103,7 @@ namespace H3D {
       }
 
       inline Iterator& operator++() {
-        if ( ++index == coord->nrAvailableCoords() )
+        if ( ++index == static_cast<int>(coord->nrAvailableCoords()) )
           index = -1;
         return *this;
       }

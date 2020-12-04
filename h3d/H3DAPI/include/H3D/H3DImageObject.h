@@ -51,8 +51,8 @@ namespace H3D {
   
     public:
       /// Constructor.
-      SFImage() : x_min( -1 ), y_min( -1 ), z_min( -1 ),
-                  x_max(-1), y_max( -1 ), z_max( -1 ) {
+      SFImage() : x_min( -1 ), y_min( -1 ),
+                  x_max(-1), y_max( -1 ), z_min( -1 ), z_max( -1 ) {
       }
 
       /// Call this function before doing any calls to any setPixel

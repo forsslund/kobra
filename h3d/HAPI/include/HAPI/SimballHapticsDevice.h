@@ -46,8 +46,7 @@ namespace HAPI {
   class HAPI_API SimballHapticsDevice: public HAPIHapticsDevice {
   public:
     /// Constructor.
-    SimballHapticsDevice( int _device_nr = 0 ) {
-      device_nr = 0;
+    SimballHapticsDevice( int _device_nr = 0 ) : device_nr( _device_nr ) {
     }
 
     /// Destructor.

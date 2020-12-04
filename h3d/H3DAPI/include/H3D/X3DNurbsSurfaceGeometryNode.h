@@ -226,20 +226,20 @@ namespace H3D {
     /// between NurbsPatchSurface and NurbsTrimmedSurface. The arguments
     /// are things that are needed to render that difference.
     virtual void renderBetweenBeginEnd(
-                                GLUnurbsObj *nurbs_object,
-                                X3DTextureCoordinateNode *tex_coord_node,
-                                TextureCoordinateGenerator *tex_coord_gen,
-                                NurbsTextureCoordinate *nurbs_tex_coord, 
-                                GLfloat *texKnotU,
-                                GLfloat *texKnotV,
-                                GLfloat *texCoordinates, 
-                                GLfloat *u_knots, 
-                                GLfloat *v_knots, 
-                                H3DInt32 &sizeOfVertex,
-                                GLfloat *withWeights, 
-                                H3DInt32 &uSizeToUse, 
-                                H3DInt32 &vSizeToUse, 
-                                H3DInt32 &map2Vertex3Or4 ) {};
+                                GLUnurbsObj * /*nurbs_object*/,
+                                X3DTextureCoordinateNode * /*tex_coord_node*/,
+                                TextureCoordinateGenerator * /*tex_coord_gen*/,
+                                NurbsTextureCoordinate * /*nurbs_tex_coord*/, 
+                                GLfloat * /*texKnotU*/,
+                                GLfloat * /*texKnotV*/,
+                                GLfloat * /*texCoordinates*/, 
+                                GLfloat * /*u_knots*/, 
+                                GLfloat * /*v_knots*/, 
+                                H3DInt32 &/*sizeOfVertex*/,
+                                GLfloat * /*withWeights*/, 
+                                H3DInt32 &/*uSizeToUse*/, 
+                                H3DInt32 &/*vSizeToUse*/, 
+                                H3DInt32 &/*map2Vertex3Or4*/ ) {};
     
     /// controlPoint defines a set of control points of dimension 
     /// uDimension × vDimension. This set of points defines a mesh where the

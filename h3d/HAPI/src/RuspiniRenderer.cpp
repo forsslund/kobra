@@ -254,7 +254,7 @@ void RuspiniRenderer::onThreeOrMorePlaneContact(
     try{
       Matrix4 m_inv = m.inverse();
       probe_local_pos = m_inv * contact.globalProbePosition();
-    } catch( H3DUtil::Exception::H3DAPIException ){
+    } catch( H3DUtil::Exception::H3DAPIException& ){
       // If the constructed matrix is a singular matrix then the
       // normals lie in the same plane, this is not particulary likely to
       // happen but it can happen, in that case just use probe_local_pos(0,0,0)
@@ -286,7 +286,7 @@ void RuspiniRenderer::onThreeOrMorePlaneContact(
         } else {
           break;
         }
-      } catch( H3DUtil::Exception::H3DAPIException ){
+      } catch( H3DUtil::Exception::H3DAPIException& ){
         // See comment for the case of only three plane constraints.
         // In this case however we will just move to the next plane.
         ++i;
@@ -444,7 +444,7 @@ RuspiniRenderer::renderHapticsOneStep( HAPIHapticsDevice *hd,
 
   HAPIForceEffect::EffectOutput output;
   bool has_intersection = false;
-  HAPIFloat d2;
+  HAPIFloat d2 = 0;
   Collision::IntersectionInfo closest_intersection;
 
   constraints.clear();  
@@ -691,14 +691,14 @@ RuspiniRenderer::renderHapticsOneStep( HAPIHapticsDevice *hd,
 
 Vec3 RuspiniRenderer::tryProxyMovement( const Vec3 &from,
                                         const Vec3 &to,
-                                        const Vec3 &normal ) {
+                                        const Vec3 &/*normal*/ ) {
   // from = closest_intersection.point;
   // to = new_proxy_pos
 
   bool has_intersection = false;
   Collision::IntersectionInfo intersection;
   Vec3 closest_point;
-  HAPIFloat d2;
+  HAPIFloat d2 = 0;
 
   // try to move the proxy from proxy_pos -> new_proxy_pos and check for 
   // intersection with the other plane constraints. 

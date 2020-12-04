@@ -118,6 +118,10 @@ void EntactDevice::updateDeviceValues() {
 #endif
 }
 
+#ifndef HAVE_ENTACTAPI
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void EntactDevice::Calibrate::onValueChange( const bool &new_value ) {
 #ifdef HAVE_ENTACTAPI
   if( new_value ) {
@@ -129,3 +133,6 @@ void EntactDevice::Calibrate::onValueChange( const bool &new_value ) {
   }
 #endif
 }
+#ifndef HAVE_ENTACTAPI
+H3D_POP_WARNINGS()
+#endif

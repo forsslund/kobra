@@ -52,7 +52,7 @@ MedX3DDemoStyleDialog::MedX3DDemoStyleDialog( wxWindow* parent )
   initializeAvailableRenderStyleList();
 }
 
-void MedX3DDemoStyleDialog::OnRenderStyleChoice( wxCommandEvent& event )
+void MedX3DDemoStyleDialog::OnRenderStyleChoice( wxCommandEvent& /*event*/ )
 {
   if( !doSaveStyleChangesDialog() ) return;
 
@@ -73,7 +73,7 @@ void MedX3DDemoStyleDialog::initializeAvailableRenderStyleList() {
   }
 }
 
-void MedX3DDemoStyleDialog::OnNewStyleButton( wxCommandEvent& event ) {
+void MedX3DDemoStyleDialog::OnNewStyleButton( wxCommandEvent& /*event*/ ) {
   if( !doSaveStyleChangesDialog() ) return;
 
   wxTextEntryDialog *enterTextDialog( new wxTextEntryDialog ( this,
@@ -102,7 +102,7 @@ void MedX3DDemoStyleDialog::OnNewStyleButton( wxCommandEvent& event ) {
   
 }
 
-void MedX3DDemoStyleDialog::OnDeleteStyleButton( wxCommandEvent& event ) {
+void MedX3DDemoStyleDialog::OnDeleteStyleButton( wxCommandEvent& /*event*/ ) {
   wxString name_choice = StyleNameChoice->GetStringSelection();
   StyleNameChoice->Delete( StyleNameChoice->GetSelection() );
   
@@ -119,7 +119,7 @@ void MedX3DDemoStyleDialog::OnDeleteStyleButton( wxCommandEvent& event ) {
   
 }
 
-void MedX3DDemoStyleDialog::OnSaveStyleButton( wxCommandEvent& event ) {
+void MedX3DDemoStyleDialog::OnSaveStyleButton( wxCommandEvent& /*event*/ ) {
   wxString name_choice = StyleNameChoice->GetStringSelection();
   if( name_choice != wxT( "" ) ) {
     X3DVolumeRenderStyleNode *s = wxGetApp().style_nodes[ name_choice ].get();
@@ -128,7 +128,7 @@ void MedX3DDemoStyleDialog::OnSaveStyleButton( wxCommandEvent& event ) {
   }
 }
 
-void MedX3DDemoStyleDialog::OnStyleTypeChoice( wxCommandEvent& event ) {
+void MedX3DDemoStyleDialog::OnStyleTypeChoice( wxCommandEvent& /*event*/ ) {
   wxString name_choice = StyleNameChoice->GetStringSelection();
   wxString type_choice = StyleTypeChoice->GetStringSelection();
 

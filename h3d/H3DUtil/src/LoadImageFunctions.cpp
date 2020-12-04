@@ -27,7 +27,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 #include <H3DUtil/LoadImageFunctions.h>
-
+#include <H3DUtil/ThreadPool.h>
 #ifdef HAVE_ZLIB
 #include <zlib.h>
 #endif
@@ -65,7 +65,9 @@
 #ifdef HAVE_OPENEXR
 
 #if _MSC_VER >= 1500
+#pragma warning( disable : 4244 )
 #pragma warning( disable : 4275 )
+#pragma warning( disable : 4515 )
 #pragma warning( disable : 4800 )
 #endif
 
@@ -75,8 +77,10 @@
 #if defined(OPENEXR_VERSION_MAJOR) && defined(H3D_WINDOWS)
 #include <OpenEXR/ImfMisc.h>
 #else
+// pixelTypeSize actually exists in ImfMisc.h in some debian releases.
+// However, the ImfMisc.h can not be included because it includes some file not included in the release.
 namespace Imf {
-  unsigned int pixelTypeSize( const Imf::PixelType &pt ) {
+  int pixelTypeSize( const Imf::PixelType &pt ) {
     switch( pt ) {
       case Imf::UINT:
   return 4;
@@ -94,7 +98,9 @@ namespace Imf {
 #endif
 
 #if _MSC_VER >= 1500
+#pragma warning( default : 4244 )
 #pragma warning( default : 4275 )
+#pragma warning( default : 4515 )
 #pragma warning( default : 4800 )
 #endif
 
@@ -215,7 +221,46 @@ Image *H3DUtil::loadFreeImage( istream &is ) {
 }
 
 bool H3DUtil::saveFreeImagePNG( const string &url,
-                                Image& image, bool disable_alpha ) {
+                                Image& image, bool disable_alpha, bool async ) {
+
+  struct SaveImageParams
+  {
+    std::string url;
+    bool disable_alpha;
+    std::unique_ptr<PixelImage> pixel_image;
+    SaveImageParams(const string& _url, Image& _image, const bool& _disable_alpha ):
+    url( _url ),
+    disable_alpha( _disable_alpha ),
+    pixel_image( new PixelImage( &_image, _image.width(), _image.height(), _image.depth() ) ) {
+    }
+  };
+
+
+  if( async ) {
+    auto saveFreeImagePNGCallBack = []( void* saveImageParams )-> void* {
+      SaveImageParams* params = static_cast<SaveImageParams*>(saveImageParams);
+      bool saved = saveFreeImagePNGInternal( params->url, *(params->pixel_image), params->disable_alpha );
+      if( !saved ) {
+        Console( LogLevel::Error ) << "Saving to url " << params->url
+          << " failed. Make sure that the url is valid and that the application has the required permissions.\n";
+      }
+      delete params;
+      return nullptr;
+    };
+    if ( ThreadPool::global_pool.size() == 0 ) {
+      ThreadPool::global_pool.resize( 2 );
+    }
+    SaveImageParams* save_image_params = new SaveImageParams( url, image, disable_alpha );
+
+    ThreadPool::global_pool.executeFunction( saveFreeImagePNGCallBack, save_image_params );
+
+    return true;
+  } else {
+    return saveFreeImagePNGInternal( url, image, disable_alpha );
+  }
+}
+
+bool H3DUtil::saveFreeImagePNGInternal( const std::string &url, Image& image, bool disable_alpha ) {
   // Can't use image.bitsPerPixel() because not all image objects use 32bpp.
   int bits_per_pixel = 32;
 
@@ -816,8 +861,8 @@ H3DUTIL_API Image *H3DUtil::loadDicomFile( const string &url,
     // In the future these might be changed to Vec3f and we check
     // the entire vector to know which order to read the images.
     // init patient_pos1 to just remove warning, it will actually be properly init later
-    H3DFloat patient_pos1 = 0.0;  
-    H3DFloat patient_pos2;
+    H3DFloat patient_pos1 = 0.0;
+    H3DFloat patient_pos2 = 0.0;
     H3DFloat patient_orn[6];
     bool first_patient_pos_set = false;
     bool second_patient_pos_set = false;
@@ -829,13 +874,13 @@ H3DUTIL_API Image *H3DUtil::loadDicomFile( const string &url,
       if( fileformat.loadFile(filenames[i].c_str()).good() ) {
         OFString string_value;
         DcmDataset * dataset = fileformat.getDataset();
-        OFCondition res = dataset->findAndGetOFString( DCM_SeriesInstanceUID,
-                                                       string_value );
+        res = dataset->findAndGetOFString( DCM_SeriesInstanceUID,
+                                           string_value );
         // only use the files that match the series instance of the original 
         // file.
         if( use_all_files ||
             string_value == orig_series_instance_UID ) {
-          OFCondition res = dataset->findAndGetOFString(
+          res = dataset->findAndGetOFString(
             DCM_ImagePositionPatient, string_value, 2 );
 
 #ifdef H3D_WINDOWS
@@ -914,7 +959,7 @@ H3DUTIL_API Image *H3DUtil::loadDicomFile( const string &url,
 
       if (fileformat.loadFile(filenames[i].c_str()).good()) {
         DcmDataset *dataset = fileformat.getDataset();
-        OFCondition res = dataset->findAndGetOFString( DCM_SeriesInstanceUID,
+        res = dataset->findAndGetOFString( DCM_SeriesInstanceUID,
                                                        series_instance_UID );
       }
      
@@ -1164,7 +1209,7 @@ H3DUTIL_API Image* H3DUtil::loadOpenEXRImage( const string &url ) {
           bytes_per_pixel,              // xStride
           bytes_per_pixel * width ) );  // fillValue
     }
-    if( g ) {
+    if( g && r ) {
       frameBuffer.insert(
         "G",
         Imf::Slice(
@@ -1173,7 +1218,7 @@ H3DUTIL_API Image* H3DUtil::loadOpenEXRImage( const string &url ) {
           bytes_per_pixel,
           bytes_per_pixel * width ) );
     }
-    if( b ) {
+    if( b && g && r ) {
       frameBuffer.insert( "B",
         Imf::Slice(
           r->type,
@@ -1182,7 +1227,7 @@ H3DUTIL_API Image* H3DUtil::loadOpenEXRImage( const string &url ) {
           bytes_per_pixel,
           bytes_per_pixel * width ) );
     }
-    if( a ) {
+    if( a && b && g && r) {
       frameBuffer.insert( "A",
         Imf::Slice( 
           r->type,

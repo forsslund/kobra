@@ -60,7 +60,9 @@ GeneratedCubeMapTexture::GeneratedCubeMapTexture(
   size( _size ),
   textureProperties( _textureProperties ),
   textures_initialized( false ),
-  generating_textures( false ) {
+  generating_textures( false ),
+  fbo_id( 0 ),
+  rbo_id( 0 ) {
     
   type_name = "GeneratedCubeMapTexture";
   database.initFields( this );

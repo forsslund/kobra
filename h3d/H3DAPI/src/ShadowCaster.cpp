@@ -93,8 +93,10 @@ ShadowCaster::ShadowCaster(
   algorithm( _algorithm ),
   generator( NULL ),
   shadowShader( _shadowShader ),
+  multiThreading( _multiThreading),
   last_shader( NULL ),
-  multiThreading( _multiThreading){
+  render_caps_ts( false ),
+  should_transfer_data_ts( false ) {
   type_name = "ShadowCaster";
   database.initFields( this );
 

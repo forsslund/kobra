@@ -169,7 +169,6 @@ namespace H3D{
 
       virtual void onRemove( Node *n) {
         if( n ){
-          RigidBodyCollection* rbc = static_cast< RigidBodyCollection* >( owner );
           CollisionCollection* cc = static_cast< CollisionCollection* >( n );
           cc->setRigidBodyCollection();
         }
@@ -281,7 +280,9 @@ namespace H3D{
       Inst< SFBool > _renderOnlyEnabledCollidables = 0,
       Inst< SFBool  > _useStaticTimeStep = 0,
       Inst< SFInt32 > _syncGraphicsFrames = 0,
-      Inst< SFInt32 > _syncPhysicsFrames = 0 );
+      Inst< SFInt32 > _syncPhysicsFrames = 0,
+      Inst< SFInt32 > _solverType = 0,
+      Inst< SFInt32 > _synchronizedStepCounter = 0);
 
     /// Destructor.
     virtual ~RigidBodyCollection();
@@ -566,6 +567,32 @@ namespace H3D{
     ///
     /// \dotfile RigidBodyCollection_syncPhysicsFrames.dot
     auto_ptr< SFInt32 > syncPhysicsFrames;
+
+    /// The desired type of solver for the physics engine. If an engine only has one type of solver this is not
+    /// a relevant option.
+    ///
+    /// For PhysX4: 
+    /// - 0 : Projected Gauss-Seidel iterative solver
+    /// - 1 : Temporal Gauss-Seidel solver
+    ///
+    /// <b>Access type:</b>inputOutput
+    /// <b>Default value:</b>0
+    ///
+    /// \dotfile RigidBodyCollection_solverType.dot
+    auto_ptr< SFInt32 > solverType;
+
+    /// The number of times the graphics and physics has been synchronized and started the next set of execution
+    ///
+    /// This is updated after the graphics have confirmed that the physics are ready to start executing,
+    /// but before both graphics and physics begin execution, meaning that if syncGraphicsFrames and
+    /// syncPhysicsFrames are greater than 0 then this is a synchronized value that both threads can use
+    /// to check how far into the overall progress of the scene they are.
+    ///
+    /// <b>Access type:</b>inputOutput
+    /// <b>Default value:</b>0
+    ///
+    /// \dotfile RigidBodyCollection_synchronizedStepCounter.dot
+    auto_ptr< SFInt32 > synchronizedStepCounter;
 
     /// The H3DNodeDatabase for this node.
     static H3DNodeDatabase database;

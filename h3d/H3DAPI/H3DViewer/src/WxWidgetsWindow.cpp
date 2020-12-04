@@ -62,14 +62,14 @@ WxWidgetsWindow::WxWidgetsWindow( wxWindow *_theParent,
   H3DWindowNode( _width, _height, _fullscreen, _mirrored, _renderMode,
                  _viewpoint, _posX, _posY, _manualCursorControl,
                  _cursorType ),
-  theWindow( _theParent ),
   drag_file_func( NULL ),
   drag_file_func_arg( NULL ),
-  is_initialized( false ),
   use_h3d_settings( true ),
+  is_initialized( false ),
+  theWindow( _theParent ),
   theWxGLCanvas( NULL ),
-  fullscreen_initialized ( false ),
   theWxGLContext( NULL ),
+  fullscreen_initialized ( false ),
   allow_new_pixel_format_creation( true ) {
   type_name = "WxWidgetsWindow";
   database.initFields( this );
@@ -389,6 +389,10 @@ void WxWidgetsWindow::MyWxGLCanvas::OnIdle(wxIdleEvent& event) {
   event.RequestMore();
 }
 
+#if __GNUC__ && !defined(wxOSX_USE_CARBON)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 void WxWidgetsWindow::MyWxGLCanvas::OnSize( wxSizeEvent& event ) {
 #if wxOSX_USE_CARBON
   wxGLCanvas::OnSize(event);
@@ -403,6 +407,9 @@ void WxWidgetsWindow::MyWxGLCanvas::OnSize( wxSizeEvent& event ) {
     }
   }
 }
+#if __GNUC__ && !defined(wxOSX_USE_CARBON)
+#pragma GCC diagnostic pop
+#endif
 
 void WxWidgetsWindow::MyWxGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event))
 {
@@ -577,7 +584,6 @@ void WxWidgetsWindow::MyWxGLCanvas::OnKeyDown(wxKeyEvent& event)
                         true ); break;
     case WXK_SHIFT: myOwner->onKeyDown( X3DKeyDeviceSensorNode::SHIFT, true );
       break;
-    default: { myOwner->onKeyDown(event.GetKeyCode(), false ); }
   }
   event.Skip();
 }
@@ -638,27 +644,27 @@ void WxWidgetsWindow::MyWxGLCanvas::onLeftMouseButtonDown(
 }
 
 void WxWidgetsWindow::MyWxGLCanvas::onLeftMouseButtonUp(
-  wxMouseEvent & event ) {
+  wxMouseEvent & /*event*/ ) {
   myOwner->onMouseButtonAction( MouseSensor::LEFT_BUTTON, MouseSensor::UP );
 }
 
 void WxWidgetsWindow::MyWxGLCanvas::onMiddleMouseButtonDown(
-  wxMouseEvent & event ) {
+  wxMouseEvent & /*event*/ ) {
   myOwner->onMouseButtonAction( MouseSensor::MIDDLE_BUTTON, MouseSensor::DOWN );
 }
 
 void WxWidgetsWindow::MyWxGLCanvas::onMiddleMouseButtonUp(
-  wxMouseEvent & event ) {
+  wxMouseEvent & /*event*/ ) {
   myOwner->onMouseButtonAction( MouseSensor::MIDDLE_BUTTON, MouseSensor::UP );
 }
 
 void WxWidgetsWindow::MyWxGLCanvas::onRightMouseButtonDown(
-  wxMouseEvent & event ) {
+  wxMouseEvent & /*event*/ ) {
   myOwner->onMouseButtonAction( MouseSensor::RIGHT_BUTTON, MouseSensor::DOWN );
 }
 
 void WxWidgetsWindow::MyWxGLCanvas::onRightMouseButtonUp(
-  wxMouseEvent & event ) {
+  wxMouseEvent & /*event*/ ) {
   myOwner->onMouseButtonAction( MouseSensor::RIGHT_BUTTON, MouseSensor::UP );
 }
 void WxWidgetsWindow::MyWxGLCanvas::onMouseMotion( wxMouseEvent & event ) {

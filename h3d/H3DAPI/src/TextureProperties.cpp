@@ -92,12 +92,11 @@ TextureProperties::TextureProperties(
   generateMipMaps( _generateMipMaps ),
   textureTransferScale( _textureTransferScale ),
   textureTransferBias( _textureTransferBias ),
+  propertyChanged( new Field ),
   textureCompareMode( _textureCompareMode ),
   textureCompareFailValue( _textureCompareFailValue ),
   textureType( _textureType ),
-  textureFormat( _textureFormat ),
-  propertyChanged( new Field ) {
-
+  textureFormat( _textureFormat ) {
   type_name = "TextureProperties";
 
   database.initFields( this );
@@ -193,7 +192,7 @@ TextureProperties::TextureProperties(
   textureFormat->route( propertyChanged );
 }
 
-void TextureProperties::renderTextureProperties( GLenum texture_target ) {
+void TextureProperties::renderTextureProperties( GLenum texture_target, bool texture_provided_mip_maps ) {
   // anisotropicDegree
   H3DFloat anisotropic = anisotropicDegree->getValue();
   if( anisotropic < 1 ) {
@@ -344,17 +343,33 @@ void TextureProperties::renderTextureProperties( GLenum texture_target ) {
            min_filter == "NICEST" ) {
     glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   } else if( min_filter == "AVG_PIXEL_AVG_MIPMAP") {
-    glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER, 
-                     GL_LINEAR_MIPMAP_LINEAR );
+    if( texture_provided_mip_maps ) {
+      glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER,
+                       GL_LINEAR_MIPMAP_LINEAR );
+    } else {
+      glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    }
   } else if( min_filter == "AVG_PIXEL_NEAREST_MIPMAP") {
-    glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER, 
-                     GL_LINEAR_MIPMAP_NEAREST );
+    if( texture_provided_mip_maps ) {
+      glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER,
+                       GL_LINEAR_MIPMAP_NEAREST );
+    } else {
+      glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    }
   } else if( min_filter == "NEAREST_PIXEL_AVG_MIPMAP") {
-    glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER, 
-                     GL_NEAREST_MIPMAP_LINEAR );
+    if( texture_provided_mip_maps ) {
+      glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER,
+                       GL_NEAREST_MIPMAP_LINEAR );
+    } else {
+      glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    }
   } else if( min_filter == "NEAREST_PIXEL_NEAREST_MIPMAP") {
-    glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER, 
-                     GL_NEAREST_MIPMAP_NEAREST );
+    if( texture_provided_mip_maps ) {
+      glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER, 
+                       GL_NEAREST_MIPMAP_NEAREST );
+    } else {
+      glTexParameteri( texture_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    }
   } else {
     Console(LogLevel::Warning) << "Warning: Invalid minification filter \"" << min_filter 
                << "\" in TextureProperties "

@@ -5,7 +5,10 @@ import sys
 import subprocess
 import time
 import platform
-from Queue import Queue, Empty
+if sys.version_info[0] >= 3:
+  from queue import Queue, Empty
+else:
+  from Queue import Queue, Empty
 from threading  import Thread
 import tempfile
 import string
@@ -71,7 +74,7 @@ class ProcessWin32(Process):
 
     import ctypes
     ctypes.windll.kernel32.SetErrorMode(0)
-    print "launching: " + " ".join(command)
+    print("launching: " + " ".join(command))
     self.process = subprocess.Popen(" ".join(command), shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd= cwd)
     
     self.std_out_q = Queue()
@@ -126,7 +129,7 @@ class ProcessWin32(Process):
             win32con.VK_ESCAPE, 
             0)
       except Exception as e:
-        print e
+        print(e)
     else:
       shell = win32com.client.Dispatch("WScript.Shell")
       shell.AppActivate(self.process_name)
@@ -138,7 +141,7 @@ class ProcessWin32(Process):
     # function to kill process through python wmi package
     # the input process can be either process name or process id
 
-    processByName = not isinstance( process, (int, long) )
+    processByName = not isinstance( process, int )
     c = wmi.WMI()
     processes = []
     if processByName:
@@ -190,7 +193,7 @@ class ProcessWin32(Process):
     for proc in psutil.process_iter():
       if "WerFault.exe".lower() in proc.name().lower():
         # NOTE: Blanket kill all WerFault instances!
-        print "killing werfault.exe"
+        print("killing werfault.exe")
         proc.kill()
         
         # # Check if WerFault is for our process
@@ -203,11 +206,11 @@ class ProcessWin32(Process):
     try:
       psutil_proc = psutil.Process(self.process.pid)
       for proc_child in psutil_proc.children(recursive=True):
-        print "killing children process, ", proc_child.name(), " with pid ", proc_child.pid
+        print("killing children process, ", proc_child.name(), " with pid ", proc_child.pid)
         self.killProcessThroughWMI(proc_child.pid)
       
       if self.isRunning():
-        print "killing main process:"
+        print("killing main process:")
         self.killProcessThroughWMI(psutil_proc.pid)
 
     except:
@@ -219,7 +222,7 @@ class ProcessWin32(Process):
     output = ""
     try:
       while not self.std_out_q.empty():
-        output+= self.std_out_q.get(timeout=.1)
+        output+= self.std_out_q.get(timeout=.1).decode("utf-8")
     except Empty:
       pass
     return output
@@ -228,7 +231,7 @@ class ProcessWin32(Process):
     output = ""
     try:
       while not self.std_err_q.empty():
-        output+= self.std_err_q.get(timeout=.1)
+        output+= self.std_err_q.get(timeout=.1).decode("utf-8")
     except Empty:
       pass
     return output

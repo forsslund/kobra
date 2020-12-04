@@ -8,7 +8,6 @@ Requirements:
 import os, sys
 import time
 import platform
-from Queue import Queue, Empty
 from threading  import Thread
 import tempfile
 import string
@@ -17,16 +16,19 @@ import math
 import signal
 import glob
 #import Image
-import ConfigParser
+if sys.version_info[0] >= 3:
+  import configparser as ConfigParser
+else:
+  import ConfigParser
 import json
 import datetime
 from collections import namedtuple
-import shlex
 from inspect import getmembers, isfunction
 import operator
 from importlib import import_module
 import ast
 import re
+import traceback
 
 from TestResults import TestResults
 from Variations import Option, Variation
@@ -76,7 +78,6 @@ parser.add_argument('--case', dest='case', help='The name of one or more cases l
 parser.add_argument('--testdefs', dest='testdefs', help='The name of one or more testdefs located somewhere in or below the workingdir. If this is specified then only cases in these TestDefs will be run. This can be combined with --case if you have multiple testdefs containing cases with the same name and only want to run one of them.', default='')
 parser.add_argument('--resolution', dest='resolution', help='The resolution h3dload should be run at (only used for h3dload), in the format widthxheight, for example 800x600', default='640x480')
 parser.add_argument('--inject_at_end_of_scene', dest='inject_at_end_of_scene', help='Specifies if the testing boilerplate nodes should be injected before </Scene> instead of the standard behaviour of injecting after <Scene>. For compatibility with projects that do search-and-replace inside the x3d file and might match information in one of the testing nodes if they come before nodes that are expected to be in Scene.', default=False)
-parser.add_argument('--simulationbasedir', dest='simulationbasedir', help='Path to the directory where the project that is being tested has its SimulationBase  python directory, this is required for using the settings testdef property.', default=None)
 parser.add_argument('--skipResultUpload', dest='skipResultUpload', action='store_true',help='Specifies if skip the uploading of result, this can be handy while doing simple test', default=False)
 parser.add_argument('--skipSvnInfoOutput', dest='skipSvnInfoOutput', action='store_true',help='Specifies if skip extracting svn info of x3d and script file used in for the test', default=False)
 parser.add_argument('--retentionTime', type=int, dest='retentionTime', help="How old test results are allowed to be (counted in days) before they are deleted automatically. If unspecified then no deletions will be made. If specified, will delete all test results and test runs that are older than [retentionTime] days before running all the tests. If it is not greater than 1 then no deletion will be done.", default=-1)
@@ -134,7 +135,7 @@ class TestCaseRunner ( object ):
         with open( warnings_ignore_list, "r" ) as file:
           ignore_list = file.readlines()
       except IOError:
-        print "Failed to open warnings ignore list file " + warnings_ignore_list
+        print("Failed to open warnings ignore list file " + warnings_ignore_list)
   
     found_result = re.split(r'((?:^\S*console_start.+$)|(?:^\S*console_end.+$))', test_results.std_out + test_results.std_err, flags=re.MULTILINE)
     haystack = ""
@@ -244,7 +245,7 @@ class TestCaseRunner ( object ):
       cwd= os.getcwd()
     else:
       cwd= args.processworkingdir
-      print "working dir for process is: " + cwd
+      print("working dir for process is: " + cwd)
     filename= os.path.abspath ( url )
     
     if os.path.isfile( self.early_shutdown_file ):
@@ -261,7 +262,7 @@ class TestCaseRunner ( object ):
       if not process.isRunning():
         break
     if not process.isRunning ():
-      print "Test finished successfully after " + str(time_slept) + "s"
+      print("Test finished successfully after " + str(time_slept) + "s")
       test_results.std_out= process.getStdOut()
       test_results.std_err= process.getStdErr()
       if test_case.ignore_warnings:
@@ -278,30 +279,30 @@ class TestCaseRunner ( object ):
       time_slept += 0.5
 
     if not process.isRunning ():
-      print "Test finished successfully after " + str(self.startup_time + time_slept) + "s"
+      print("Test finished successfully after " + str(self.startup_time + time_slept) + "s")
 
       # display warning if test finishes with (less than, or more than) this time remaining
       show_warning_secs = (10, 30)
       time_remaining = self.shutdown_time - time_slept
       if time_remaining < show_warning_secs[0]:
-        print( 
+        print(( 
           "WARNING: Test finished with less than %.1f seconds (%.1fs) before timeout. "
           "Consider increasing timeout from %.1f to %.1f!" % 
-          (show_warning_secs[0], time_remaining, self.shutdown_time, time_slept+show_warning_secs[0]))
+          (show_warning_secs[0], time_remaining, self.shutdown_time, time_slept+show_warning_secs[0])))
 
       if time_remaining > show_warning_secs[1]:
-        print( 
+        print(( 
           "NOTE: Test finished with more than %.1f seconds (%.1fs) before timeout. "
           "Consider reducing timeout from %.1f to %.1f!" % 
-          (show_warning_secs[1], time_remaining, self.shutdown_time, time_slept+show_warning_secs[1]))
+          (show_warning_secs[1], time_remaining, self.shutdown_time, time_slept+show_warning_secs[1])))
 
       test_results.terminates_ok= True
     else:
-      print "Shutdown timeout hit, test looks like it crashed or froze."
+      print("Shutdown timeout hit, test looks like it crashed or froze.")
       test_results.terminates_ok= False
     # Now that we're done running the tests, regardless of if it failed or not we should kill the process and all its child processes (killing the process also triggers killing WERFault which ensures even crashed child processes will be properly terminated.
     try:
-      print "killing processes"
+      print("killing processes")
       process.kill ()
       time_slept = 0
       self.shutdown_timeout = 60
@@ -340,11 +341,11 @@ class TestCaseRunner ( object ):
       All of these values default to None
     The list will contain one namedtuple for each Section in the specified definition file
     """
-    confParser = ConfigParser.RawConfigParser(defaults={'x3d':None, 'baseline':None, 'script':None, 'runtime':1, 'starttime':1, 'fuzz': 2, 'threshold': 20, 'resolution': None, 'processargs': '', 'physics_engine': None, 'settings': None, 'ignore_warnings': None, 'console_ostream': 'cerr'}, allow_no_value=True)
+    confParser = ConfigParser.RawConfigParser(defaults={'x3d':None, 'baseline':None, 'script':None, 'runtime':1, 'starttime':1, 'fuzz': 2, 'threshold': 20, 'resolution': None, 'processargs': '', 'physics_engine': None, 'ignore_warnings': None, 'console_ostream': 'cerr'}, allow_no_value=True)
     try:
       confParser.read(file_path)
     except:
-      print sys.exc_info()[0]
+      print(sys.exc_info()[0])
       return None
     result = []
     description = ""
@@ -355,7 +356,7 @@ class TestCaseRunner ( object ):
         except:
           description = ''
       else:
-        test_case = namedtuple('TestDefinition', ['name', 'filename', 'x3d', 'baseline', 'script', 'runtime', 'starttime', 'resolution', 'processargs', 'maxtrials', 'physics_engine', 'settings', 'ignore_warnings', 'expected_steps', 'warnings_ignore_list', 'console_ostream'])
+        test_case = namedtuple('TestDefinition', ['name', 'filename', 'x3d', 'baseline', 'script', 'runtime', 'starttime', 'resolution', 'processargs', 'maxtrials', 'physics_engine', 'ignore_warnings', 'expected_steps', 'warnings_ignore_list', 'console_ostream'])
         test_case.name = sect
         test_case.x3d = confParser.get(sect, 'x3d')
         test_case.baseline = confParser.get(sect, 'baseline folder')
@@ -417,12 +418,7 @@ class TestCaseRunner ( object ):
           test_case.physics_engine = confParser.get(sect, 'physics_engine')
         except:
           test_case.physics_engine = None
-        
-        try:
-          test_case.settings = confParser.get(sect, 'settings')
-        except:
-          test_case.settings = None
-                  
+
         try:
           test_case.ignore_warnings = confParser.getboolean(sect, 'ignore_warnings')
         except:
@@ -478,59 +474,7 @@ class TestCaseRunner ( object ):
                                                                   testCase.starttime,
                                                                   os.path.join(args.RunTestsDir, 'TestBoilerplate.py'))
     v = Variation (testCase.name, script)
-    # Check if we should change settings
-    if not testCase.settings is None:
-      if args.simulationbasedir is None:
-        print("Error! No --simulationbasedir flag! The Settings testdef property requires access to SimulationBase! Skipping TestCase!")
-        all_tests_successful = False
-        exitcode = 1
-        return None
-      else:
-        try:
-          print("Doing settings injection!")
-          settings_new, settings_dir = shlex.split(testCase.settings)
-          if settings_new is None or settings_dir is None:
-            print("Error! Settings property needs two values, the settings file to use and the module's settings directory!")
-            all_tests_successful = False
-            exitcode = 1
-            return None
-          settings_new = os.path.join(directory, settings_new)
-          settings_local = os.path.join(directory, settings_dir, "local", testCase.name, "settings", testCase.name + ".ini")
-          settings_default = os.path.join(directory, settings_dir, "Default" + testCase.name + ".ini")
-            
-          sys.path.append(args.simulationbasedir)
-          import SimulationBase.Settings
-          settings_file = SimulationBase.Settings.ConfigINI()
-          if os.path.exists(settings_local + ".original.ini"):
-            try:
-              print settings_local+'_original.ini already exists! This probably means that RunTests was interrupted during a previous execution.'
-              print "Restoring " + settings_local + " before continuing..."
-              os.remove(settings_local)
-              os.rename(settings_local + ".original.ini", settings_local)  
-            except:
-              print "Failed to restore! Please check the files manually."
-              return
-            
-          if(os.path.exists(settings_local)):
-            settings_file.load(settings_local)
-            if not settings_file.save(settings_local + ".original.ini"):
-              print("Failed to backup original file.")            
-          else:
-            print("No local settings file found, you should make sure you run this module outside of the tests at least once before running more tests with it.")
-            all_tests_successful = False
-            return None              
 
-          settings_file_new = SimulationBase.Settings.ConfigINI()
-          settings_file_new.load(settings_new)
-          for section in settings_file_new.getSections():
-            for option in settings_file_new.getOptions(section):
-              settings_file.set(section, option, settings_file_new.get(section, option))
-          if not settings_file.save(settings_local):
-            print("Failed to save new file")
-        except Exception as e:
-          print(str(e))
-        
-        
     # use svn info to attempt to find the repo url of this test and its test script
     if args.skipSvnInfoOutput:
       svn_info_out = ""
@@ -545,8 +489,8 @@ class TestCaseRunner ( object ):
         print("Unable to obtain svn info for test x3d file, won't include it in results")
       else:
         #include it here
-        for line in svn_info_out.split('\r\n'):
-          if line.startswith("URL: "):
+        for line in svn_info_out.split(b'\r\n'):
+          if line.startswith(b"URL: "):
             svn_url_x3d = line[5:]
             break
       p = subprocess.Popen('svn info "' + os.path.join(directory, testCase.script) + '"', stdout=subprocess.PIPE, shell=False )
@@ -555,8 +499,8 @@ class TestCaseRunner ( object ):
         print("Unable to obtain svn info for test x3d file, won't include it in results")
       else:
         #include it here
-        for line in svn_info_out.split('\r\n'):
-          if line.startswith("URL: "):
+        for line in svn_info_out.split(b'\r\n'):
+          if line.startswith(b"URL: "):
             svn_url_script = line[5:]
             break
 
@@ -570,15 +514,15 @@ class TestCaseRunner ( object ):
     original_path = os.path.join(directory, testCase.x3d)
     try:
       if os.path.exists(original_path+'_original.x3d'):
-        print original_path+'_original.x3d already exists! This probably means that RunTests was interrupted during a previous execution.'
-        print "Restoring " + original_path + " before continuing..."
+        print(original_path+'_original.x3d already exists! This probably means that RunTests was interrupted during a previous execution.')
+        print("Restoring " + original_path + " before continuing...")
         try:
           if os.path.exists(original_path):
             os.remove(original_path)
           os.rename(original_path+'_original.x3d', original_path)
-          print "Restored! Continuing the testing..."
+          print("Restored! Continuing the testing...")
         except:
-          print "Failed to restore! Please check the files manually."
+          print("Failed to restore! Please check the files manually.")
           return
       if (os.path.exists(os.path.join(output_dir, "validation.txt"))):
         os.remove(os.path.join(output_dir, "validation.txt"))
@@ -591,24 +535,26 @@ class TestCaseRunner ( object ):
     try:
       # Run the test
       for trial in range(testCase.maxtrials):
-        print "NOTE: Running trial %d/%d..." % (trial+1, testCase.maxtrials)
+        print("NOTE: Running trial %d/%d..." % (trial+1, testCase.maxtrials))
         result = self.runTestCase (file, testCase, os.path.abspath(original_path), os.path.join(directory, testCase.x3d), v.name, v)
         if result.terminates_ok:
-          print result.std_err
-          print result.std_out
+          print(result.std_err)
+          print(result.std_out)
           break
         else:
-          print "WARNING: Trial %d/%d failed!" % (trial+1, testCase.maxtrials)
-        
-  #    print os.path.abspath(output_dir + '\\validation.txt')
-      result.parseValidationFile(testCase, os.path.abspath(output_dir + '\\validation.txt'), os.path.abspath(os.path.join(directory, testCase.baseline)), os.path.abspath(output_dir + '\\text\\'), testCase.fuzz, testCase.threshold)
+          print("WARNING: Trial %d/%d failed!" % (trial+1, testCase.maxtrials))
+
+      result.parseValidationFile(
+        testCase, os.path.abspath( os.path.join( output_dir, "validation.txt" ) ),
+        os.path.abspath( os.path.join( directory, testCase.baseline ) ),
+        os.path.abspath( os.path.join( output_dir, "text" ) ), testCase.fuzz, testCase.threshold )
         
       if result.success and all_tests_successful:
         exitcode = 0
       else:
         exitcode = 1
     except Exception as e:
-      print str(e)
+      print(str(e))
   
 
     try:
@@ -623,20 +569,17 @@ class TestCaseRunner ( object ):
       os.rename(original_path+'_original.x3d', original_path)
     except:
       pass
-      
-    try:
-      if testCase.settings != None:
-        settings_new, settings_dir = shlex.split(testCase.settings)
-        settings_new = os.path.join(directory, settings_new)
-        settings_local = os.path.join(directory, settings_dir, "local", testCase.name, "settings", testCase.name + ".ini")     
-        os.remove(settings_local)
-        os.rename(settings_local+".original.ini", settings_local)
-    except:
-      pass
 
     if result:
-      result.svn_url_x3d = svn_url_x3d
-      result.svn_url_script = svn_url_script
+      if sys.version_info[0] < 3 or isinstance( svn_url_x3d, str ):
+        result.svn_url_x3d = svn_url_x3d
+      else:
+        result.svn_url_x3d = svn_url_x3d.decode("utf-8")
+
+      if sys.version_info[0] < 3 or isinstance( svn_url_script, str ):
+        result.svn_url_script = svn_url_script
+      else:
+        result.svn_url_script = svn_url_script.decode("utf-8")
 
     return result
 
@@ -652,8 +595,12 @@ class TestCaseRunner ( object ):
     results = []
 
     if not args.skipResultUpload:
-      global MySQLdb
-      import MySQLdb
+      if sys.version_info[0] >= 3:
+        global MySQLdb
+        import pymysql as MySQLdb
+      else:
+        global MySQLdb
+        import MySQLdb
       self.build_name = args.buildname
       self.hardware_name = args.hardwarename
       self.ConnectDB()
@@ -682,25 +629,28 @@ class TestCaseRunner ( object ):
               file_path= os.path.join(root,file)
               testCases, filedescription = self.parseTestDefinitionFile(file_path)
               for testCase in testCases:
-                if testCase != None and testCase.x3d != None and testCase.script != None:
-                  found_tests = True
-                  print "Testing: " + testCase.name
-                  case_results = self.processTestDef(file, testCase, results, root)
-                  results.append(case_results)
-                  if case_results != None:
-                    all_tests_successful = all_tests_successful and case_results.success
-                    all_tests_run = all_tests_run and case_results.terminates_ok
-                  else:
-                    all_tests_succesful = False
-                    all_tests_run = False
-                  testCase.filename = (os.path.relpath(file_path, directory)).replace('\'', '/') # This is used to set up the tree structure for the results page. It will store this parameter in the database as a unique identifier of this specific file of tests.
-                  if not args.skipResultUpload and case_results != None:  
-                    self.UploadResultsToSQL(testCase, case_results, root, filedescription)
+                try:
+                  if testCase != None and testCase.x3d != None and testCase.script != None:
+                    found_tests = True
+                    print("Testing: " + testCase.name)
+                    case_results = self.processTestDef(file, testCase, results, root)
+                    results.append(case_results)
+                    if case_results != None:
+                      all_tests_successful = all_tests_successful and case_results.success
+                      all_tests_run = all_tests_run and case_results.terminates_ok
+                    else:
+                      all_tests_succesful = False
+                      all_tests_run = False
+                    testCase.filename = (os.path.relpath(file_path, directory)).replace('\'', '/') # This is used to set up the tree structure for the results page. It will store this parameter in the database as a unique identifier of this specific file of tests.
+                    if not args.skipResultUpload and case_results != None:  
+                      self.UploadResultsToSQL(testCase, case_results, root, filedescription)
+                except Exception as e1:
+                  print( "Something went wrong while handling test case " + str(testCase.name) + " in TestDef file: " + str(file) + " with exception message: " + str(e1) )
+                  traceback.print_exc(file=sys.stderr)
         except Exception as e:
           print("processing defs in " + str(file)+" failed with exception: " + str(e) )
     if not found_tests:
-      print "No valid tests found in: " + os.path.abspath(directory)
-              
+      print("No valid tests found in: " + os.path.abspath(directory))
     return results, all_tests_successful, all_tests_run
   
 
@@ -711,16 +661,22 @@ class TestCaseRunner ( object ):
     else:
       return True
   def _createVariationFile ( self, variation, file_path ):
-    
-    orig_file= open ( file_path, 'r' )
-    
-    
-    variation_file= tempfile.NamedTemporaryFile(dir=os.path.dirname(file_path), suffix='.x3d', delete= False )
-    original_contents= orig_file.read()
-    variation_contents= variation.parse ( original_contents, inject_at_end_of_scene=args.inject_at_end_of_scene)
-    variation_file.write ( variation_contents )
-    variation_file.close()
-    
+
+    if sys.version_info[0] >= 3:
+      orig_file= open ( file_path, 'r', encoding='utf-8', errors='ignore' )
+      variation_file= tempfile.NamedTemporaryFile(mode='wb', dir=os.path.dirname(file_path), suffix='.x3d', delete= False )
+      original_contents= orig_file.read()
+      variation_contents= variation.parse ( original_contents, inject_at_end_of_scene=args.inject_at_end_of_scene)
+      variation_file.write ( variation_contents.encode( 'utf-8', errors='ignore') )
+      variation_file.close()
+    else:
+      orig_file= open ( file_path, 'r' )
+      variation_file= tempfile.NamedTemporaryFile(dir=os.path.dirname(file_path), suffix='.x3d', delete= False )
+      original_contents= orig_file.read()
+      variation_contents= variation.parse ( original_contents, inject_at_end_of_scene=args.inject_at_end_of_scene)
+      variation_file.write ( variation_contents )
+      variation_file.close()
+
     return (variation_contents!=original_contents, variation_file.name)
  
 
@@ -728,9 +684,9 @@ class TestCaseRunner ( object ):
   def ConnectDB(self):
     if self.db == None:
       try:
-        print "Attempting to connect to results database at " + args.dbhost
+        print("Attempting to connect to results database at " + args.dbhost)
         self.db = MySQLdb.connect(host=args.dbhost, db=args.dbname, user=args.dbuser, passwd=args.dbpass)
-        print "Connected!"
+        print("Connected!")
         self.db.autocommit = True
         curs = self.db.cursor()
         curs.execute("SELECT * FROM servers WHERE build_name='%s' AND hardware_name='%s'" % (self.build_name, self.hardware_name))
@@ -739,12 +695,12 @@ class TestCaseRunner ( object ):
         curs.close()
         self.db.commit()
       except Exception as e:
-        print(str(e))        
+        print((str(e)))        
         
         
   def DeleteOldResults(self, retentionTime):
     if retentionTime <= 1:
-      print "Retention Time too low, needs to be greater than 1."
+      print("Retention Time too low, needs to be greater than 1.")
       return
       
     self.ConnectDB()
@@ -778,7 +734,7 @@ class TestCaseRunner ( object ):
       return text
     
   def UploadResultsToSQL(self, testCase, case_results, output_dir, testfile_description):
-    print "Uploading results for " + testCase.filename
+    print("Uploading results for " + testCase.filename)
     self.ConnectDB()
     curs = self.db.cursor()
     
@@ -870,7 +826,7 @@ class TestCaseRunner ( object ):
           for line in result.output:
             output_string += line
           if result.success:
-            curs.execute("INSERT INTO console_results (test_run_id, file_id, case_id, step_id, success, output, new_failure, error_type) VALUES (%d, %d, %d, %d, 'Y', '%s', 'N', 'NO_ERROR')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, self.db.escape_string(output_string)))
+            curs.execute("INSERT INTO console_results (test_run_id, file_id, case_id, step_id, success, output, new_failure, error_type) VALUES (%d, %d, %d, %d, 'Y', '%s', 'N', 'NO_ERROR')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, self.db.escape_string(self._truncateTextForSQL(output_string))))
           else:
             # Try to fetch the previous test run to see if the failure is new
             curs.execute("SELECT success FROM console_results WHERE test_run_id<%d and file_id=%d and case_id=%d and step_id=%d ORDER BY test_run_id DESC LIMIT 1;" % (self.test_run_id, testfile_id, testcase_id, teststep_id))
@@ -887,16 +843,16 @@ class TestCaseRunner ( object ):
               f = open(result.baseline_path)
               baseline_string = f.read()
               f.close()
-              curs.execute("INSERT INTO console_results (test_run_id, file_id, case_id, step_id, success, output, baseline, diff, new_failure, error_type) VALUES (%d, %d, %d, %d, 'N', '%s', '%s', '%s', '%s', '%s')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, self.db.escape_string(output_string), self.db.escape_string(baseline_string), self.db.escape_string(result.diff), new_failure, result.error_type))
+              curs.execute("INSERT INTO console_results (test_run_id, file_id, case_id, step_id, success, output, baseline, diff, new_failure, error_type) VALUES (%d, %d, %d, %d, 'N', '%s', '%s', '%s', '%s', '%s')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, self.db.escape_string(self._truncateTextForSQL(output_string)), self.db.escape_string(baseline_string), self.db.escape_string(self._truncateTextForSQL(result.diff)), new_failure, result.error_type))
             else:
-              curs.execute("INSERT INTO console_results (test_run_id, file_id, case_id, step_id, success, output, baseline, diff, new_failure, error_type) VALUES (%d, %d, %d, %d, 'N', '%s', NULL, NULL, '%s', '%s')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, self.db.escape_string(output_string), new_failure, result.error_type))
+              curs.execute("INSERT INTO console_results (test_run_id, file_id, case_id, step_id, success, output, baseline, diff, new_failure, error_type) VALUES (%d, %d, %d, %d, 'N', '%s', NULL, NULL, '%s', '%s')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, self.db.escape_string(self._truncateTextForSQL(output_string)), new_failure, result.error_type))
             
         elif type(result).__name__ == 'CustomResult':
           output_string = ''
           for line in result.output:
             output_string += line
           if result.success:
-            curs.execute("INSERT INTO custom_results (test_run_id, file_id, case_id, step_id, success, output, new_failure, error_type) VALUES (%d, %d, %d, %d, 'Y', '%s', 'N', 'NO_ERROR')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, self.db.escape_string(output_string)))
+            curs.execute("INSERT INTO custom_results (test_run_id, file_id, case_id, step_id, success, output, new_failure, error_type) VALUES (%d, %d, %d, %d, 'Y', '%s', 'N', 'NO_ERROR')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, self.db.escape_string(self._truncateTextForSQL(output_string))))
           else:
             # Try to fetch the previous test run to see if the failure is new
             curs.execute("SELECT success FROM custom_results WHERE test_run_id<%d and file_id=%d and case_id=%d and step_id=%d ORDER BY test_run_id DESC LIMIT 1;" % (self.test_run_id, testfile_id, testcase_id, teststep_id))
@@ -915,13 +871,13 @@ class TestCaseRunner ( object ):
               f.close()
             else:
               baseline_string = 'Baseline not found'
-            curs.execute("INSERT INTO custom_results (test_run_id, file_id, case_id, step_id, success, output, baseline, diff, new_failure, error_type) VALUES (%d, %d, %d, %d, 'N', '%s', '%s', '%s', '%s', '%s')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, self.db.escape_string(output_string), self.db.escape_string(baseline_string), self.db.escape_string(result.diff), new_failure, result.error_type))
+            curs.execute("INSERT INTO custom_results (test_run_id, file_id, case_id, step_id, success, output, baseline, diff, new_failure, error_type) VALUES (%d, %d, %d, %d, 'N', '%s', '%s', '%s', '%s', '%s')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, self.db.escape_string(self._truncateTextForSQL(output_string)), self.db.escape_string(baseline_string), self.db.escape_string(self._truncateTextForSQL(result.diff)), new_failure, result.error_type))
 
         elif type(result).__name__ == 'PerformanceResult':
           # Insert the performance results, but only if all the tests in this step succeeded!
           if step.success:
 #            curs.execute("INSERT INTO performance_results (test_run_id, file_id, case_id, step_id, min_fps, max_fps, avg_fps, mean_fps, full_case_data) VALUES (%d, %d, %d, %d, %s, %s, %s, %s, '%s')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, result.fps_min, result.fps_max, result.fps_avg, result.fps_mean, result.fps_full))
-            curs.execute("INSERT INTO performance_results (test_run_id, file_id, case_id, step_id, full_profiling_data) VALUES (%d, %d, %d, %d, '%s')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, result.profiling_data_full))
+            curs.execute("INSERT INTO performance_results (test_run_id, file_id, case_id, step_id, full_profiling_data) VALUES (%d, %d, %d, %d, '%s')" % (self.test_run_id, testfile_id, testcase_id, teststep_id, self._truncateTextForSQL(result.profiling_data_full)))
             perf_res_id = curs.lastrowid
             for data in result.profiling_data_lines:
               curs.execute("INSERT INTO performance_result_data (performance_result_id, level, identifier, mean, percent) VALUES (%d, %d, '%s', %f, %f)" % (perf_res_id, int(data.level), data.id, float(data.mean), float(data.percent)) )
@@ -937,7 +893,7 @@ class TestCaseRunner ( object ):
               curs.execute("SELECT id, image FROM rendering_baselines WHERE file_id=%s AND case_id=%s AND step_id=%s ORDER BY timestamp DESC LIMIT 1" % (testfile_id, testcase_id, teststep_id))
               res = curs.fetchone()
               if res == None or res[1] != baseline_image:
-                curs.execute(("INSERT INTO rendering_baselines (file_id, case_id, step_id, timestamp, image) VALUES (%d, %d, %d, '%s'" % (testfile_id, testcase_id, teststep_id, args.timestamp)) + ", %s)", [baseline_image,])
+                curs.execute(("INSERT INTO rendering_baselines (file_id, case_id, step_id, timestamp, image) VALUES (%d, %d, %d, '%s'" % (testfile_id, testcase_id, teststep_id, args.timestamp)) + ", _binary %s)", [baseline_image,])
 #              elif res[1] != baseline_image:
 #                curs.execute("INSERT into rendering_baselines  image=%s WHERE id=%s", [baseline_image, res[0]])
             else:
@@ -967,7 +923,7 @@ class TestCaseRunner ( object ):
                 output_file.close()
               else:
                 output_image = 'NULL'
-              curs.execute("INSERT INTO rendering_results (test_run_id, file_id, case_id, step_id, new_failure, error_type, diff_pixels, threshold, success, output_image, diff_image) VALUES (%d, %d, %d, %d, '%s', '%s', %d, %d" % (self.test_run_id, testfile_id, testcase_id, teststep_id, new_failure, result.error_type, result.diff_pixels, result.threshold) + ", 'N', %s, %s)", [output_image, diff_image]);
+              curs.execute("INSERT INTO rendering_results (test_run_id, file_id, case_id, step_id, new_failure, error_type, diff_pixels, threshold, success, output_image, diff_image) VALUES (%d, %d, %d, %d, '%s', '%s', %d, %d" % (self.test_run_id, testfile_id, testcase_id, teststep_id, new_failure, result.error_type, result.diff_pixels, result.threshold) + ", 'N', _binary %s, _binary %s)", [output_image, diff_image]);
             else:
               curs.execute("INSERT INTO rendering_results (test_run_id, file_id, case_id, step_id, success, new_failure, error_type, diff_pixels, threshold) VALUES (%d, %d, %d, %d, 'Y', 'N', 'NO_ERROR', %d, %d)" % (self.test_run_id, testfile_id, testcase_id, teststep_id, result.diff_pixels, result.threshold));
 
@@ -1252,9 +1208,9 @@ img {
 
  
 
-print ""
-print "WARNING: Do not change the window focus, or perform other input until the test is complete!"
-print ""
+print("")
+print("WARNING: Do not change the window focus, or perform other input until the test is complete!")
+print("")
 
 
 h3d_process_name = args.processname
@@ -1265,9 +1221,9 @@ def isTestable ( file_name , files_in_dir):
   return True
 
 try:
-  print "Running these tests using: " + subprocess.check_output('where.exe ' + ('"'+ args.processpath + '":' if (args.processpath != "") else "") + h3d_process_name) # Run our test script and wait for it to finish executing
+  print("Running these tests using: " + subprocess.check_output('where.exe ' + ('"'+ args.processpath + '":' if (args.processpath != "") else "") + h3d_process_name).decode("utf-8") ) # Run our test script and wait for it to finish executing
 except Exception as e:
-  print h3d_process_name + " not found, tests may not be run: " + str(e)
+  print(h3d_process_name + " not found, tests may not be run: " + str(e))
 
 
 
@@ -1275,10 +1231,10 @@ tester= TestCaseRunner( os.path.join(args.workingdir, ""), startup_time= 5, shut
 results, all_tests_successful, all_tests_run = tester.processAllTestDefinitions(directory=os.path.abspath(args.workingdir), output_dir=args.output)
 
 if not all_tests_run:
-  print "Error: Some tests were not run!"
+  print("Error: Some tests were not run!")
   exitCode = 2
 elif not all_tests_successful:
-  print "Warning: One or more tests failed!"
+  print("Warning: One or more tests failed!")
   exitCode = 1
 
 

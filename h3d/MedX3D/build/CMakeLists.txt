@@ -8,6 +8,7 @@ set( CMAKE_MODULE_PATH "${MedX3D_SOURCE_DIR}/localModules" "${MedX3D_SOURCE_DIR}
 include( H3DCommonFunctions )
 setCommonH3DCMakePolicies()
 setupRPathForLib()
+enableCpp11( FAIL_MESSAGE "Enabling C++11 support. This compiler lacks such support." )
 handleCommonCacheVar( CMAKE_INSTALL_PREFIX ${MedX3D_SOURCE_DIR}/.. GENERATE_H3D_PACKAGE_PROJECT H3D_PREFER_STATIC_LIBRARIES )
 set( MedX3D_COMPILE_FLAGS "-DMEDX3D_EXPORTS" )
 
@@ -98,7 +99,7 @@ if( MSVC )
   set_target_properties( MedX3D PROPERTIES LINK_FLAGS_DEBUG "${MedX3D_LINK_FLAGS_DEBUG} /INCREMENTAL:NO" )
   
 elseif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-  addCommonH3DGNUCompileFlags( MedX3D_COMPILE_FLAGS )
+  addCommonH3DGNUCompileFlags( MedX3D_COMPILE_FLAGS TRUE )
 endif()
 
 set( MEDX3D_FULL_VERSION ${MEDX3D_MAJOR_VERSION}.${MEDX3D_MINOR_VERSION}.${MEDX3D_BUILD_VERSION} )

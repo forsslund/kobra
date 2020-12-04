@@ -40,9 +40,10 @@ bool H3DNavigation::force_jump = false;
 
 H3DNavigation::H3DNavigation() : haptic_device_nav( NULL ),
                                  sws_navigation( NULL ),
+                                 last_time( 0 ),
                                  linear_interpolate( false ),
-                                 old_vp( NULL ),
-                                 last_time( 0 ) {
+                                 start_time( 0 ),
+                                 old_vp( NULL ) {
   mouse_nav.reset( new MouseNavigation( this ) );
   keyboard_nav.reset( new KeyboardNavigation( this ) );
   AUTOREF_DEBUG_NAME( old_vp, "H3DNavigation::old_vp")
@@ -86,9 +87,9 @@ void H3DNavigation::doNavigation(
 
       if( transition == "TELEPORT" ) {
         // Instant movement.
-        NavigationInfo *nav_info = NavigationInfo::getActive();
-        if( nav_info ) {
-          nav_info->setTransitionComplete( true );
+        NavigationInfo *_nav_info = NavigationInfo::getActive();
+        if( _nav_info ) {
+          _nav_info->setTransitionComplete( true );
         }
       } else {
         // For all other types than teleport, use LINEAR movement.
@@ -132,9 +133,9 @@ void H3DNavigation::doNavigation(
         (H3DFloat)interpolation ) );
     } else {
       linear_interpolate = false;
-      NavigationInfo *nav_info = NavigationInfo::getActive();
-      if( nav_info ) {
-        nav_info->setTransitionComplete( true );
+      NavigationInfo *_nav_info = NavigationInfo::getActive();
+      if( _nav_info ) {
+        _nav_info->setTransitionComplete( true );
       }
       vp->relPos->setValue( goal_position );
       vp_full_pos = vp_pos + goal_position;

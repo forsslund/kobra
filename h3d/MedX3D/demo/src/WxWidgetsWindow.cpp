@@ -61,14 +61,14 @@ WxWidgetsWindow::WxWidgetsWindow( wxWindow *_theParent,
   H3DWindowNode( _width, _height, _fullscreen, _mirrored, _renderMode,
                  _viewpoint, _posX, _posY, _manualCursorControl,
                  _cursorType ),
-  theWindow( _theParent ),
   drag_file_func( NULL ),
   drag_file_func_arg( NULL ),
-  is_initialized( false ),
   use_h3d_settings( true ),
+  is_initialized( false ),
+  theWindow( _theParent ),
   theWxGLCanvas( NULL ),
-  fullscreen_initialized ( false ),
-        theWxGLContext( NULL ) {
+  theWxGLContext( NULL ),
+  fullscreen_initialized( false ) {
   type_name = "WxWidgetsWindow";
   database.initFields( this );
  
@@ -218,10 +218,8 @@ void WxWidgetsWindow::setFullscreen( bool fullscreen ) {
 //#include<FreeImage.h>
 
 void WxWidgetsWindow::swapBuffers() {
-
-  RenderMode::Mode stereo_mode = renderMode->getRenderMode();
-
 #ifdef HAVE_DX9
+  RenderMode::Mode stereo_mode = renderMode->getRenderMode();
   if( stereo_mode == RenderMode::NVIDIA_3DVISION ) {
     int current_w = generator->width->getValue();
     int current_h = generator->height->getValue();
@@ -322,7 +320,7 @@ if( myOwner && myOwner->is_initialized ) {
   event.RequestMore();
 }
 
-void WxWidgetsWindow::MyWxGLCanvas::OnSize( wxSizeEvent& event ) {
+void WxWidgetsWindow::MyWxGLCanvas::OnSize( wxSizeEvent& /*event*/ ) {
 #if wxOSX_USE_CARBON
   wxGLCanvas::OnSize(event);
 #endif
@@ -565,27 +563,27 @@ void WxWidgetsWindow::MyWxGLCanvas::onLeftMouseButtonDown(
 }
 
 void WxWidgetsWindow::MyWxGLCanvas::onLeftMouseButtonUp(
-  wxMouseEvent & event ) {
+  wxMouseEvent & /*event*/ ) {
   myOwner->onMouseButtonAction( MouseSensor::LEFT_BUTTON, MouseSensor::UP );
 }
 
 void WxWidgetsWindow::MyWxGLCanvas::onMiddleMouseButtonDown(
-  wxMouseEvent & event ) {
+  wxMouseEvent & /*event*/ ) {
   myOwner->onMouseButtonAction( MouseSensor::MIDDLE_BUTTON, MouseSensor::DOWN );
 }
 
 void WxWidgetsWindow::MyWxGLCanvas::onMiddleMouseButtonUp(
-  wxMouseEvent & event ) {
+  wxMouseEvent & /*event*/ ) {
   myOwner->onMouseButtonAction( MouseSensor::MIDDLE_BUTTON, MouseSensor::UP );
 }
 
 void WxWidgetsWindow::MyWxGLCanvas::onRightMouseButtonDown(
-  wxMouseEvent & event ) {
+  wxMouseEvent & /*event*/ ) {
   myOwner->onMouseButtonAction( MouseSensor::RIGHT_BUTTON, MouseSensor::DOWN );
 }
 
 void WxWidgetsWindow::MyWxGLCanvas::onRightMouseButtonUp(
-  wxMouseEvent & event ) {
+  wxMouseEvent & /*event*/ ) {
   myOwner->onMouseButtonAction( MouseSensor::RIGHT_BUTTON, MouseSensor::UP );
 }
 void WxWidgetsWindow::MyWxGLCanvas::onMouseMotion( wxMouseEvent & event ) {

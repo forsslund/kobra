@@ -137,8 +137,8 @@ MarchingCubes::MarchingCubes( Inst< SFNode    > _metadata,
                               Inst< SFBool > _voxelsAllowedToBeReinitialized ):
   X3DGeometryNode( _metadata, _bound, _displayList, NULL, NULL, NULL, NULL, NULL, _boundTree ),
   isovalue(_isovalue),
-  octTree(_octTree),
   voxels( _voxels ),
+  octTree( _octTree ),
   normalRenderMode( _normalRenderMode ),
   writeMarchingCubesAsITS( _writeMarchingCubesAsITS ),
   texCoord( _texCoord ),
@@ -285,7 +285,7 @@ void buildNormalizedData( float *normalized_data,
                           void *orig_data,
                           unsigned int width,
                           unsigned int height,
-                          unsigned int depth,
+                          unsigned int /*depth*/,
                           int volume_min_x,
                           int volume_min_y,
                           int volume_min_z,
@@ -468,13 +468,7 @@ void MarchingCubes::SFOctTree::update() {
 #endif
 
     // create tree structure....
-    value = new OctTreeNode;
-    value->x_min = 0;
-    value->x_max = x_points-1;
-    value->y_min = 0;
-    value->y_max = y_points-1;
-    value->z_min = 0;
-    value->z_max = z_points-1;
+    value = new OctTreeNode( 0, 0, 0, x_points - 1, y_points - 1, z_points - 1 );
 
     value->subdivide( TREEDEPTH );
 
@@ -608,7 +602,7 @@ void MarchingCubes::SFOctTree::updateGradients( int x_min, int x_max,
         if (x==0)  {
           gradient.x=(getVoxelValue(x+1,y,z)-getVoxelValue(x,y,z))
             /voxel_size.x;          
-        } else if (x==x_points-1) {
+        } else if (static_cast< unsigned int>(x)==x_points-1) {
           gradient.x=(getVoxelValue(x,y,z)-getVoxelValue(x-1,y,z))
             /voxel_size.x;
         } else {
@@ -619,7 +613,7 @@ void MarchingCubes::SFOctTree::updateGradients( int x_min, int x_max,
         if (y==0)  {
           gradient.y=(getVoxelValue(x,y+1,z)-getVoxelValue(x,y,z))
             /voxel_size.y;
-        } else if (y==y_points-1) {
+        } else if ( static_cast<unsigned int>(y) ==y_points-1) {
           gradient.y=(getVoxelValue(x,y,z)-getVoxelValue(x,y-1,z))
             /voxel_size.y;
         } else {
@@ -630,7 +624,7 @@ void MarchingCubes::SFOctTree::updateGradients( int x_min, int x_max,
         if (z==0) {
           gradient.z=(getVoxelValue(x,y,z+1)-getVoxelValue(x,y,z))
             /voxel_size.z;
-        } else if (z==z_points-1) {
+        } else if ( static_cast<unsigned int>(z) ==z_points-1) {
           gradient.z=(getVoxelValue(x,y,z)-getVoxelValue(x,y,z-1))
             /voxel_size.z;
         } else{
@@ -1020,7 +1014,7 @@ void MarchingCubes::OctTreeNode::subdivide( int tree_depth ) {
       for( int j=0; j<2; ++j ) {
         for( int k=0; k<2; ++k ) {
           int index = i * 4 + j*2 + k;
-          children[index] = new OctTreeNode;
+          children[index] = new OctTreeNode( x_min, y_min, z_min, x_max, y_max, z_max );
           children[index]->parent = this;
 
           // x
@@ -2027,7 +2021,7 @@ void MarchingCubes::AABBOctTreeBBTreeLeaf::closestPoint( const HAPI::Vec3 &p,
       HAPI::Vec3 v;
       if( !left_right_children[1]->isLeaf() ) {
         HAPI::Vec3 cp;
-        cp = cp = left_right_children[1]->boundClosestPoint(p);
+        cp = left_right_children[1]->boundClosestPoint(p);
         v = (cp-p);
       }
 
@@ -2056,7 +2050,6 @@ void MarchingCubes::AABBOctTreeBBTreeLeaf::closestPoint( const HAPI::Vec3 &p,
     HAPI::HAPIFloat box_max_dist = H3DMax( 2 * ( box_bound->max - box_bound->min ).lengthSqr(), ( box_center - p ).lengthSqr() );
     HAPI::Vec3 point_outside_box = box_center + H3DSqrt( box_max_dist ) * HAPI::Vec3( 1.0, 0.0, 0.0 ); //
     HAPI::HAPIFloat closest_dist = numeric_limits< HAPI::HAPIFloat >::max();
-    bool have_closest = false;
     for( unsigned int i = 0; i < children.size(); ++i ) {
       bool do_closest_point = !children[i]->children.empty();
       if( do_closest_point || children[i]->left.get() || children[i]->right.get() ) {
@@ -2074,7 +2067,6 @@ void MarchingCubes::AABBOctTreeBBTreeLeaf::closestPoint( const HAPI::Vec3 &p,
           HAPI::Vec3 v = p - cp;
           HAPI::HAPIFloat ld2 = v * v;
           if( ld2 < closest_dist ) {
-            have_closest = true;
             closest_point = cp;
             closest_normal = cn;
             closest_tex_coord = tc;

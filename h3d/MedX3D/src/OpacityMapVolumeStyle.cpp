@@ -261,11 +261,9 @@ using namespace H3D;
  
   
   void OpacityMapVolumeStyle::SFPreIntegratedTextureNode::update() {
-    OpacityMapVolumeStyle *style = static_cast< OpacityMapVolumeStyle * >( getOwner() );
-
     X3DTextureNode *t = static_cast< SFTextureNode * >( routes_in[0] )->getValue();
-    H3DFloat integral_step_size = static_cast< SFFloat * >( routes_in[1] )->getValue();
-    H3DFloat step_size = static_cast< SFFloat * >( routes_in[2] )->getValue();
+    /*H3DFloat integral_step_size = */static_cast< SFFloat * >( routes_in[1] )->getValue();
+    /*H3DFloat step_size = */static_cast< SFFloat * >( routes_in[2] )->getValue();
     string _type = static_cast< SFString * >( routes_in[3] )->getValue();
 
     if( !value.get() ) {

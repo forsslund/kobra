@@ -81,7 +81,8 @@ BodyPID::BodyPID(
   angularControl3( _angularControl3 ),
   body( _body ),
   writeToLog( _writeToLog ),
-  start_log_time( -1 ) {
+  start_log_time( -1 ),
+  body_id( 0 ) {
 
   type_name = "BodyPID";
   database.initFields( this );
@@ -92,6 +93,8 @@ BodyPID::BodyPID(
   angular_PID1 = NULL;
   angular_PID2 = NULL;
   angular_PID3 = NULL;
+
+  log_file = NULL;
 }
 
 void BodyPID::traverseSG( TraverseInfo &ti ) {
@@ -102,7 +105,7 @@ void BodyPID::traverseSG( TraverseInfo &ti ) {
   write_to_log = tmp_write_to_log;
   pid_lock.unlock();
 
-  PhysicsEngineThread *pt;
+  PhysicsEngineThread *pt = NULL;
   // obtain the physics thread
   ti.getUserData( "PhysicsEngine", (void * *)&pt );
 
@@ -188,7 +191,9 @@ void BodyPID::updateActuation() {
 
     if( tmp_write_to_log != "" ) {
       H3DTime curTime = TimeStamp();
-      ofstream f( tmp_write_to_log.c_str(), std::ofstream::app );
+      if( !log_file ) {
+        log_file = new std::ofstream( tmp_write_to_log.c_str(), std::ofstream::app );
+      }
       if( start_log_time < 0 ) {
         start_log_time = curTime;
       }
@@ -197,11 +202,10 @@ void BodyPID::updateActuation() {
       Vec3f tar_angles = orientation_target.toEulerAngles();
 
       // Scale and offset in the target are not considered
-      f << (curTime - start_log_time) << "," << linear_PID1->target->getValueRT() << "," << linear_PID2->target->getValueRT() << "," << linear_PID3->target->getValueRT() << "," <<
+      *log_file << (curTime - start_log_time) << "," << linear_PID1->target->getValueRT() << "," << linear_PID2->target->getValueRT() << "," << linear_PID3->target->getValueRT() << "," <<
         body_params->getPosition().x << "," << body_params->getPosition().y << "," << body_params->getPosition().z << "," <<
         tar_angles.x << "," << tar_angles.y << "," << tar_angles.z << "," <<
         cur_angles.x << "," << cur_angles.y << "," << cur_angles.z << "," << endl;
-
     }
 
     // Apply force and torque to body

@@ -55,11 +55,11 @@ namespace HAPI {
       point( _point ),
       normal( _normal ),
       tex_coord( _tex_coord ),
+      face( intersected_face ),
       intersection( false ),
       t( 0 ),
-      id( _id ),
-      face( intersected_face ),
-      primitive( NULL ) {}
+      primitive( NULL ),
+      id( _id ) {}
 
       /// The intersection point.
       Vec3 point;

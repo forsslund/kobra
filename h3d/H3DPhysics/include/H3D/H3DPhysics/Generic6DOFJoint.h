@@ -59,7 +59,9 @@ namespace H3D{
   /// By default all translational degrees of freedom have the maximum and minimum limits set to zero and
   /// so are locked. All rotational limits have max < min and therefore have no limits.
   ///
-  /// Engine support: This joint type is currently only supported using Bullet
+  /// Engine support: This joint type is currently only supported using Bullet and PhysX3. The update of the 
+  /// output fields, hence driving this joint with a JointPID, is currently only implemented for PhysX3
+  /// for the angular control.
   ///
   ///
   /// <b>Examples:</b>
@@ -106,7 +108,17 @@ namespace H3D{
       Inst< SFFloat     > _maxLimit3 = 0,
       Inst< SFFloat     > _maxForce1 = 0,
       Inst< SFFloat     > _maxForce2 = 0,
-      Inst< SFFloat     > _maxForce3 = 0 );
+      Inst< SFFloat     > _maxForce3 = 0,
+      Inst< SFVec3f     > _body1AnchorPoint = 0,
+      Inst< SFVec3f     > _body2AnchorPoint = 0,
+      Inst< SFVec3f     > _body1Axis = 0,
+      Inst< SFVec3f     > _body2Axis = 0,
+      Inst< SFFloat     > _hinge1Angle = 0,
+      Inst< SFFloat     > _hinge1AngleRate = 0,
+      Inst< SFFloat     > _hinge2Angle = 0,
+      Inst< SFFloat     > _hinge2AngleRate = 0,
+      Inst< SFFloat     > _hinge3Angle = 0,
+      Inst< SFFloat     > _hinge3AngleRate = 0 );
 
     /// The point where the joint is centered in world coordinates.
     /// 
@@ -340,12 +352,90 @@ namespace H3D{
     /// \dotfile Generic6DOFJoint_maxForce3.dot
     auto_ptr< SFFloat > maxForce3;
 
+    /// The body1AnchorPoint output field reports the current location of the 
+    /// anchor point relative to body1.
+    ///
+    /// <b>Access type:</b> outputOnly
+    /// 
+    /// \dotfile Generic6DOFJoint_body1AnchorPoint.dot
+    auto_ptr< SFVec3f > body1AnchorPoint;
+
+    /// The axis of body1.
+    /// 
+    /// <b>Access type:</b> outputOnly
+    /// 
+    /// \dotfile Generic6DOFJoint_body1Axis.dot
+    auto_ptr< SFVec3f > body1Axis;
+
+    /// The body1AnchorPoint output field reports the current location of the 
+    /// anchor point relative to body2.
+    ///
+    /// <b>Access type:</b> outputOnly
+    /// 
+    /// \dotfile Generic6DOFJoint_body2AnchorPoint.dot
+    auto_ptr< SFVec3f > body2AnchorPoint;
+
+    /// The axis of body2.
+    /// 
+    /// <b>Access type:</b> outputOnly
+    /// 
+    /// \dotfile Generic6DOFJoint_body2Axis.dot
+    auto_ptr< SFVec3f > body2Axis;
+
+    /// The hinge1Angle output field reports the current relative angle(in radians) 
+    /// between the two bodies from the axis1.
+    /// 
+    /// <b>Access type:</b> outputOnly
+    /// 
+    /// \dotfile Generic6DOFJoint_hinge1Angle.dot
+    auto_ptr< SFFloat > hinge1Angle;
+
+    /// The hinge1AngleRate output field describes the rate at which the relative 
+    /// angle between the two bodies change from axis1 (in radians/s).
+    /// 
+    /// <b>Access type:</b> outputOnly
+    /// 
+    /// \dotfile Generic6DOFJoint_hinge1AngleRate.dot
+    auto_ptr< SFFloat > hinge1AngleRate;
+
+    /// The hinge1Angle output field reports the current relative angle(in radians) 
+    /// between the two bodies from the axis2.
+    /// 
+    /// <b>Access type:</b> outputOnly
+    /// 
+    /// \dotfile Generic6DOFJoint_hinge2Angle.dot
+    auto_ptr< SFFloat > hinge2Angle;
+
+    /// The hinge2AngleRate output field describes the rate at which the relative 
+    /// angle between the two bodies change from axis2 (in radians/s).
+    /// 
+    /// <b>Access type:</b> outputOnly
+    /// 
+    /// \dotfile Generic6DOFJoint_hinge2AngleRate.dot
+    auto_ptr< SFFloat > hinge2AngleRate;
+
+    /// The hinge1Angle output field reports the current relative angle(in radians) 
+    /// between the two bodies from the axis3.
+    /// 
+    /// <b>Access type:</b> outputOnly
+    /// 
+    /// \dotfile Generic6DOFJoint_hinge3Angle.dot
+    auto_ptr< SFFloat > hinge3Angle;
+
+    /// The hinge3AngleRate output field describes the rate at which the relative 
+    /// angle between the two bodies change from axis3 (in radians/s).
+    /// 
+    /// <b>Access type:</b> outputOnly
+    /// 
+    /// \dotfile Generic6DOFJoint_hinge3AngleRate.dot
+    auto_ptr< SFFloat > hinge3AngleRate;
+
     /// The H3DNodeDatabase for this node.
     static H3DNodeDatabase database;
 
   protected:
     /// Returns a new instance of 
-    /// PhysicsEngineParameters::DoubleAxisJointParameters with the values updated with
+    /// PhysicsEngineParameters::Generic6DOFJointParameters with the values updated with
     /// corresponding field values that have changed in the last frame. 
     /// All other values will be ignored.
     /// \param all_params if true, function returns all field values regardless of whether
@@ -356,9 +446,9 @@ namespace H3D{
     virtual PhysicsEngineParameters::ConstraintParameters* createConstraintParameters ();
 
     /// Updates the body1Axis, body2Axis, body1AnchorPoint, body2AnchorPoint,
-    /// hinge1Angle, hinge2Angle, hinge1AngleRate, hinge2AngleRate fields if 
+    /// hinge1Angle, hinge2Angle, hinge3Angle, hinge1AngleRate, hinge2AngleRate, hinge3AngleRate fields if 
     /// they are enabled by the forceOutput field.
-    //void updateOutputFields();
+    void updateOutputFields();
 
     /// Apply the specifed transform to all joint parameters
     virtual void applyTransform ( const Matrix4f& _transform );

@@ -56,7 +56,8 @@ RenderTargetSelectGroup::RenderTargetSelectGroup(
        _metadata, _bound, _bboxCenter, _bboxSize ),
   renderTargets( _renderTargets ),
   support_message_displayed( false ),
-  draw_buffers() {
+  draw_buffers(),
+  max_nr_draw_buffers( 0 ) {
 
   type_name = "RenderTargetSelectGroup";
   database.initFields( this );

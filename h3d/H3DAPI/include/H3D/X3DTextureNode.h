@@ -166,9 +166,9 @@ namespace H3D {
     /// scaled to the closest higher power of two if dimensions are not a power
     /// of two.
     ///
-    virtual void glTexImage( Image *image,
-                             GLenum texture_target,
-                             bool scale_to_power_of_two ){
+    virtual void glTexImage( Image * /*image*/,
+                             GLenum /*texture_target*/,
+                             bool /*scale_to_power_of_two*/ ){
       throw glTexImageFunctionNotDefined( "", H3D_FULL_LOCATION ); 
     }
 

@@ -49,7 +49,7 @@ HapticTimeFunctionEffect::HapticTimeFunctionEffect(
 }
 
 HAPIForceEffect::EffectOutput HapticTimeFunctionEffect::calculateForces(
-    const EffectInput &input ) {
+    const EffectInput &/*input*/ ) {
   HAPITime current_time = H3DUtil::TimeStamp();
   HAPIFloat x_current_time = current_time - x_zero_time;
   HAPIFloat y_current_time = current_time - y_zero_time;

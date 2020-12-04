@@ -29,7 +29,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <H3D/ImageTexture.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 #include <H3D/DicomImageLoader.h>
 #include <H3D/GlobalSettings.h>
 #include <H3D/X3DProgrammableShaderObject.h>

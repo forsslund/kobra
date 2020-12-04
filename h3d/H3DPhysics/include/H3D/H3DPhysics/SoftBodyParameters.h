@@ -793,6 +793,9 @@ namespace H3D{
       /// Constructor
       H3DSoftBodyNodeParameters();
 
+      /// Destructor
+      virtual ~H3DSoftBodyNodeParameters();
+
       /// Called from physics thread just after data has been copied from the physics engine to the struct.
       /// The function is called while the physics thread has locked soft_body_lock.
       ///

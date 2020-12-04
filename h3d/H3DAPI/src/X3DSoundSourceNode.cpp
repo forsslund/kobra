@@ -64,6 +64,7 @@ X3DSoundSourceNode::X3DSoundSourceNode( Inst< SFNode  >  _metadata,
   description     ( _description      ),
   pitch           ( _pitch            ),
   duration_changed( _duration_changed ),
+  sound_as_stream( false ),
   soundBuffer( new ALSoundBuffer ) {
   type_name = "X3DSoundSourceNode";
   database.initFields( this );

@@ -81,7 +81,7 @@ void PIDCollection::initialize( PhysicsEngineThread& pt ) {
   // We need to have a reference to the RBC to ensure correct destruction order
   if( rbc->getValue() ) {
     engine_thread = &pt;
-    // register callback for the updatPhysics function 
+    // register callback for the updatePhysics function 
     physics_callback_id = engine_thread->asynchronousCallback( PIDCollection::updatePhysics, this );
   }
 }
@@ -89,7 +89,7 @@ void PIDCollection::initialize( PhysicsEngineThread& pt ) {
 // Implementation of traverseSG 
 void PIDCollection::traverseSG( TraverseInfo &ti ) {
   X3DChildNode::traverseSG( ti );
-  PhysicsEngineThread *pt;
+  PhysicsEngineThread *pt = NULL;
   // obtain the physics thread
   ti.getUserData( "PhysicsEngine", (void * *)&pt );
 

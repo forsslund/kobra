@@ -29,7 +29,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <H3D/ImportLibrary.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 
 using namespace H3D;
 
@@ -69,8 +69,10 @@ string ImportLibrary::GetVCVer() {
   return "vc12";
 #elif _MSC_VER < 1910
   return "vc14";
-#elif _MSC_VER < 2000
+#elif _MSC_VER < 1920
   return "vc15";
+#elif _MSC_VER < 2000
+  return "vc16";
 #endif
 }
 

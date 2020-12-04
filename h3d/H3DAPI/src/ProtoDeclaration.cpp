@@ -48,9 +48,9 @@ ProtoDeclaration::ProtoDeclaration( const string &_name,
                                     const vector<string > &_body_extra,
                                     PrototypeVector *_existing_protos ) :
       name( _name ),
-      existing_protos( NULL ),
       body( _body ),
-      body_extra( _body_extra ) {
+      body_extra( _body_extra ),
+      existing_protos( NULL ) {
   if( _existing_protos ) {
     existing_protos = new PrototypeVector;
     for( PrototypeVector::const_iterator i = _existing_protos->begin();

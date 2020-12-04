@@ -40,10 +40,10 @@ H3DNodeDatabase ThreadExample::database( "ThreadExample",
                                   &X3DGeometryNode::database );
 
 namespace ThreadExampleInternals {
-  FIELDDB_ELEMENT( ThreadExample, points, INPUT_ONLY );
-  FIELDDB_ELEMENT( ThreadExample, animationDirection, INPUT_OUTPUT );
-  FIELDDB_ELEMENT( ThreadExample, limit, INPUT_OUTPUT );
-  FIELDDB_ELEMENT( ThreadExample, speed, INPUT_OUTPUT );
+  FIELDDB_ELEMENT( ThreadExample, points, INPUT_ONLY )
+  FIELDDB_ELEMENT( ThreadExample, animationDirection, INPUT_OUTPUT )
+  FIELDDB_ELEMENT( ThreadExample, limit, INPUT_OUTPUT )
+  FIELDDB_ELEMENT( ThreadExample, speed, INPUT_OUTPUT )
 }
 
 using namespace ThreadExampleInternals;

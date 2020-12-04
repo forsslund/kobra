@@ -288,7 +288,7 @@ void H3DViewerFieldValuesPanel::updateGridFromNode( wxGrid *FieldValuesGrid,
 
 }
 
-void H3DViewerFieldValuesPanel::OnIdle( wxIdleEvent& event ) {
+void H3DViewerFieldValuesPanel::OnIdle( wxIdleEvent& /*event*/ ) {
   try {
     if( IsShown() ) {
       TimeStamp now;

@@ -58,10 +58,19 @@
 #include <H3D/HapticsRenderers.h>
 #include <H3D/GraphicsHardwareInfo.h>
 #include <H3D/OculusRiftHandler.h>
+#ifdef HAVE_PYTHON
+#undef HAVE_SSIZE_T
+#endif
+#include <H3D/PythonMethods.h>
+#include <H3D/PythonTypes.h>
 
 #include <H3DUtil/DynamicLibrary.h>
 
 #include <wx/display.h>
+
+#ifndef H3D_WINDOWS
+#include "H3DViewer.xpm"
+#endif
 
 using namespace std;
 using namespace H3D;
@@ -91,7 +100,7 @@ void insertLineBreak(stringstream &inputstream, stringstream &outputstream, int 
 
 #if wxUSE_DRAG_AND_DROP
 
-void onDropFiles( wxCoord x, wxCoord y,
+void onDropFiles( wxCoord /*x*/, wxCoord /*y*/,
                   const wxArrayString& filenames,
                   void *arg ) {
   WxFrame *f = static_cast< WxFrame * >( arg );
@@ -153,6 +162,9 @@ namespace WxFrameInternals {
   string str_FEEDBACK = "FEEDBACK_BUFFER";
   string str_DEPTH = "DEPTH_BUFFER";
   string str_CUSTOM = "CUSTOM";
+  const bool debug_resource_cleanup = false;
+
+  wxString clear_data_exiting_string = wxT( "Exiting H3DViewer" );
 }
 
 /*******************Constructor*********************/
@@ -165,22 +177,22 @@ WxFrame::WxFrame( wxWindow *_parent, wxWindowID _id,
                         bool _cmd_line_fullscreen,
                         bool _hide_menu ):
   wxFrame(_parent, _id, _title, _pos, _size, _style, _name ),
+  glwindow( NULL ),
+  navigationDevices(NULL),
+  avatar_collision(true),
   navTypeCount(0),
   deviceCount(0),
-  navigationDevices(NULL),
-  avatar_collision( true ),
   loaded_first_file( false ),
-  change_nav_type( new ChangeNavType ),
-  handle_action_key( new HandleActionKey ),
-  itemIdViewpointMap(),
-  current_viewpoint_id(0),
-  check_dialogs_position_because_of_fullscreen_and_not_quadro( false ),
-  glwindow( NULL ),
-  updateStereoModeMenu( new UpdateStereoModeMenu ),
   a_file_is_loaded( false ),
   cmd_line_fullscreen( _cmd_line_fullscreen ),
   hide_menu( _hide_menu ),
-  the_status_bar(NULL)
+  the_status_bar(NULL),
+  check_dialogs_position_because_of_fullscreen_and_not_quadro( false ),
+  change_nav_type(new ChangeNavType),
+  itemIdViewpointMap(),
+  current_viewpoint_id(0),
+  handle_action_key(new HandleActionKey),
+  updateStereoModeMenu( new UpdateStereoModeMenu )
 {
   lastOpenedFilepath = "";
   wxAcceleratorEntry entries[1];
@@ -470,8 +482,10 @@ WxFrame::WxFrame( wxWindow *_parent, wxWindowID _id,
 
 #ifdef H3D_WINDOWS
   wxIcon tmpIcon( wxT( "IDI_ICON1" ), wxBITMAP_TYPE_ICO_RESOURCE );
-  SetIcon( tmpIcon );
+#else
+  wxIcon tmpIcon( H3DViewer_xpm );
 #endif
+  SetIcon( tmpIcon );
 
   glwindow = new WxWidgetsWindow(this);
 #if wxUSE_DRAG_AND_DROP
@@ -1613,8 +1627,30 @@ bool WxFrame::loadFile( const string &filename) {
 }
 
 //Clear data when closing file
-void WxFrame::clearData () {
+void WxFrame::clearData ( bool final_shutdown ) {
+  unsigned int pre_close_time_routes;
+  unsigned int pre_close_eventsink_routes;
+  unsigned int pre_close_python_nodes;
+  unsigned int pre_close_python_fields;
+  if (WxFrameInternals::debug_resource_cleanup) {
+    pre_close_time_routes = Scene::time->getRoutesOut().size();
+    pre_close_eventsink_routes = Scene::eventSink->getRoutesIn().size();
+#ifdef HAVE_PYTHON
+    pre_close_python_nodes = PyNodePtr::python_node_ptrs.size();
+    pre_close_python_fields = PythonFieldBase::python_fields.size();
+#endif
+  }
   scene->setSceneRoot( NULL );
+  if (tree_view_dialog) {
+    if (!tree_view_dialog->stop_treeview_update_checkbox->IsChecked()) {
+      tree_view_dialog->clearTreeView();
+    }
+    else {
+      tree_view_dialog->updateNodeTreeWhenUpdateStopped(tree_view_dialog->TreeViewTree->GetRootItem());
+      tree_view_dialog->selected_node.reset(NULL);
+      tree_view_dialog->field_values_panel->displayFieldsFromNode(NULL);
+    }
+  }
   h3dConfig->SetPath(wxT("/Settings"));
   bool new_viewpoint_on_load = true;
   h3dConfig->Read(wxT("new_viewpoint_on_load"), &new_viewpoint_on_load);
@@ -1641,22 +1677,65 @@ void WxFrame::clearData () {
   // then just remove it.
   while( navigationMenu->GetMenuItemCount() != 0 ) {
     wxMenuItem * temp_menu_item = navigationMenu->FindItemByPosition( 0 );
-    if( temp_menu_item != navigationDevices ) {
+    if( final_shutdown || temp_menu_item != navigationDevices ) {
       navigationMenu->Destroy( temp_menu_item->GetId() );
     } else {
       navigationMenu->Remove( temp_menu_item->GetId() );
     }
   }
+  if( final_shutdown ) {
+    navigationDevices = nullptr;
+  }
+
   if( global_settings.get() ) {
     global_settings->set_bind->setValue( false );
   }
   global_settings.reset( NULL );
+  if (stereo_info.get()) {
+    stereo_info->set_bind->setValue(false);
+  }
   stereo_info.reset( NULL );
+  unsigned int pre_python_time_routes;
+  unsigned int pre_python_eventsink_routes;
+  unsigned int pre_python_python_nodes;
+  unsigned int pre_python_python_fields;
+  if (WxFrameInternals::debug_resource_cleanup)
+  {
+    pre_python_time_routes = Scene::time->getRoutesOut().size();
+    pre_python_eventsink_routes = Scene::eventSink->getRoutesIn().size();
+#ifdef HAVE_PYTHON
+    pre_python_python_nodes = PyNodePtr::python_node_ptrs.size();
+    pre_python_python_fields = PythonFieldBase::python_fields.size();
+#endif
+  }
+#ifdef HAVE_PYTHON
+  PythonInternals::finishH3DInternal();
+#endif
+  if (WxFrameInternals::debug_resource_cleanup)
+  {
+    unsigned int post_close_time_routes = Scene::time->getRoutesOut().size();
+    unsigned int post_close_eventsink_routes = Scene::eventSink->getRoutesIn().size();
+#ifdef HAVE_PYTHON
+    unsigned int post_close_python_nodes = PyNodePtr::python_node_ptrs.size();
+    unsigned int post_close_python_fields = PythonFieldBase::python_fields.size();
+#endif
+
+  Console(LogLevel::Warning) << "Scene::time routes: " << pre_close_time_routes <<
+    " " << pre_python_time_routes << " " << post_close_time_routes << endl;
+  Console(LogLevel::Warning) << "Scene::eventSink routes: " << pre_close_eventsink_routes <<
+    " " << pre_python_eventsink_routes << " " << post_close_eventsink_routes << endl;
+#ifdef HAVE_PYTHON
+  Console(LogLevel::Warning) << "Python objects with nodes alive: " << pre_close_python_nodes <<
+    " " << pre_python_python_nodes << " " << post_close_python_nodes << endl;
+  Console(LogLevel::Warning) << "Python objects with fields alive: " << pre_close_python_fields <<
+    " " << pre_python_python_fields << " " << post_close_python_fields << endl;
+#endif
+  }
 }
 
 
 //Open a file
-void WxFrame::OnOpenFileURL(wxCommandEvent & event) {
+void WxFrame::OnOpenFileURL(wxCommandEvent & /*event*/) {
    auto_ptr< wxTextEntryDialog > text_dialog( new wxTextEntryDialog ( this,
                              wxT("Enter the location of the file here"),
                              wxT("Open file from UR"),
@@ -1670,8 +1749,7 @@ void WxFrame::OnOpenFileURL(wxCommandEvent & event) {
    }
 }
 
-void WxFrame::OnOpenFile(wxCommandEvent & event)
-{
+void WxFrame::OnOpenFile(wxCommandEvent & /*event*/) {
   auto_ptr< wxFileDialog > openFileDialog( new wxFileDialog ( this,
                              wxT("Open file"),
                              GetCurrentPath(),
@@ -1730,14 +1808,11 @@ void WxFrame::OnCloseFile(wxCommandEvent & event) {
     return;
   }
   lastOpenedFilepath.clear();
-  //clearData();
-  scene->setSceneRoot( NULL );
-  //t->children->clear();
-  if( !tree_view_dialog->stop_treeview_update_checkbox->IsChecked() ) {
-    tree_view_dialog->clearTreeView();
+  clearData( event.GetString().Cmp( WxFrameInternals::clear_data_exiting_string ) == 0 );
+  for(set< Scene * >::iterator i = Scene::scenes.begin(); i != Scene::scenes.end(); ++i) {
+    (*i)->setSceneRoot(NULL);
   }
-  if( !Viewpoint::getActive() )
-    viewpoint.reset( new Viewpoint );
+
   SetStatusText(wxT("File closed"), 0);
   SetStatusText(wxT(""),1);
 
@@ -1745,14 +1820,13 @@ void WxFrame::OnCloseFile(wxCommandEvent & event) {
   menuBar->EnableTop(2, false);
   menuBar->EnableTop(3, false);
 
-  //a_file_is_loaded = false;
-  //this->glwindow->renderMode->touch();
   //Disable items in rendererMenu again
   rendererMenu->Enable(FRAME_CHOOSERENDERER, false);
   rendererMenu->Enable(FRAME_RENDERMODE, false);
+
 }
 
-void WxFrame::OnChooseDir(wxCommandEvent & event) {
+void WxFrame::OnChooseDir(wxCommandEvent & /*event*/) {
   auto_ptr< wxDirDialog >  d( new wxDirDialog( this, 
                                                wxT("Choose a directory"),
                                                GetCurrentPath(), 
@@ -1765,8 +1839,8 @@ void WxFrame::OnChooseDir(wxCommandEvent & event) {
 }
 
 //About dialog
-void WxFrame::OnAbout(wxCommandEvent & event)
-{ wxString t = wxTheApp->GetAppName();
+void WxFrame::OnAbout(wxCommandEvent & /*event*/) {
+  wxString t = wxTheApp->GetAppName();
 
   t.append( AUTHOR );
   
@@ -1775,7 +1849,7 @@ void WxFrame::OnAbout(wxCommandEvent & event)
 }
 
 //Idle event
-void WxFrame::OnIdle(wxIdleEvent &event) {
+void WxFrame::OnIdle(wxIdleEvent &/*event*/) {
   TimeStamp now;
   if ( now - last_viewmenu_update > 0.5 && 
        (X3DViewpointNode::viewpointsChanged() || 
@@ -1970,13 +2044,11 @@ void WxFrame::SetShowWindowsInFullscreen(bool show) {
 
 
 //Restore from fullscreen
-void WxFrame::ToggleFullscreen(wxCommandEvent & event)
-{
-  SetFullscreen( !glwindow->fullscreen->getValue() );
+void WxFrame::ToggleFullscreen(wxCommandEvent & /*event*/) {
+  SetFullscreen(!glwindow->fullscreen->getValue());
 }
 
-void WxFrame::MirrorScene(wxCommandEvent & event)
-{
+void WxFrame::MirrorScene(wxCommandEvent & /*event*/) {
   lastmirror = glwindow->mirrored->getValue();
   glwindow->mirrored->setValue(!lastmirror);
   if ( glwindow->mirrored->getValue() ) {
@@ -2351,10 +2423,9 @@ void WxFrame::OnShowWindowsInFullscreen(wxCommandEvent & event) {
   SetShowWindowsInFullscreen(event.IsChecked());
 }
 
-void WxFrame::ShowPluginsDialog(wxCommandEvent & event)
-{
-  if (!(check_dialogs_position_because_of_fullscreen_and_not_quadro &&
-      GetScreenRect().Intersects( plugins_dialog->GetScreenRect() ) ) ) {
+void WxFrame::ShowPluginsDialog(wxCommandEvent & /*event*/) {
+  if( !(check_dialogs_position_because_of_fullscreen_and_not_quadro &&
+         GetScreenRect().Intersects( plugins_dialog->GetScreenRect() )) ) {
     if( plugins_dialog->IsIconized() )
       plugins_dialog->Iconize(false);
     if( !plugins_dialog->Show())
@@ -2399,11 +2470,10 @@ void WxFrame::ChangeViewpoint (wxCommandEvent & event)
 }
 
 //Reset Active Viewpoint
-void WxFrame::ResetViewpoint(wxCommandEvent & event)
-{
-  if (current_viewpoint) {
-      current_viewpoint->relOrn->setValue( Rotation() );
-      current_viewpoint->relPos->setValue( Vec3f() );
+void WxFrame::ResetViewpoint(wxCommandEvent & /*event*/) {
+  if( current_viewpoint ) {
+    current_viewpoint->relOrn->setValue( Rotation() );
+    current_viewpoint->relPos->setValue( Vec3f() );
   }
 }
 
@@ -2418,9 +2488,9 @@ void WxFrame::ChangeCollision (wxCommandEvent & event) {
   }
 }
 
-void WxFrame::OnSpeed( wxCommandEvent & event ) {
-  if (!(check_dialogs_position_because_of_fullscreen_and_not_quadro &&
-      GetScreenRect().Intersects( speed_slider->GetScreenRect() ) ) && !speed_slider->Show()) {
+void WxFrame::OnSpeed(wxCommandEvent & /*event*/) {
+  if( !(check_dialogs_position_because_of_fullscreen_and_not_quadro &&
+         GetScreenRect().Intersects( speed_slider->GetScreenRect() )) && !speed_slider->Show() ) {
     speed_slider->Show();
   }
 }
@@ -2439,10 +2509,10 @@ void WxFrame::ChangeNavigation (wxCommandEvent & event)
 }
 
 // 09.10.14 Reload
-void WxFrame::OnReload (wxCommandEvent & event)
-{
-  if (lastOpenedFilepath.empty())
+void WxFrame::OnReload(wxCommandEvent & /*event*/) {
+  if( lastOpenedFilepath.empty() ) {
     return;
+  }
   clearData();
   loadFile(lastOpenedFilepath);
   SetStatusText(wxT("Reloaded"), 0);
@@ -2450,10 +2520,10 @@ void WxFrame::OnReload (wxCommandEvent & event)
 }
 
 //Exit via menu
-void WxFrame::OnExit (wxCommandEvent & event)
-{
+void WxFrame::OnExit(wxCommandEvent & /*event*/) {
   SaveCollisionOptions();
   wxCommandEvent fake_event;
+  fake_event.SetString( WxFrameInternals::clear_data_exiting_string );
   // Close file so that printout in possible destructors does not
   // cause a crash if done after the console is destroyed.
   OnCloseFile( fake_event );
@@ -2462,12 +2532,12 @@ void WxFrame::OnExit (wxCommandEvent & event)
 }
 
 //Exit via window manager
-void WxFrame::OnWindowExit (wxCloseEvent & event) 
-{
+void WxFrame::OnWindowExit(wxCloseEvent & /*event*/) {
   SaveCollisionOptions();
   wxCommandEvent fake_event;
   // Close file so that printout in possible destructors does not
   // cause a crash if done after the console is destroyed.
+  fake_event.SetString( WxFrameInternals::clear_data_exiting_string );
   OnCloseFile( fake_event );
   tree_view_dialog->clearTreeView();
   Destroy();
@@ -3181,11 +3251,11 @@ void WxFrame::LoadSettings( bool from_config ) {
 }
 
 string WxFrame::navTypeToNavMenuString( const string &nav_type ) {
-  if( nav_type == "EXAMINE" ) return "EXAMINE\tAlt-e";
-  if( nav_type == "FLY" ) return "FLY\tAlt-f";
-  if( nav_type == "WALK" ) return "WALK\tAlt-w";
-  if( nav_type == "LOOKAT" ) return "LOOKAT\tAlt-l";
-  if( nav_type == "NONE" ) return "NONE\tAlt-n";
+  if( nav_type == "EXAMINE" ) return "EXAMINE\tCtrl-Alt-e";
+  if( nav_type == "FLY" ) return "FLY\tCtrl-Alt-f";
+  if( nav_type == "WALK" ) return "WALK\tCtrl-Alt-w";
+  if( nav_type == "LOOKAT" ) return "LOOKAT\tCtrl-Alt-l";
+  if( nav_type == "NONE" ) return "NONE\tCtrl-Alt-n";
   return nav_type;
 }
 
@@ -3203,7 +3273,6 @@ void WxFrame::buildNavMenu () {
       navigationMenu->Enable(FRAME_NAVIGATION, false);
     } else {
       vector<string> allowedTypes;
-      vector<string>::iterator navList = navTypes.begin();
       bool hasAny = false;
       for (vector<string>::iterator navList = navTypes.begin(); 
            navList != navTypes.end(); ++navList) { 
@@ -3245,7 +3314,6 @@ void WxFrame::buildNavMenu () {
         allTypes.push_back("FLY");
         allTypes.push_back("WALK");
         allTypes.push_back("LOOKAT");
-         vector<string>::iterator allList = allTypes.begin();
         for (vector<string>::iterator allList = allTypes.begin();
              allList != allTypes.end(); ++allList) {
           bool found = false;
@@ -3348,7 +3416,7 @@ bool WxFrame::validateNavType (string a) {
 }
 
 
-void WxFrame::OnSettings (wxCommandEvent & event) {
+void WxFrame::OnSettings(wxCommandEvent & /*event*/) {
   SaveSettings( false );
   if (!(check_dialogs_position_because_of_fullscreen_and_not_quadro &&
       GetScreenRect().Intersects( settings->GetScreenRect() ) ) && !settings->Show()) {
@@ -3687,7 +3755,7 @@ BEGIN_EVENT_TABLE(SettingsDialog, wxPropertySheetDialog)
 END_EVENT_TABLE()
 
 SettingsDialog::SettingsDialog(WxFrame *parent ):
-    wx_frame( parent ), on_cancel_rebuild_displaylist( false )
+    on_cancel_rebuild_displaylist( false ), wx_frame( parent )
 {
 
 
@@ -4166,7 +4234,7 @@ void SettingsDialog::OnOk (wxCommandEvent & event) {
   this->Show(false);
 }
 
-void SettingsDialog::OnCancel (wxCommandEvent & event) {
+void SettingsDialog::OnCancel(wxCommandEvent & /*event*/) {
   static_cast< WxFrame* >(this->GetParent())->LoadSettings( false );
   if( on_cancel_rebuild_displaylist )
     H3DDisplayListObject::DisplayList::rebuildAllDisplayLists();

@@ -79,18 +79,18 @@ namespace HAPI {
     typedef H3DUtil::AutoRefVector< HAPIHapticShape > HapticShapeVector;
 
     /// Initialize the renderer to be used with the given haptics device.
-    virtual void initRenderer( HAPIHapticsDevice *hd ) {}
+    virtual void initRenderer( HAPIHapticsDevice * /*hd*/ ) {}
 
     /// Release all resources that has been used in the renderer for
     /// the given haptics device.
-    virtual void releaseRenderer( HAPIHapticsDevice *hd ) {}
+    virtual void releaseRenderer( HAPIHapticsDevice * /*hd*/ ) {}
 
     /// This function will be called in the main loop when new shapes are
     /// transferred to be rendered in the haptics loop. It can be used
     /// to make some last changes to the shapes before moving them over
     /// to the haptics loop.
-    virtual void preProcessShapes( HAPIHapticsDevice *hd,
-                                   const HapticShapeVector &shapes ) {} 
+    virtual void preProcessShapes( HAPIHapticsDevice * /*hd*/,
+                                   const HapticShapeVector & /*shapes*/ ) {} 
 
     /// Destructor. Stops haptics rendering and remove callback functions.
     virtual ~HAPIHapticsRenderer();
@@ -98,8 +98,8 @@ namespace HAPI {
     /// This function is kept for backwards compatibility with older haptic
     /// renderers that do not accept dt.
     virtual HAPIForceEffect::EffectOutput 
-      renderHapticsOneStep( HAPIHapticsDevice *hd,
-                            const HapticShapeVector &shapes ) {
+      renderHapticsOneStep( HAPIHapticsDevice * /*hd*/,
+                            const HapticShapeVector & /*shapes*/ ) {
       return HAPIForceEffect::EffectOutput();
     };
 
@@ -109,7 +109,7 @@ namespace HAPI {
     virtual HAPIForceEffect::EffectOutput 
       renderHapticsOneStep( HAPIHapticsDevice *hd,
                             const HapticShapeVector &shapes,
-                            HAPITime dt ) {
+                            HAPITime /*dt*/ ) {
       return renderHapticsOneStep( hd, shapes );
     };
 

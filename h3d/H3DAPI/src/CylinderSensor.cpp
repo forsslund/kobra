@@ -73,7 +73,9 @@ CylinderSensor::CylinderSensor(
   new_cylinder( true ),
   prev_new_cylinder( true ),
   y_axis( Vec3f( 0, 1, 0 ) ),
-  plane_d( 0.0f ) {
+  plane_d( 0.0f ),
+  radius( 0 ),
+  use_caps( false ) {
 
   type_name = "CylinderSensor";
   database.initFields( this );

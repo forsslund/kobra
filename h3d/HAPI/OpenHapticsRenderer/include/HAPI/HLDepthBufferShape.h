@@ -83,6 +83,8 @@ namespace HAPI {
     HAPIGLShape *gl_shape;
 
   protected:
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
    /// Must be defined in order to link correctly.
    virtual bool lineIntersectShape( const Vec3 &from, 
                                      const Vec3 &to,
@@ -113,6 +115,7 @@ namespace HAPI {
     /// Must be defined in order to link correctly.
     virtual void getTangentSpaceMatrixShape( const Vec3 &point,
                                              Matrix4 &result_mtx ) {}
+H3D_POP_WARNINGS()
 
     /// Must be defined in order to link correctly.
     virtual void glRenderShape() {}

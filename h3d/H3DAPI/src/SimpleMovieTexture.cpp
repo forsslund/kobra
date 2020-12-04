@@ -86,8 +86,8 @@ SimpleMovieTexture::SimpleMovieTexture(
   videoWidth( _width ),
   videoHeight( _height ),
   elapsedTime( _elapsedTime ),
-  decoderManager( new DecoderManager ),
-  fieldUpdater( new FieldUpdater ) {
+  fieldUpdater( new FieldUpdater ),
+  decoderManager( new DecoderManager ) {
   type_name = "SimpleMovieTexture";
   database.initFields( this );
   

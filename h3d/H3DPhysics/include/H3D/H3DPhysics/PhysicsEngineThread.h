@@ -123,11 +123,14 @@ namespace H3D {
     /// run as fast as possible.
     /// \param _useMainThread If true execute all callbacks in the main thread.
     /// \param _use_synchronization If true, use deterministic synchronization of the physics and graphics threads.
+    /// \param _solver_type Chooses which solver to use. This option has different meaning for different physics engines,
+    /// but has no effect if only one solver option is available for a certain solver.
     PhysicsEngineThread( const string &engine = "ODE",
                          Priority thread_priority = NORMAL_PRIORITY,
                          int thread_frequency = 100,
                          bool _useMainThread = false,
-                         bool _use_synchronization = false );
+                         bool _use_synchronization = false,
+                         const H3DUInt32 _solver_type = 0 );
 
     /// Destructor.
     virtual ~PhysicsEngineThread();
@@ -432,6 +435,11 @@ namespace H3D {
       return (unsigned int) constraints.size();
     }
 
+    /// Returns the solver type set by the user.
+    inline H3DUInt32 getSolverType() const {
+      return solver_type;
+    }
+
     /// Get the the ids of all current constraints. The paramater c
     /// must be an stl container class containing objects of H3DConstraintId
     /// and supporting the push_back function. E.g. list< H3DConstraintId > or
@@ -460,6 +468,8 @@ namespace H3D {
     /// struct and then registered via the PhysicsEngineRegistration class
     /// (or registerPhysicsEngine function).
     struct PhysicsEngineCallbacks {
+      virtual ~PhysicsEngineCallbacks() {}
+
       // global engine callback functions
       H3DUtil::PeriodicThread::CallbackCode (*initEngine)(void *data);
       H3DUtil::PeriodicThread::CallbackCode (*deInitEngine)(void *data);
@@ -750,6 +760,9 @@ namespace H3D {
 
     /// Mutex lock for access to the space member variable.
     MutexLock space_lock;
+
+    /// The type of solver to be used for the physics engine.
+    const H3DUInt32 solver_type;
 
 #ifdef USE_CONTACTS_LOCK
     typedef list< ContactParameters > ContactList;

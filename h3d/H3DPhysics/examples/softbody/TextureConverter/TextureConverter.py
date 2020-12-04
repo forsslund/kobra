@@ -68,7 +68,7 @@ def textureCoordsClosestMatch ( index, point, origPoint, origIndex, origTexCoord
     found= False
     
     if isReportTime():
-      print "Direct match: %.0f%% Complete" % ((t1/float(len(index)))*100.0)
+      print("Direct match: %.0f%% Complete" % ((t1/float(len(index)))*100.0))
     
     for t2 in range(0,len(origIndex),4):
     
@@ -165,7 +165,7 @@ def textureCoordsBarycentric ( notFound, index, point, origPoint, origIndex, ori
     
     # Report progress
     if isReportTime():
-      print "Interpolation: %.0f%% Complete" % ((t1_i/float(len(notFound)))*100.0)
+      print("Interpolation: %.0f%% Complete" % ((t1_i/float(len(notFound)))*100.0))
     
     # For each node of the new triangle a list
     # of old triangles that the node falls within
@@ -243,7 +243,7 @@ def textureCoordsBarycentric ( notFound, index, point, origPoint, origIndex, ori
     # Find the triangle with the maximum occurance
     max_v= 0
     max_k= -1
-    for k,v in frq.iteritems():
+    for k,v in list(frq.items()):
       if v > max_v:
         max_v= v
         max_k= k
@@ -308,19 +308,19 @@ origTexCoordIndex= origGeometry.texCoordIndex.getValue()
 origTexCoord= origGeometry.texCoord.getValue()
 origTexPoint= origTexCoord.point.getValue()
 
-print "Mapping texture coordinates... Please wait..."
+print("Mapping texture coordinates... Please wait...")
 
 texPoints, texIndex, notFound= textureCoordsClosestMatch ( index, point, origPoint, origIndex, origTexCoordIndex, origTexPoint )
 
 if len(notFound) > 0:
-  print "%d triangles with no match. Passing these on for barycentric interpolation..." % len(notFound)
-  print "Created %d texture indices (%d face indices)." % (len(texIndex),len(index))
+  print("%d triangles with no match. Passing these on for barycentric interpolation..." % len(notFound))
+  print("Created %d texture indices (%d face indices)." % (len(texIndex),len(index)))
   textureCoordsBarycentric ( notFound, index, point, origPoint, origIndex, origTexCoordIndex, origTexPoint, texPoints, texIndex )
 else:
-  print "All triangles directly matched."
+  print("All triangles directly matched.")
   
-print "Created %d texture indices (%d face indices)." % (len(texIndex),len(index))
-print "Done"
+print("Created %d texture indices (%d face indices)." % (len(texIndex),len(index)))
+print("Done")
 
 texCoords= createNode( "TextureCoordinate" )
 texCoords.point.setValue ( texPoints )
@@ -329,4 +329,4 @@ geometry.texCoordIndex.setValue ( texIndex )
 
 f= open ( 'newGeometry.x3d', 'w' )
 f.write ( writeNodeAsX3D ( geometry ) )
-print "Written new geometry to: " + str(f.name)
+print(("Written new geometry to: " + str(f.name)))

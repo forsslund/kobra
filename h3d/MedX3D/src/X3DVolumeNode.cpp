@@ -88,8 +88,8 @@ X3DVolumeNode::X3DVolumeNode( Inst< DisplayList > _displayList,
             Inst< SFEmptySpaceClassificationTexture2D > _emptySpaceClassificationTexture,
             Inst< SFVolumeRendererNode > _renderer  ) :
   X3DChildNode( _metadata ),
-  H3DDisplayListObject( _displayList ),
   X3DBoundedObject( _bound, _bboxCenter, _bboxSize ),
+  H3DDisplayListObject( _displayList ),
   dimensions( _dimensions ),
   voxels( _voxels ),
   surfaceNormals( _surfaceNormals ),
@@ -97,14 +97,14 @@ X3DVolumeNode::X3DVolumeNode( Inst< DisplayList > _displayList,
   useSlicing( new UseSlicingField ),
   filterType( _filterType ),
   filterTexture( _filterTexture ),
-  emptySpaceSkippingRes( _emptySpaceSkippingRes ),
-  emptySpaceMinMaxTexture( _emptySpaceMinMaxTexture ),
-  emptySpaceClassificationTexture( _emptySpaceClassificationTexture ),
-  renderer( _renderer ),
   stopRaysAtGeometries( new SFBool ),
   useEmptySpaceSkipping( new SFBool ),
+  emptySpaceSkippingRes( _emptySpaceSkippingRes ),
   showNonEmptySpace( new SFBool ),
+  emptySpaceMinMaxTexture( _emptySpaceMinMaxTexture ),
+  emptySpaceClassificationTexture( _emptySpaceClassificationTexture ),
   useStochasticJittering( new SFBool ),
+  renderer( _renderer ),
   textureMatrix( new SFMatrix4f ),
   textureMatrixInverse( new SFMatrix4f ),
   updateDimensions( new UpdateDimensions ),
@@ -230,7 +230,7 @@ void X3DVolumeNode::SFFilterKernelTexture::catmullRomSplineWeights( H3DFloat x,
 }
 
 void X3DVolumeNode::SFFilterKernelTexture::update() {
-  X3DTexture3DNode *tex = 
+  /*X3DTexture3DNode *tex = */
     static_cast< SFTexture3DNode * >( routes_in[0] )->getValue();
   const string &filter_type = 
     static_cast< SFString * >( routes_in[1] )->getValue();
@@ -725,7 +725,6 @@ void findMinMax( Image *image,
    A *data = (A*) image->getImageData();
    unsigned int w = image->width();
    unsigned int h = image->height();
-   unsigned int d = image->depth();
    A max_v, min_v;
 
    // go through each voxel in the volume and find the minimum and maximum value.

@@ -548,7 +548,7 @@ namespace H3D {
     /// contain empt space or not. The function returns
     /// true if the value range min_v to max_v can be empty, i.e. there
     /// exists a value in the range that causes the alpha value to be 0.
-    virtual bool isEmptySpace( H3DFloat min_v, H3DFloat max_v ) {
+    virtual bool isEmptySpace( H3DFloat /*min_v*/, H3DFloat max_v ) {
       return max_v == 0;
     }
 

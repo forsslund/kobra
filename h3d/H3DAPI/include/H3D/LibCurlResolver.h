@@ -37,13 +37,13 @@
 #include <fstream>
 #include <list>
 #include <curl/curl.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 
 namespace H3D {
 
   /// The LibCurlResolver uses libcurl to resolve URLs using e.g. the
   /// http or ftp protocols.
-  class H3DAPI_API LibCurlResolver : public ResourceResolver {
+  class H3DAPI_API LibCurlResolver : public H3DUtil::ResourceResolver {
   public:
 
     /// Constructor.       

@@ -78,7 +78,15 @@ namespace H3D {
 
   class PyNodePtr {
   public:
-    PyNodePtr() : refCountNode ( true ), ptr( NULL ) {}
+    PyNodePtr() : refCountNode ( true ), ptr( NULL ) {
+      assert( H3DUtil::ThreadBase::inMainThread() );
+      python_node_ptrs.insert( this );
+    }
+
+    ~PyNodePtr() {
+      assert( H3DUtil::ThreadBase::inMainThread() );
+      python_node_ptrs.erase( this );
+    }
 
     /// If true, then the PyNode should keep a reference count
     /// for the Node ptr. Usually this is the desired behaviour, except
@@ -87,6 +95,26 @@ namespace H3D {
     inline void setRefCountNode ( bool _refCountNode ) {
       refCountNode= _refCountNode;
     }
+
+    /// Set the value of the encapsulated Node *.
+    inline void setNodePtr( Node *_ptr ) {
+      if( ptr ) {
+        python_node_ptrs.erase( this );
+      }
+      
+      if( refCountNode && ptr ) ptr->unref();
+      ptr = _ptr;
+      if( refCountNode && ptr ) ptr->ref();
+
+      if (ptr && refCountNode) {
+         python_node_ptrs.insert( this );
+      }
+    }
+    /// Get the value of the encapsulated Node *.
+    inline Node *nodePtr() {
+      return ptr;
+    }
+    static H3DAPI_API std::set<PyNodePtr *> python_node_ptrs;
 
   protected:
     bool refCountNode;
@@ -122,18 +150,6 @@ namespace H3D {
   /// \class PyNode
   /// \brief Python C Type wrapper around Node*
   struct PyNode : public PyType, PyNodePtr {
-
-    /// Set the value of the encapsulated Node *.
-    inline void setNodePtr( Node *_ptr ) {
-      if( refCountNode && ptr ) ptr->unref();
-      ptr = _ptr;
-      if( refCountNode && ptr ) ptr->ref();
-    }
-
-    /// Get the value of the encapsulated Node *.
-    inline Node *nodePtr() {
-      return ptr;
-    }
     
     static void installType( PyObject* H3D_module );
     

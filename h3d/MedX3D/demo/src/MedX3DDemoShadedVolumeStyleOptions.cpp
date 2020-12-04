@@ -122,7 +122,7 @@ void MedX3DDemoShadedVolumeStyleOptions::OnShadedTransparencyScroll( wxScrollEve
   wxGetApp().style_dialog->setStyleModified( true );
 }
 
-void MedX3DDemoShadedVolumeStyleOptions::OnShadedTransparencyText( wxCommandEvent& event )
+void MedX3DDemoShadedVolumeStyleOptions::OnShadedTransparencyText( wxCommandEvent& /*event*/ )
 {
 }
 
@@ -136,17 +136,17 @@ void MedX3DDemoShadedVolumeStyleOptions::OnShadedAmbientIntensityScroll( wxScrol
   shaded_volume_style_material->ambientIntensity->setValue( value );
 }
 
-void MedX3DDemoShadedVolumeStyleOptions::OnShadedAmbientIntensityText( wxCommandEvent& event )
+void MedX3DDemoShadedVolumeStyleOptions::OnShadedAmbientIntensityText( wxCommandEvent& /*event*/ )
 {
 }
 
-void MedX3DDemoShadedVolumeStyleOptions::OnShadedLightingBox( wxCommandEvent& event )
+void MedX3DDemoShadedVolumeStyleOptions::OnShadedLightingBox( wxCommandEvent& /*event*/ )
 {
   shaded_volume_style->lighting->setValue( ShadedLightingBox->IsChecked() );
   wxGetApp().style_dialog->setStyleModified( true );
 }
 
-void MedX3DDemoShadedVolumeStyleOptions::OnShadedShadowsBox( wxCommandEvent& event )
+void MedX3DDemoShadedVolumeStyleOptions::OnShadedShadowsBox( wxCommandEvent& /*event*/ )
 {
   shaded_volume_style->shadows->setValue( ShadedShadowsBox->IsChecked() );
   wxGetApp().style_dialog->setStyleModified( true );

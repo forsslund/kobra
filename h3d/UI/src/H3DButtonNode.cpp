@@ -90,6 +90,24 @@ H3DButtonNode::H3DButtonNode( Inst< SFNode          > _metadata,
   buttonMode->routeNoEvent( state );
 }
 
+H3DButtonNode::~H3DButtonNode() {
+  for( ButtonGroupMap::iterator i = button_group_map.begin(); i != button_group_map.end(); ++i ) {
+    list<H3DButtonNode *>::iterator j = std::find( (*i).second.begin(),
+                                                   (*i).second.end(),
+                                                   this );
+    if( j != (*i).second.end() ) {
+      (*i).second.erase( j );
+      if( (*i).second.empty() ) {
+        button_group_map.erase( i );
+        if( button_group_map.empty() ) {
+          break;
+        }
+        i = button_group_map.begin();
+      }
+    }
+  }
+}
+
 void H3DButtonNode::ButtonState::setValue( const bool &v, int _id ) {
   if( !static_cast< H3DButtonNode* >(getOwner())->enabled->getValue() ) {
     return;

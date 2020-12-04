@@ -172,8 +172,8 @@ namespace H3D {
     /// exists a value in the range that causes the alpha value to be 0.
     /// The previous_empty value is true if a previous step has decided
     /// the range is possibly empty. 
-    virtual bool isEmptySpace( H3DFloat min_v, 
-                               H3DFloat max_v, 
+    virtual bool isEmptySpace( H3DFloat /*min_v*/, 
+                               H3DFloat /*max_v*/, 
                                bool previous_empty ) {
       return previous_empty;
     }

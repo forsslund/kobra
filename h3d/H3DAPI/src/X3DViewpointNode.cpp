@@ -103,8 +103,8 @@ X3DViewpointNode::X3DViewpointNode( Inst< SFSetBind     > _set_bind,
   totalOrientation ( _totalOrientation ),
   relPos( new SFVec3f() ),
   relOrn( new SFRotation() ),
-  in_scene_graph( false ),
-  is_top_level( false ) {
+  is_top_level( false ),
+  in_scene_graph( false ) {
   
   type_name = "X3DViewpointNode";
   database.initFields( this );
@@ -213,7 +213,7 @@ void X3DViewpointNode::toStackTop() {
   }
 }
 
-void X3DViewpointNode::rotateAround( Rotation rotation, bool collision,
+void X3DViewpointNode::rotateAround( Rotation rotation, bool /*collision*/,
                                      Vec3f center_of_rot ) {
   Vec3f vp_pos = position->getValue();
   Vec3f vp_full_pos = vp_pos + relPos->getValue();

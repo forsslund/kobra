@@ -190,6 +190,11 @@ namespace H3D {
   public:
     /// Returns the OpenGL pixel format to use given an Image, e.g. 
     virtual GLenum glPixelFormat( Image *_image );
+
+  protected:
+    // Needed to correctly fall back in case the TextureProperties settings are not matching the mip map settings
+    // or mip mapping can not be used (compressed image).
+    bool mip_mapping_used;
   };
 }
 

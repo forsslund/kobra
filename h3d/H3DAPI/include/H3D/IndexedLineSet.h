@@ -188,6 +188,8 @@ namespace H3D {
     /// Render the IndexedLineSet with OpenGL
     virtual void render();
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// Detect collision between a moving sphere and the geometry.
     /// \param radius The radius of the sphere
     /// \param from The start position of the sphere
@@ -201,6 +203,7 @@ namespace H3D {
                                         NodeIntersectResult &result ) {
       return false;
     }
+H3D_POP_WARNINGS()
 
     /// Field for setting the value of the colorIndex field.
     /// <b>Access type:</b> inputOnly 

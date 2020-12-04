@@ -193,9 +193,9 @@ void Node::cloneFieldValue ( Field& _from, Field& _to, bool deepCopy, DeepCopyMa
         if ( SFieldClass *sfield_to = dynamic_cast< SFieldClass * >( &_to ) ) {
           unsigned int data_size = sfield_from->valueTypeSize();
           unsigned char* data = new unsigned char[ data_size ];
-          data_size = sfield_from->getValueAsVoidPtr( data, data_size );
-          if ( data_size != -1 ) {
-            sfield_to->setValueFromVoidPtr ( (const void *)data, data_size );
+          int nr_copied_bytes = sfield_from->getValueAsVoidPtr( data, data_size );
+          if ( nr_copied_bytes != -1 ) {
+            sfield_to->setValueFromVoidPtr ( (const void *)data, nr_copied_bytes );
           }
           delete [] data;
         }

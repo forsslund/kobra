@@ -45,7 +45,7 @@ namespace ForceDimensionDeviceInternals {
   FIELDDB_ELEMENT( ForceDimensionDevice, waitForReset, INPUT_ONLY )
   FIELDDB_ELEMENT( ForceDimensionDevice, endEffectorMass, INPUT_ONLY )
   FIELDDB_ELEMENT( ForceDimensionDevice, useBrakes, INPUT_OUTPUT )
-  FIELDDB_ELEMENT( ForceDimensionDevice, deviceType, OUTPUT_ONLY )
+  FIELDDB_ELEMENT( ForceDimensionDevice, deviceType, INPUT_OUTPUT )
   FIELDDB_ELEMENT( ForceDimensionDevice, enableForce, INPUT_OUTPUT )
   FIELDDB_ELEMENT( ForceDimensionDevice, vibrationFrequency, INPUT_OUTPUT )
   FIELDDB_ELEMENT( ForceDimensionDevice, vibrationAmplitude, INPUT_OUTPUT )
@@ -54,6 +54,8 @@ namespace ForceDimensionDeviceInternals {
   FIELDDB_ELEMENT( ForceDimensionDevice, isAutoCalibrated, OUTPUT_ONLY )
   FIELDDB_ELEMENT( ForceDimensionDevice, desiredComThreadRate, INITIALIZE_ONLY )
   FIELDDB_ELEMENT( ForceDimensionDevice, gripperForce, OUTPUT_ONLY )
+  FIELDDB_ELEMENT( ForceDimensionDevice, flipGripperValues, INITIALIZE_ONLY )
+  FIELDDB_ELEMENT( ForceDimensionDevice, releaseDevicePosition, INPUT_OUTPUT )
 }
 
 /// Constructor.
@@ -93,7 +95,9 @@ ForceDimensionDevice::ForceDimensionDevice(
                Inst< SFAutoCalibrate    > _autoCalibrate,
                Inst< SFBool             > _isAutoCalibrated,
                Inst< SFInt32            > _desiredComThreadRate,
-               Inst< SFFloat            > _gripperForce ) :
+               Inst< SFFloat            > _gripperForce,
+               Inst< SFBool             > _flipGripperValues,
+               Inst< SFReleasePosition  > _releaseDevicePosition ) :
   H3DHapticsDevice( _devicePosition, _deviceOrientation, _trackerPosition,
               _trackerOrientation, _positionCalibration, 
               _orientationCalibration, _proxyPosition,
@@ -111,23 +115,17 @@ ForceDimensionDevice::ForceDimensionDevice(
   enableForce( _enableForce ),
   vibrationFrequency( _vibrationFrequency ),
   vibrationAmplitude( _vibrationAmplitude ),
-  changeVibration( new ChangeVibration ),
   gripperAngle( _gripperAngle ),
+  changeVibration( new ChangeVibration ),
   autoCalibrate( _autoCalibrate ),
   isAutoCalibrated( _isAutoCalibrated ),
   desiredComThreadRate( _desiredComThreadRate ),
-  gripperForce( _gripperForce ) {
+  gripperForce( _gripperForce ),
+  flipGripperValues( _flipGripperValues ),
+  releaseDevicePosition( _releaseDevicePosition ){
 
   type_name = "ForceDimensionDevice";
   database.initFields( this );
-
-#ifdef HAVE_DHDAPI
-  hapi_device.reset( new HAPI::ForceDimensionHapticsDevice );
-#else
-  Console(LogLevel::Error) << "Cannot use ForceDimensionDevice. HAPI compiled without"
-       << " DHDAPI support. Recompile HAPI with HAVE_DHDAPI defined"
-       << " in order to use it." << endl;
-#endif
 
   gripperAngle->setValue( 0, id );
   gripperForce->setValue( 0, id );
@@ -145,16 +143,26 @@ ForceDimensionDevice::ForceDimensionDevice(
   autoCalibrate->setValue( false );
   isAutoCalibrated->setValue( false, id );
   desiredComThreadRate->setValue( 1000 );
+  flipGripperValues->setValue( false, id );
+  // Do not set the default value of releaseDevicePosition since
+  // Vec3d will be automatically set to 0,0,0 and if the position is
+  // set then the device will try to move there.
 }
 
 
+#ifndef HAVE_DHDAPI
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void ForceDimensionDevice::Reset::onNewValue( const bool &v ) {
 #ifdef HAVE_DHDAPI
   ForceDimensionDevice *fd = 
     static_cast< ForceDimensionDevice * >( getOwner() );
   HAPI::ForceDimensionHapticsDevice * dhd = 
     static_cast< HAPI::ForceDimensionHapticsDevice * >( fd->hapi_device.get() );
-  if( v ) dhd->reset();
+  if( v && dhd ) {
+    dhd->reset();
+  }
 #endif
 }
 
@@ -164,7 +172,9 @@ void ForceDimensionDevice::WaitReset::onNewValue( const bool &v ) {
     static_cast< ForceDimensionDevice * >( getOwner() );
   HAPI::ForceDimensionHapticsDevice * dhd = 
     static_cast< HAPI::ForceDimensionHapticsDevice * >( fd->hapi_device.get() );
-  if( v ) dhd->waitForReset();
+  if( v && dhd ) {
+    dhd->waitForReset();
+  }
 #endif
 }
 
@@ -174,7 +184,9 @@ void ForceDimensionDevice::GravityComp::onValueChange( const bool &v ) {
     static_cast< ForceDimensionDevice * >( getOwner() );
   HAPI::ForceDimensionHapticsDevice * dhd = 
     static_cast< HAPI::ForceDimensionHapticsDevice * >( fd->hapi_device.get() );
-  dhd->useGravityCompensation( v );
+  if( dhd ) {
+    dhd->useGravityCompensation( v );
+  }
 #endif
 }
 
@@ -184,7 +196,9 @@ void ForceDimensionDevice::EffectorMass::onValueChange( const H3DFloat &v ) {
     static_cast< ForceDimensionDevice * >( getOwner() );
   HAPI::ForceDimensionHapticsDevice * dhd = 
     static_cast< HAPI::ForceDimensionHapticsDevice * >( fd->hapi_device.get() );
-  dhd->setEffectorMass( v );
+  if( dhd ) {
+    dhd->setEffectorMass( v );
+  }
 #endif
 }
 
@@ -194,7 +208,9 @@ void ForceDimensionDevice::Brakes::onValueChange( const bool &v ) {
     static_cast< ForceDimensionDevice * >( getOwner() );
   HAPI::ForceDimensionHapticsDevice * dhd = 
     static_cast< HAPI::ForceDimensionHapticsDevice * >( fd->hapi_device.get() );
-  dhd->useBrakes( v );
+  if( dhd ) {
+    dhd->useBrakes( v );
+  }
 #endif
 }
 
@@ -204,11 +220,14 @@ void ForceDimensionDevice::EnableForce::onValueChange( const bool &v ) {
     static_cast< ForceDimensionDevice * >( getOwner() );
   HAPI::ForceDimensionHapticsDevice * dhd = 
     static_cast< HAPI::ForceDimensionHapticsDevice * >( fd->hapi_device.get() );
-  if( call_hapi_function ) {
+  if( call_hapi_function && dhd ) {
     dhd->enableForce( v );
   }
 #endif
 }
+#ifndef HAVE_DHDAPI
+H3D_POP_WARNINGS()
+#endif
 
 H3DHapticsDevice::ErrorCode ForceDimensionDevice::initDevice() {
 #ifdef HAVE_DHDAPI
@@ -233,7 +252,6 @@ H3DHapticsDevice::ErrorCode ForceDimensionDevice::initDevice() {
 
 H3DHapticsDevice::ErrorCode ForceDimensionDevice::releaseDevice() {
   HAPI::HAPIHapticsDevice::ErrorCode e = H3DHapticsDevice::releaseDevice();
-  deviceType->setValue( -1, id );
   return e;
 }
 
@@ -275,17 +293,51 @@ void ForceDimensionDevice::updateDeviceValues() {
 #endif
 }
 
+#ifndef HAVE_DHDAPI
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void ForceDimensionDevice::SFAutoCalibrate::onNewValue( const bool &v ) {
 #ifdef HAVE_DHDAPI
   ForceDimensionDevice *fd = 
     static_cast< ForceDimensionDevice * >( getOwner() );
   HAPI::ForceDimensionHapticsDevice * dhd = 
     static_cast< HAPI::ForceDimensionHapticsDevice * >( fd->hapi_device.get() );
-  if( v ) {
+  if( v && dhd ) {
     dhd->autoCalibrate();
     fd->enableForce->call_hapi_function = false;
     fd->enableForce->setValue(true);
     fd->enableForce->call_hapi_function = true;
   }
+#endif
+}
+
+void ForceDimensionDevice::SFReleasePosition::onNewValue( const Vec3d &v ) {
+#ifdef HAVE_DHDAPI
+  ForceDimensionDevice *fd =
+    static_cast< ForceDimensionDevice * >(getOwner());
+  HAPI::ForceDimensionHapticsDevice * dhd =
+    static_cast<HAPI::ForceDimensionHapticsDevice *>(fd->hapi_device.get());
+  if( dhd ) {
+    dhd->setReleasePosition( v );
+  }
+  value_is_set = true;
+#endif
+}
+#ifndef HAVE_DHDAPI
+H3D_POP_WARNINGS()
+#endif
+
+void ForceDimensionDevice::initialize() {
+#ifdef HAVE_DHDAPI
+  HAPI::ForceDimensionHapticsDevice * dhd = new HAPI::ForceDimensionHapticsDevice( deviceType->getValue(), flipGripperValues->getValue() );
+  hapi_device.reset( dhd );
+  if( releaseDevicePosition->value_is_set ) {
+    dhd->setReleasePosition( releaseDevicePosition->getValue() );
+  }
+#else
+  Console(LogLevel::Error) << "Cannot use ForceDimensionDevice. HAPI compiled without"
+       << " DHDAPI support. Recompile HAPI with HAVE_DHDAPI defined"
+       << " in order to use it." << endl;
 #endif
 }

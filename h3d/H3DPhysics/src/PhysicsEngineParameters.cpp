@@ -348,7 +348,8 @@ PhysicsEngineParameters::DistanceJointParameters::DistanceJointParameters() :
   min_distance( 0.0f ),
   stiffness( 100.f ),
   damping( 0.1f ),
-  tolerance( 0.f ) {
+  tolerance( 0.f ),
+  distance( 0 ) {
   type = "DistanceJoint";
   all_output = DISTANCE;
 }
@@ -616,7 +617,8 @@ PhysicsEngineParameters::SliderJointParameters::SliderJointParameters() :
   stop_bounce( 0 ),
   stop_error_correction( 1 ),
   separation( 0 ),
-  separation_rate( 0 ) {
+  separation_rate( 0 ),
+  slider_force( 0 ) {
   type = "SliderJoint";
   all_output = SEPARATION | SEPARATION_RATE;
 }
@@ -729,14 +731,30 @@ Generic6DOFJointParameters::Generic6DOFJointParameters() :
   max_limit3( 0.0f ),
   max_force1( 0.0f ),
   max_force2( 0.0f ),
-  max_force3( 0.0f ) {
+  max_force3( 0.0f ),
+  hinge1_angle( 0 ),
+  hinge1_angle_rate( 0 ),
+  hinge2_angle( 0 ),
+  hinge2_angle_rate( 0 ),
+  hinge3_angle( 0 ),
+  hinge3_angle_rate( 0 ),
+  body1_anchor_point( Vec3f( 0, 0, 0 ) ),
+  body1_axis( Vec3f( 0, 0, 0 ) ),
+  body2_anchor_point( Vec3f( 0, 0, 0 ) ),
+  body2_axis( Vec3f( 0, 0, 0 ) ),
+  generic6dof_output_bit_mask( 0 ) {
   type = "Generic6DOFJoint";
+  all_output = HINGE1_ANGLE | HINGE2_ANGLE | HINGE3_ANGLE | HINGE1_ANGLE_RATE | HINGE2_ANGLE_RATE |
+    HINGE3_ANGLE_RATE | BODY1_ANCHOR_POINT | BODY2_ANCHOR_POINT | BODY1_AXIS | BODY2_AXIS;
 }
 
 void Generic6DOFJointParameters::copyInputParameters( ConstraintParameters& s ) {
   Generic6DOFJointParameters *src = dynamic_cast<Generic6DOFJointParameters *>(&s);
   if( src ) {
+    unsigned long int update_bit_mask_old = update_bit_mask;
     JointParameters::copyInputParameters( *src );
+    update_bit_mask = src->update_bit_mask;
+    copyGeneric6DOFOutputBitMask( src->generic6dof_output_bit_mask );
 
     anchor_point = src->anchor_point;
     axis1 = src->axis1;
@@ -776,3 +794,29 @@ void Generic6DOFJointParameters::copyInputParameters( ConstraintParameters& s ) 
     max_force3 = src->max_force3;
   }
 }
+
+void Generic6DOFJointParameters::copyOutputParameters( ConstraintParameters& s ) {
+  Generic6DOFJointParameters *src = dynamic_cast<Generic6DOFJointParameters *>(&s);
+  if( src ) {
+    unsigned long int update_bit_mask_old = update_bit_mask;
+    JointParameters::copyOutputParameters( *src );
+    update_bit_mask = src->update_bit_mask;
+    copyGeneric6DOFOutputBitMask( src->generic6dof_output_bit_mask );
+
+    body1_anchor_point = src->body1_anchor_point;
+    body2_anchor_point = src->body2_anchor_point;
+    body1_axis = src->body1_axis;
+    body2_axis = src->body2_axis;
+    hinge1_angle = src->hinge1_angle;
+    hinge2_angle = src->hinge2_angle;
+    hinge3_angle = src->hinge3_angle;
+    hinge1_angle_rate = src->hinge1_angle_rate;
+    hinge2_angle_rate = src->hinge2_angle_rate;
+    hinge3_angle_rate = src->hinge3_angle_rate;
+    max_angle1 = src->max_angle1;
+    min_angle1 = src->min_angle1;
+    axis1 = src->axis1;
+    axis2 = src->axis2;
+  }
+}
+

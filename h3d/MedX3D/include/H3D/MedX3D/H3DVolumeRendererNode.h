@@ -57,7 +57,7 @@ namespace H3D {
     }
 
     /// Traverse the scene graph.
-    virtual void traverseSG( X3DVolumeNode *, TraverseInfo &ti ) {}
+    virtual void traverseSG( X3DVolumeNode *, TraverseInfo & ) {}
 
     /// Virtual function to build the shader to use for a single volume.
     virtual void buildShader( X3DVolumeNode * ) {}

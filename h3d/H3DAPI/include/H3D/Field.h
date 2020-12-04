@@ -114,12 +114,15 @@ namespace H3D {
     
     /// Destructor.
     virtual ~Field();
-        
+
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// Check that a given input field is of the correct type. Needed
     /// for TypedField.
     /// \param f The field to check the type for
     /// \param index The index of the field in the routes_in member.
     virtual void checkFieldType( Field *f, int index ) {}
+H3D_POP_WARNINGS()
 
     /// Sets local the name of the field. Will be used in error reporting.
     void setName( string _name ) { name = _name; }
@@ -361,7 +364,7 @@ namespace H3D {
     virtual void setValueFromString( const string &s ) = 0;
     /// Get the value of the field as a string. If the field contains
     /// multiple values the separator string is used between the values.
-    inline virtual string getValueAsString( const string& separator = " " ) {
+    inline virtual string getValueAsString( const string& /*separator*/ = " " ) {
       return "";
     }
   };
@@ -374,9 +377,8 @@ namespace H3D {
     /// we try to parse the values according to the X3D/XML 
     /// specification.
     virtual size_t getSize( ) = 0;
-    /// Get the value of the field as a string. If the field contains
-    /// multiple values the separator string is used between the values.
-    inline virtual string getElementAsString( size_t element ) {
+    /// Get the value of an element of the field as a string.
+    inline virtual string getElementAsString( size_t /*element*/ ) {
       return "";
     }
     /// Add a new element to an MField from a string value.

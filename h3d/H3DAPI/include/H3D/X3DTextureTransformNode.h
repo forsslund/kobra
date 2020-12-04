@@ -49,7 +49,7 @@ namespace H3D {
       H3D_API_EXCEPTION( InvalidCallToCallList );
       
       /// Perform front face code outside the display list.
-      virtual void callList( bool build_list ) {
+      virtual void callList( bool /*build_list*/ ) {
         stringstream s;
         s << "Cannot call callList() on the DisplayList of an "
           << "X3DTextureTransformNode since the rendering requires "

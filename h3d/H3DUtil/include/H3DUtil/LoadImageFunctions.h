@@ -53,9 +53,15 @@ namespace H3DUtil {
   /// \param image The image to save.
   /// \param disable_alpha If true the alpha value will not be read from the file
   ///                      and instead be replaced with the default full alpha value.
+  /// \param async If true, then the png image saving will be done in a separate thread asynchronously,
+  ///              note that when using asynchronous saving, this function always return true, but if the saving failed in saving thread,
+  ///              an error message will be printed out in that thread. 
   /// \returns true on success.
   H3DUTIL_API bool saveFreeImagePNG( const std::string &url,
-                                     Image& image, bool disable_alpha = false );
+                                     Image& image, bool disable_alpha = false, bool async = false );
+
+  /// An internal helper function used by saveFreeImagePNG 
+  bool saveFreeImagePNGInternal( const std::string &url, Image& image, bool disable_alpha );
 #endif
 
 #ifdef HAVE_TEEM

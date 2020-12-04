@@ -64,44 +64,64 @@ namespace Generic6DOFJointInternals {
   FIELDDB_ELEMENT( Generic6DOFJoint, maxForce1, INPUT_OUTPUT )
   FIELDDB_ELEMENT( Generic6DOFJoint, maxForce2, INPUT_OUTPUT )
   FIELDDB_ELEMENT( Generic6DOFJoint, maxForce3, INPUT_OUTPUT )
+  FIELDDB_ELEMENT( Generic6DOFJoint, body1AnchorPoint, OUTPUT_ONLY )
+  FIELDDB_ELEMENT( Generic6DOFJoint, body1Axis, OUTPUT_ONLY )
+  FIELDDB_ELEMENT( Generic6DOFJoint, body2AnchorPoint, OUTPUT_ONLY )
+  FIELDDB_ELEMENT( Generic6DOFJoint, body2Axis, OUTPUT_ONLY )
+  FIELDDB_ELEMENT( Generic6DOFJoint, hinge1Angle, OUTPUT_ONLY )
+  FIELDDB_ELEMENT( Generic6DOFJoint, hinge1AngleRate, OUTPUT_ONLY )
+  FIELDDB_ELEMENT( Generic6DOFJoint, hinge2Angle, OUTPUT_ONLY )
+  FIELDDB_ELEMENT( Generic6DOFJoint, hinge2AngleRate, OUTPUT_ONLY )
+  FIELDDB_ELEMENT( Generic6DOFJoint, hinge3Angle, OUTPUT_ONLY )
+  FIELDDB_ELEMENT( Generic6DOFJoint, hinge3AngleRate, OUTPUT_ONLY )
 }
 
 Generic6DOFJoint::Generic6DOFJoint(
-                                   Inst< SFNode      > _metadata,
-                                   Inst< ValueUpdater > _value_updater,
-                                   Inst< SFRigidBody > _body1,
-                                   Inst< SFRigidBody > _body2,
-                                   Inst< MFString    > _forceOutput,
+                                   Inst< SFNode          > _metadata,
+                                   Inst< ValueUpdater    > _value_updater,
+                                   Inst< SFRigidBody     > _body1,
+                                   Inst< SFRigidBody     > _body2,
+                                   Inst< MFString        > _forceOutput,
                                    Inst< MFEngineOptions > _engineOptions,
                                    Inst< SFTransformNode > _transform,
-                                   Inst< SFVec3f     > _anchorPoint,
-                                   Inst< SFVec3f     > _axis1,
-                                   Inst< SFVec3f     > _axis2,
-                                   Inst< SFVec3f     > _axis3,
-                                   Inst< SFFloat     > _desiredAngularVelocity1,
-                                   Inst< SFFloat     > _desiredAngularVelocity2,
-                                   Inst< SFFloat     > _desiredAngularVelocity3,
-                                   Inst< SFFloat     > _minAngle1,
-                                   Inst< SFFloat     > _minAngle2,
-                                   Inst< SFFloat     > _minAngle3,
-                                   Inst< SFFloat     > _maxAngle1,
-                                   Inst< SFFloat     > _maxAngle2,
-                                   Inst< SFFloat     > _maxAngle3,
-                                   Inst< SFFloat     > _maxTorque1,
-                                   Inst< SFFloat     > _maxTorque2,
-                                   Inst< SFFloat     > _maxTorque3,
-                                   Inst< SFFloat     > _desiredLinearVelocity1,
-                                   Inst< SFFloat     > _desiredLinearVelocity2,
-                                   Inst< SFFloat     > _desiredLinearVelocity3,
-                                   Inst< SFFloat     > _minLimit1,
-                                   Inst< SFFloat     > _minLimit2,
-                                   Inst< SFFloat     > _minLimit3,
-                                   Inst< SFFloat     > _maxLimit1,
-                                   Inst< SFFloat     > _maxLimit2,
-                                   Inst< SFFloat     > _maxLimit3,
-                                   Inst< SFFloat     > _maxForce1,
-                                   Inst< SFFloat     > _maxForce2,
-                                   Inst< SFFloat     > _maxForce3 ) : 
+                                   Inst< SFVec3f         > _anchorPoint,
+                                   Inst< SFVec3f         > _axis1,
+                                   Inst< SFVec3f         > _axis2,
+                                   Inst< SFVec3f         > _axis3,
+                                   Inst< SFFloat         > _desiredAngularVelocity1,
+                                   Inst< SFFloat         > _desiredAngularVelocity2,
+                                   Inst< SFFloat         > _desiredAngularVelocity3,
+                                   Inst< SFFloat         > _minAngle1,
+                                   Inst< SFFloat         > _minAngle2,
+                                   Inst< SFFloat         > _minAngle3,
+                                   Inst< SFFloat         > _maxAngle1,
+                                   Inst< SFFloat         > _maxAngle2,
+                                   Inst< SFFloat         > _maxAngle3,
+                                   Inst< SFFloat         > _maxTorque1,
+                                   Inst< SFFloat         > _maxTorque2,
+                                   Inst< SFFloat         > _maxTorque3,
+                                   Inst< SFFloat         > _desiredLinearVelocity1,
+                                   Inst< SFFloat         > _desiredLinearVelocity2,
+                                   Inst< SFFloat         > _desiredLinearVelocity3,
+                                   Inst< SFFloat         > _minLimit1,
+                                   Inst< SFFloat         > _minLimit2,
+                                   Inst< SFFloat         > _minLimit3,
+                                   Inst< SFFloat         > _maxLimit1,
+                                   Inst< SFFloat         > _maxLimit2,
+                                   Inst< SFFloat         > _maxLimit3,
+                                   Inst< SFFloat         > _maxForce1,
+                                   Inst< SFFloat         > _maxForce2,
+                                   Inst< SFFloat         > _maxForce3,
+                                   Inst< SFVec3f         > _body1AnchorPoint,
+                                   Inst< SFVec3f         > _body1Axis,
+                                   Inst< SFVec3f         > _body2AnchorPoint,
+                                   Inst< SFVec3f         > _body2Axis,
+                                   Inst< SFFloat         > _hinge1Angle,
+                                   Inst< SFFloat         > _hinge1AngleRate,
+                                   Inst< SFFloat         > _hinge2Angle,
+                                   Inst< SFFloat         > _hinge2AngleRate,
+                                   Inst< SFFloat         > _hinge3Angle,
+                                   Inst< SFFloat         > _hinge3AngleRate ) :
 H3DRigidBodyJointNode ( _metadata, _value_updater, _body1, _body2, _forceOutput, _engineOptions, _transform ),
 anchorPoint ( _anchorPoint ),
 axis1 ( _axis1 ),
@@ -130,7 +150,17 @@ maxLimit2 ( _maxLimit2 ),
 maxLimit3 ( _maxLimit3 ),
 maxForce1 ( _maxForce1 ),
 maxForce2 ( _maxForce2 ),
-maxForce3 ( _maxForce3 ) {
+maxForce3 ( _maxForce3 ),
+body1AnchorPoint( _body1AnchorPoint ),
+body1Axis( _body1Axis ),
+body2AnchorPoint( _body2AnchorPoint ),
+body2Axis( _body2Axis ),
+hinge1Angle( _hinge1Angle ),
+hinge1AngleRate( _hinge1AngleRate ),
+hinge2Angle( _hinge2Angle ),
+hinge2AngleRate( _hinge2AngleRate ),
+hinge3Angle( _hinge3Angle ),
+hinge3AngleRate( _hinge3AngleRate ) {
 
   type_name = "Generic6DOFJoint";
   database.initFields( this );
@@ -297,55 +327,115 @@ PhysicsEngineParameters::ConstraintParameters * Generic6DOFJoint::getConstraintP
     params->setMaxForce3( maxForce3->getValue() );
   }
 
+  if( all_params || valueUpdater->hasCausedEvent( forceOutput ) ) {
+    const vector<string> &output = forceOutput->getValue();
+    bool has_none = std::find( output.begin(), output.end(), "NONE" ) != output.end();
+    if( !has_none ) {
+      bool has_all = std::find( output.begin(), output.end(), "ALL" ) != output.end();
+      if( has_all ) {
+        params->enableHinge1Angle();
+        params->enableHinge2Angle();
+        params->enableHinge3Angle();
+        params->enableHinge1AngleRate();
+        params->enableHinge2AngleRate();
+        params->enableHinge3AngleRate();
+        params->enableBody1AnchorPoint();
+        params->enableBody2AnchorPoint();
+        params->enableBody1Axis();
+        params->enableBody2Axis();
+      } else {
+        for( vector<string>::const_iterator i = output.begin(); i != output.end(); ++i ) {
+          if( (*i) == "NONE" || (*i) == "ALL" ) continue;
+          if( (*i) == "hinge1Angle" ) {
+            params->enableHinge1Angle();
+          } else if( (*i) == "hinge2angle" ) {
+            params->enableHinge2Angle();
+          } else if( (*i) == "hinge3angle" ) {
+            params->enableHinge3Angle();
+          } else if( (*i) == "hinge1AngleRate" ) {
+            params->enableHinge1AngleRate();
+          } else if( (*i) == "hinge2AngleRate" ) {
+            params->enableHinge2AngleRate();
+          } else if( (*i) == "hinge3AngleRate" ) {
+            params->enableHinge3AngleRate();
+          } else if( (*i) == "body1AnchorPoint" ) {
+            params->enableBody1AnchorPoint();
+          } else if( (*i) == "body2AnchorPoint" ) {
+            params->enableBody2AnchorPoint();
+          } else if( (*i) == "body1Axis" ) {
+            params->enableBody1Axis();
+          } else if( (*i) == "body2Axis" ) {
+            params->enableBody2Axis();
+          } else {
+            Console( 4 ) << "Invalid forceOutput value in Generic6DOFJoint: " << (*i) << endl;
+          }
+        }
+      }
+    }
+
+    // Save requested output fields in bit mask for next time
+    output_bit_mask = params->getGeneric6DOFOutputBitMask();
+  }
+
+  // To avoid recalculating the bit mask from the forceOutput field each time,
+  // copy the output_bit_mask saved last time forceOutput was updated
+  params->copyGeneric6DOFOutputBitMask( output_bit_mask );
+
   return params;
 }
 
-/*void Generic6DOFJoint::updateOutputFields() {
-H3DRigidBodyJointNode::updateOutputFields();
+void Generic6DOFJoint::updateOutputFields() {
+  H3DRigidBodyJointNode::updateOutputFields();
 
-PhysicsEngineParameters::DoubleAxisHingeJointParameters params;
+  PhysicsEngineParameters::Generic6DOFJointParameters params;
 
-// look at the forceOutput field to determine which fields to update
-unsigned int bitmask = 0;
-const vector<string> &output = forceOutput->getValue();
-bool has_none = std::find( output.begin(), output.end(), "NONE" ) != output.end();
+  // look at the forceOutput field to determine which fields to update
+  unsigned int bitmask = 0;
+  const vector<string> &output = forceOutput->getValue();
+  bool has_none = std::find( output.begin(), output.end(), "NONE" ) != output.end();
 
-if( has_none ) return;
+  if( has_none ) return;
 
-engine_thread->getConstraintParameters( getConstraintId(), &params );
+  engine_thread->getConstraintParameters( getConstraintId(), params );
 
-// set the fields with the updated data
-if( params.haveHinge1Angle() && params.getHinge1Angle() != hinge1Angle->getValue() ) {
-hinge1Angle->setValue( params.getHinge1Angle(), id );
+  // set the fields with the updated data
+  if( params.haveHinge1Angle() && params.getHinge1Angle() != hinge1Angle->getValue() ) {
+    hinge1Angle->setValue( params.getHinge1Angle(), id );
+  }
+  if( params.haveHinge2Angle() && params.getHinge2Angle() != hinge2Angle->getValue() ) {
+    hinge2Angle->setValue( params.getHinge2Angle(), id );
+  }
+  if( params.haveHinge3Angle() && params.getHinge3Angle() != hinge3Angle->getValue() ) {
+    hinge3Angle->setValue( params.getHinge3Angle(), id );
+  }
+  if( params.haveHinge1AngleRate() && params.getHinge1AngleRate() != hinge1AngleRate->getValue() ) {
+    hinge1AngleRate->setValue( params.getHinge1AngleRate(), id );
+  }
+  if( params.haveHinge2AngleRate() && params.getHinge2AngleRate() != hinge2AngleRate->getValue() ) {
+    hinge2AngleRate->setValue( params.getHinge2AngleRate(), id );
+  }
+  if( params.haveHinge3AngleRate() && params.getHinge3AngleRate() != hinge3AngleRate->getValue() ) {
+    hinge3AngleRate->setValue( params.getHinge3AngleRate(), id );
+  }
+  if( params.haveBody1AnchorPoint() &&
+      params.getBody1AnchorPoint() != body1AnchorPoint->getValue() ) {
+    body1AnchorPoint->setValue( params.getBody1AnchorPoint(), id );
+  }
+  if( params.haveBody2AnchorPoint() &&
+      params.getBody2AnchorPoint() != body2AnchorPoint->getValue() ) {
+    body2AnchorPoint->setValue( params.getBody2AnchorPoint(), id );
+  }
+  if( params.haveBody1Axis() &&
+      params.getBody1Axis() != body1Axis->getValue() ) {
+    body1Axis->setValue( params.getBody1Axis(), id );
+  }
+  if( params.haveBody2Axis() &&
+      params.getBody2Axis() != body2Axis->getValue() ) {
+    body2Axis->setValue( params.getBody2Axis(), id );
+  }
 }
-if( params.haveHinge2Angle() && params.getHinge2Angle() != hinge2Angle->getValue() ) {
-hinge2Angle->setValue( params.getHinge2Angle(), id );
-}
-if( params.haveHinge1AngleRate() && params.getHinge1AngleRate() != hinge1AngleRate->getValue() ) {
-hinge1AngleRate->setValue( params.getHinge1AngleRate(), id );
-}
-if( params.haveHinge2AngleRate() && params.getHinge2AngleRate() != hinge2AngleRate->getValue() ) {
-hinge2AngleRate->setValue( params.getHinge2AngleRate(), id );
-}
-if( params.haveBody1AnchorPoint() && 
-params.getBody1AnchorPoint() != body1AnchorPoint->getValue() ) {
-body1AnchorPoint->setValue( params.getBody1AnchorPoint(), id );
-}
-if( params.haveBody2AnchorPoint() && 
-params.getBody2AnchorPoint() != body2AnchorPoint->getValue() ) {
-body2AnchorPoint->setValue( params.getBody2AnchorPoint(), id );
-}
-if( params.haveBody1Axis() && 
-params.getBody1Axis() != body1Axis->getValue() ) {
-body1Axis->setValue( params.getBody1Axis(), id );
-}
-if( params.haveBody2Axis() && 
-params.getBody2Axis() != body2Axis->getValue() ) {
-body2Axis->setValue( params.getBody2Axis(), id );
-}
-}*/
 
-void Generic6DOFJoint::applyTransform ( const Matrix4f& _transform ) { 
+void Generic6DOFJoint::applyTransform( const Matrix4f& _transform ) {
   anchorPoint->setValue( _transform*anchorPoint->getValue() );
   axis1->setValue( _transform.getRotationPart()*axis1->getValue() );
   axis2->setValue( _transform.getRotationPart()*axis2->getValue() );

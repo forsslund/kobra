@@ -76,7 +76,7 @@ def specifyParameters(physicsX3DFileString,engine,constantForceMix,errorCorrecti
                 # if current rigid body collection is not used as input to other node such as python script node
                     rbc.setAttribute(rbcf,str(speicfiedRBCFValue[idx]))
                 else:
-                    print 'current rbc have no corresponding attributes'
+                    print('current rbc have no corresponding attributes')
     
     # 3. specify the z axis shift for every RigidBody position
     rigidBodies = physicsX3DFileString.getElementsByTagName('RigidBody')
@@ -152,7 +152,7 @@ def newPhysicsGroupNode():
             node, dn = createX3DFromString(xmldoc.toxml('utf-8'))
             physicsGroupNodeAttachementPoint.children.push_back(node)
         else:
-            print "please specify a supported engine. SOFA is not accepted." 
+            print("please specify a supported engine. SOFA is not accepted.") 
 
 
 # updatePhysicsGroup is used to react to the user key event, engine name changing event and physics scene file changing event

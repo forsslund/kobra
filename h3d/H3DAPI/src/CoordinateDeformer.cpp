@@ -48,12 +48,12 @@ namespace CoordinateDeformerInternals {
 
 void CoordinateDeformer::deformPoints( const vector< bool  > &is_touched,
                                        const vector< Vec3f > &touch_points,
-                                       const vector< Vec3f > &touch_normal,
-                                       const vector< Vec3f > &touch_force,
+                                       const vector< Vec3f > &/*touch_normal*/,
+                                       const vector< Vec3f > &/*touch_force*/,
                                        const vector< Vec3f > &penetration_points,
-                                       const vector< Vec3f > &orig_points,
+                                       const vector< Vec3f > &/*orig_points*/,
                                        const vector< Vec3f > &resting_points,
-                                       const vector< Vec3f > &deformed_points,
+                                       const vector< Vec3f > &/*deformed_points*/,
                                        vector< Vec3f > &new_resting_points,
                                        vector< Vec3f > &new_deformed_points ) {
   new_deformed_points.clear();

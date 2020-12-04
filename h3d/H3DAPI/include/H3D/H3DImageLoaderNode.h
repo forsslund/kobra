@@ -106,7 +106,7 @@ namespace H3D {
     /// \returns An Image * with the image data loaded from the
     /// url. Returns NULL if not implemented for image loader.
     ///
-    virtual Image *loadImage( istream &is ) { return NULL; }
+    virtual Image *loadImage( istream &/*is*/ ) { return NULL; }
     
     /// Returns the default xml containerField attribute value.
     /// For this node it is "imageLoader".

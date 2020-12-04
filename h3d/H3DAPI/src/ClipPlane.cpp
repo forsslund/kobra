@@ -61,8 +61,8 @@ ClipPlane::ClipPlane( Inst< SFNode  >  _metadata,
   enabled( _enabled ),
   plane( _plane ),
   clipHaptics( _clipHaptics ),
-  clipGraphics( _clipGraphics ),
-  clipHapticsDevice( _clipHapticsDevice ) {
+  clipHapticsDevice( _clipHapticsDevice ),
+  clipGraphics( _clipGraphics ) {
 
   type_name = "ClipPlane";
   database.initFields( this );

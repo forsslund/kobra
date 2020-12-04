@@ -23,7 +23,7 @@
         </Appearance>
         <Text DEF='Text' string='"All moving objects should collide with the fixed objects."
                                  "Only the green sphere should collide with the moving objects."
-                                 "PhysX3 support is required for this example."'>
+                                 "PhysX3 or PhysX4 support is required for this example."'>
           <FontStyle size='0.02' />
         </Text>
       </Shape>

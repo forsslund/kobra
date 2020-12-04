@@ -120,7 +120,7 @@ void HAPIFrictionSurface::setLocalProxyMovement( ContactInfo &contact_info,
                                                  HAPIFloat t_force_length,
                                                  HAPIFloat n_force_length,
                                                  Vec2 &proxy_movement,
-                                                 bool have_proxy_mov_length,
+                                                 bool /*have_proxy_mov_length*/,
                                                  HAPIFloat proxy_mov_length ) {
   setLocalProxyMovement( contact_info, t_force_length, n_force_length,
                          proxy_movement, static_friction, dynamic_friction,

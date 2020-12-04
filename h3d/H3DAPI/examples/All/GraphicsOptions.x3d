@@ -36,7 +36,8 @@ import ExampleScripts
 global_settings = getActiveGlobalSettings()
 fields_to_handle, field_classes = ExampleScripts.getFieldsForMultipleFieldValue2StringList( global_settings.options.getValue()[0] )
 
-printValuesField = ExampleScripts.MultipleFieldValue2StringList(field_classes)
+format_strings = [None, None, None, None, "{:.11f}"]
+printValuesField = ExampleScripts.MultipleFieldValue2StringList(field_classes, format_strings)
 for f in fields_to_handle:
   f.route( printValuesField )
 

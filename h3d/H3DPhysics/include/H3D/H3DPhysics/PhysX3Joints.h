@@ -192,6 +192,9 @@ namespace H3D {
     /// Rate of change of hinge2 angle
     RateOfChange hinge2AngleRate;
 
+    /// Rate of change of hinge3 angle
+    RateOfChange hinge3AngleRate;
+
     Vec3f axis1;
     Vec3f axis2;
     Vec3f axis3;

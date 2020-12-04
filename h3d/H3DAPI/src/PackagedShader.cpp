@@ -32,7 +32,7 @@
 #include <H3D/X3DTexture2DNode.h>
 #include <H3D/X3DTexture3DNode.h>
 #include <H3D/ShaderFunctions.h>
-#include "H3D/ResourceResolver.h"
+#include "H3DUtil/ResourceResolver.h"
 
 using namespace H3D;
 
@@ -61,7 +61,9 @@ PackagedShader::PackagedShader( Inst< DisplayList  > _displayList,
 #ifdef HAVE_CG
   ,cg_context( 0 ),
   cg_vertex_program( 0 ),
-  cg_fragment_program( 0 )
+  cg_fragment_program( 0 ),
+  cg_fragment_profile( CG_PROFILE_UNKNOWN ),
+  cg_vertex_profile( CG_PROFILE_UNKNOWN )
 #endif
 {
   type_name = "PackagedShader";

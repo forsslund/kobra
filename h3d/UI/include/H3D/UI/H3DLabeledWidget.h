@@ -129,8 +129,6 @@ namespace H3D {
     /// Internal field storing an X3DGeometryNode
     auto_ptr< SFGeometryNode   > widgetGeometry;
 
-    Shape *widget_shape;
-
     X3D::DEFNodes widget_defs;
     X3D::DEFNodes text_defs;
   };

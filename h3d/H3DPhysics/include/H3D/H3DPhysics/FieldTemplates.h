@@ -133,29 +133,6 @@ namespace H3D {
     typename MFieldType::vector_type validValues;
   };
 
-  /// Same as SpecializedTypedNode but for two allowed subclasses.
-  template < class SpecializationNodeClass0, class SpecializationNodeClass1, class ParentFieldT >
-  class SpecializedTypedNode2 : public ParentFieldT {
-    virtual void onAdd ( Node* n ) {
-      SpecializationNodeClass0 * c0 = dynamic_cast< SpecializationNodeClass0 * >( n );
-      SpecializationNodeClass1 * c1 = dynamic_cast< SpecializationNodeClass1 * >( n );
-      if( !c0 && !c1 ) {
-        Node *pi = this->getPrototypeNode( n );
-        c0 = dynamic_cast< SpecializationNodeClass0 * >( pi );
-        c1 = dynamic_cast< SpecializationNodeClass1 * >( pi );
-        if( !c0 && !c1 ) {
-          stringstream s;
-          s << "Expecting " << typeid( SpecializationNodeClass0 ).name() << " or "
-            << typeid( SpecializationNodeClass0 ).name();
-          throw InvalidNodeType( n->getTypeName(),
-                                 s.str(),
-                                 H3D_FULL_LOCATION );
-        }
-      }
-      ParentFieldT::onAdd( n );
-    }
-  };
-
   /// An base class for TrackedMField which provides an
   /// interface to access changes made to the field value.
   template < class BaseMFieldType >

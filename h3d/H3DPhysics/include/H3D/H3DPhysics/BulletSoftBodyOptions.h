@@ -65,7 +65,8 @@ namespace H3D{
         collisionGroup( 0 ),
         collidesWith( 0 ),
         poseMatchingVolume( false ),
-        poseMatchingFrame( false ) {}
+        poseMatchingFrame( false ),
+        poseMatchingCoefficient( 0 ) {}
 
       // 'set' functions
 

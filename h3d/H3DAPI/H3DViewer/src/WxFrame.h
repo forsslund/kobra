@@ -48,7 +48,7 @@
 #include <H3D/Scene.h>
 #include <H3D/KeySensor.h>
 #include <H3D/DeviceInfo.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 #include <H3D/NavigationInfo.h>
 #include <H3D/X3D.h>
 #include <H3D/PeriodicUpdate.h>
@@ -306,7 +306,7 @@ public:
 
   bool loadIniFile();
   bool loadFile( const std::string &file );
-  void clearData();
+  void clearData( bool final_shutdown = false );
 
   /***************Member Functions*****************/
   void OnOpenFile( wxCommandEvent & event );

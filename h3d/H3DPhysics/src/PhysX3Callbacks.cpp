@@ -33,8 +33,8 @@
 #ifdef HAVE_PHYSX3
 
 #include <H3D/H3DPhysics/PhysX3Joints.h>
-#include <H3D/H3DPhysics/PhysX3RigidBodyOptions.h>
-#include <H3D/H3DPhysics/PhysX3CollidableOptions.h>
+#include <H3D/H3DPhysics/PhysXRigidBodyOptions.h>
+#include <H3D/H3DPhysics/PhysXCollidableOptions.h>
 
 #include <H3D/Box.h>
 #include <H3D/Cone.h>
@@ -78,7 +78,7 @@ PhysX3RigidBody::~PhysX3RigidBody () {
   // Remove geometry
   for ( ShapeVector::const_iterator i= shapes.begin(); i != shapes.end(); ++i ) {
     PhysX3CollidableShape* shape= *i;
-    //Console(4) << "Removing cs: " << shape << " from body id: " << this << endl;
+    //Console( LogLevel::Warning ) << "Removing cs: " << shape << " from body id: " << this << endl;
     shape->removeFromBody();
   }
   shapes.clear();
@@ -198,7 +198,7 @@ void PhysX3RigidBody::setParameters ( PhysicsEngineParameters::RigidBodyParamete
     // Remove old geometry
     for ( ShapeVector::const_iterator i= shapes.begin(); i != shapes.end(); ++i ) {
       PhysX3CollidableShape* shape= *i;
-      //Console(4) << "Removing cs: " << shape << " from body bid: " << this << endl;
+      //Console( LogLevel::Warning ) << "Removing cs: " << shape << " from body bid: " << this << endl;
       shape->removeFromBody();
     }
     shapes.clear();
@@ -226,8 +226,8 @@ void PhysX3RigidBody::setParameters ( PhysicsEngineParameters::RigidBodyParamete
 
   // PhysX3 specific rigid body options
   if ( _params.haveEngineOptions() ) {
-    if ( PhysX3RigidBodyParameters* options= 
-      dynamic_cast<PhysX3RigidBodyParameters*>(_params.getEngineOptions()) ) {
+    if ( PhysXRigidBodyParameters* options= 
+      dynamic_cast<PhysXRigidBodyParameters*>(_params.getEngineOptions()) ) {
       
       isStatic = options->getCreateAsStatic();
 
@@ -312,7 +312,7 @@ void PhysX3RigidBody::setPxRigidBodyParameters( PxRigidBody* _body, PhysicsEngin
                  (m*r*r)/2.0f ) );
     } else {
       if ( n ) {
-        Console(4) << "Warning: Mass density model " << n->getTypeName() << " is not supported by PhysX3!" 
+        Console( LogLevel::Warning ) << "Warning: Mass density model " << n->getTypeName() << " is not supported by PhysX3!" 
                    << " Inertia will be calculated based on collision geometry instead. " << endl;
     
         // No mass density model supplied, calculate it automatically based on the
@@ -382,7 +382,7 @@ PhysX3ArticulationLink::~PhysX3ArticulationLink () {
 }
 
 PhysX3ArticulatedRigidBody::PhysX3ArticulatedRigidBody ( PhysicsEngineParameters::RigidBodyParameters& _params ) :
-  PhysX3RigidBody( _params ) {
+  PhysX3RigidBody( _params ), articulation( NULL )  {
 }
 
 PhysX3ArticulatedRigidBody::~PhysX3ArticulatedRigidBody () {
@@ -457,7 +457,7 @@ void PhysX3ArticulatedRigidBody::setParameters ( PhysicsEngineParameters::RigidB
 
     const vector< H3DCollidableId > geom_ids = _params.getGeometry();
     if( geom_ids.size() != s_positions.size() || geom_ids.size() != s_orientations.size() ){
-      Console (4) << "ERROR: The position and orientation field must have same number of elements with the geometry of the ArticulatedRigidBody." << endl;
+      Console( LogLevel::Warning ) << "ERROR: The position and orientation field must have same number of elements with the geometry of the ArticulatedRigidBody." << endl;
       return;
     }
 
@@ -601,8 +601,8 @@ void PhysX3ArticulatedRigidBody::setParameters ( PhysicsEngineParameters::RigidB
 
   // PhysX3 specific rigid body options
   if ( _params.haveEngineOptions() ) {
-    if ( PhysX3RigidBodyParameters* options= 
-      dynamic_cast<PhysX3RigidBodyParameters*>(_params.getEngineOptions()) ) {
+    if ( PhysXRigidBodyParameters* options= 
+      dynamic_cast<PhysXRigidBodyParameters*>(_params.getEngineOptions()) ) {
 
       // solverPositionIterations
       if ( options->haveSolverPositionIterations() ) {
@@ -757,7 +757,7 @@ bool LoadOFF(const std::string & fileName, std::vector< HACD::Vec3<HACD::Real> >
 // Helper function to debug HACD by saving result to file
 bool SaveOFF(const std::string & fileName, size_t nV, size_t nT, const HACD::Vec3<HACD::Real> * const points, const HACD::Vec3<long> * const triangles)
 {
-  std::cout << "Saving " <<  fileName << std::endl;
+  Console( LogLevel::Info ) << "Saving " <<  fileName << std::endl;
   std::ofstream fout(fileName.c_str());
   if (fout.is_open()) 
   {           
@@ -816,10 +816,10 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
 
     // if there are no triangles built then don't create a shape
     if( triangles.size() > 0 ) {
-      PhysX3CollidableParameters options;
+      PhysXCollidableParameters options;
       if( _params.haveEngineOptions() ) {
-        if( PhysX3CollidableParameters* p =
-          dynamic_cast<PhysX3CollidableParameters*>(_params.getEngineOptions()) ) {
+        if( PhysXCollidableParameters* p =
+          dynamic_cast<PhysXCollidableParameters*>(_params.getEngineOptions()) ) {
           options = *p;
         }
       }
@@ -883,7 +883,7 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
                 success = physx_data->cooking->cookConvexMesh( convexDesc, *buf.get() );
             }
             if( !success ) {
-              Console( 4 ) << "Error: PhysX3 error cooking convex mesh!" << endl;
+              Console( LogLevel::Warning ) << "Error: PhysX3 error cooking convex mesh!" << endl;
             } else {
               // Load the cooked mesh
               PxDefaultFileInputData input( filename.c_str() );
@@ -891,12 +891,12 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
                 convexMesh = physx_data->sdk->createConvexMesh( input );
                 geometry.push_back( new PxConvexMeshGeometry( convexMesh ) );
               } else
-                Console( 4 ) << "Error: PhysX3 error creating convex mesh!" << endl;
+                Console( LogLevel::Warning ) << "Error: PhysX3 error creating convex mesh!" << endl;
             }
           } else {
             PxDefaultMemoryOutputStream buf;
             if( !physx_data->cooking->cookConvexMesh( convexDesc, buf ) ) {
-              Console( 4 ) << "Error: PhysX3 error cooking convex mesh!" << endl;
+              Console( LogLevel::Warning ) << "Error: PhysX3 error cooking convex mesh!" << endl;
             } else {
               // Load the cooked mesh
               PxDefaultMemoryInputData input( buf.getData(), buf.getSize() );
@@ -945,10 +945,10 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
             // This can take a long time, ouput message to console
             // Use PhysX3CollidableOptions::cookedFilename to cache the result
             if( !load_cooked ) {
-              Console( 4 ) << "Warning: Consider caching convex decomposition using PhysX3CollidableOptions::cookedFilename" << endl;
+              Console( LogLevel::Warning ) << "Warning: Consider caching convex decomposition using PhysX3CollidableOptions::cookedFilename" << endl;
             }
 
-            Console( 4 ) << "Note: Doing convex decomposition..." << endl;
+            Console( LogLevel::Info ) << "Note: Doing convex decomposition..." << endl;
 
             std::vector< HACD::Vec3<HACD::Real> > points;
             std::vector< HACD::Vec3<long> > tris;
@@ -1011,9 +1011,9 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
               }
 
               if( saved_composition )
-                Console( 4 ) << "Debugging: Saved convex decomposition to " << convex_decomposition_file << endl;
+                Console( LogLevel::Debug ) << "Debugging: Saved convex decomposition to " << convex_decomposition_file << endl;
               else
-                Console( 4 ) << "Debugging: Error saving convex decomposition to " << options.getSaveConvexDecomposition() << endl;
+                Console( LogLevel::Debug ) << "Debugging: Error saving convex decomposition to " << options.getSaveConvexDecomposition() << endl;
 
               const HACD::Vec3<HACD::Real> * const decimatedPoints = myHACD->GetDecimatedPoints();
               const HACD::Vec3<long> * const decimatedTriangles = myHACD->GetDecimatedTriangles();
@@ -1021,9 +1021,9 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
                 if( SaveOFF( convex_decomposition_file + "-decimated.off",
                   myHACD->GetNDecimatedPoints(),
                   myHACD->GetNDecimatedTriangles(), decimatedPoints, decimatedTriangles ) ) {
-                  Console( 4 ) << "Debugging: Saved decimated mesh to " << convex_decomposition_file << "-decimated.off" << endl;
+                  Console( LogLevel::Debug ) << "Debugging: Saved decimated mesh to " << convex_decomposition_file << "-decimated.off" << endl;
                 } else {
-                  Console( 4 ) << "Debugging: Error saving decimated mesh to " << options.getSaveConvexDecomposition() << "-decimated.off" << endl;
+                  Console( LogLevel::Debug ) << "Debugging: Error saving decimated mesh to " << options.getSaveConvexDecomposition() << "-decimated.off" << endl;
                 }
               }
             }
@@ -1060,7 +1060,6 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
               if( load_cooked ) {
                 bool success = false;
                 {
-                  // Allocate using new in order to
                   auto_ptr< PxDefaultFileOutputStream > buf( new PxDefaultFileOutputStream( filename.c_str() ) );
                   if( !buf->isValid() && options.getBaseURL() != "" ) {
                     filename = options.getBaseURL() + filename;
@@ -1070,20 +1069,25 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
                     success = physx_data->cooking->cookConvexMesh( convexDesc, *buf.get() );
                 }
                 if( !success ) {
-                  Console( 4 ) << "Error: PhysX3 error cooking convex mesh!" << endl;
+                  Console( LogLevel::Error ) << "Error: PhysX3 error cooking convex mesh!" << endl;
                 } else {
                   // Load the cooked mesh
-                  PxDefaultFileInputData input( filename.c_str() );
-                  PxConvexMesh* convexMesh = physx_data->sdk->createConvexMesh( input );
-                  if( convexMesh )
-                    geometry.push_back( new PxConvexMeshGeometry( convexMesh ) );
-                  else
-                    Console( 4 ) << "Error: PhysX3 error creating convex mesh!" << endl;
+                  auto_ptr< PxDefaultFileInputData > input( new PxDefaultFileInputData( filename.c_str() ) );
+                  PxConvexMesh* convexMesh = nullptr;
+                  if( input->isValid() ) {
+                    convexMesh = physx_data->sdk->createConvexMesh( *input.get() );
+                    if( convexMesh ) {
+                      geometry.push_back( new PxConvexMeshGeometry( convexMesh ) );
+                    }
+                  }
+                  if( !convexMesh ) {
+                    Console( LogLevel::Error ) << "Error: PhysX3 error creating convex mesh!" << endl;
+                  }
                 }
               } else {
                 PxDefaultMemoryOutputStream buf;
                 if( !physx_data->cooking->cookConvexMesh( convexDesc, buf ) ) {
-                  Console( 4 ) << "Error: error cooking convex mesh!" << endl;
+                  Console( LogLevel::Error ) << "Error: PhysX3 error cooking convex mesh!" << endl;
                 } else {
                   // Load the cooked mesh
                   PxDefaultMemoryInputData input( buf.getData(), buf.getSize() );
@@ -1094,13 +1098,13 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
 
               delete[] verts;
             }
-            Console( 4 ) << "Done." << endl;
+            Console( LogLevel::Info ) << "Done." << endl;
             HACD::DestroyHACD( myHACD );
           }
         } else {
 #endif
           if( options.getConvexDecomposition() ) {
-            Console( 4 ) << "Warning: H3DPhysics was not compiled with convex decomposition capabilities (requires HACD)!" << endl;
+            Console( LogLevel::Warning ) << "Warning: H3DPhysics was not compiled with convex decomposition capabilities (requires HACD)!" << endl;
           }
 
           string filename = options.getCookedFilename();
@@ -1153,7 +1157,7 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
                   success = physx_data->cooking->cookTriangleMesh( meshDesc, buf );
               }
               if( !success ) {
-                Console( 4 ) << "Error: PhysX3 error cooking convex mesh!" << endl;
+                Console( LogLevel::Error ) << "Error: PhysX3 error cooking convex mesh!" << endl;
               } else {
                 // Load the cooked mesh
                 PxDefaultFileInputData input( filename.c_str() );
@@ -1166,7 +1170,7 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
             } else {
               PxDefaultMemoryOutputStream buf;
               if( !physx_data->cooking->cookTriangleMesh( meshDesc, buf ) ) {
-                Console( 4 ) << "Error: PhysX3 error cooking convex mesh!" << endl;
+                Console( LogLevel::Error ) << "Error: PhysX3 error cooking convex mesh!" << endl;
               } else {
                 // Load the cooked mesh
                 PxDefaultMemoryInputData input( buf.getData(), buf.getSize() );
@@ -1183,7 +1187,7 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
       }
     }
     else {
-      Console( 4 ) << "Error: PhysX3. error no triangles in the shape bound tree!" << endl;
+      Console( LogLevel::Error ) << "Error: PhysX3. error no triangles in the shape bound tree!" << endl;
     }
   }
   
@@ -1192,9 +1196,9 @@ PhysX3CollidableShape::PhysX3CollidableShape ( PhysicsEngineParameters::ShapePar
 
 PhysX3CollidableShape::~PhysX3CollidableShape () {
   
-  //Console(4) << "Deleting cs: " << this << " with bid: " << body << endl;
+  //Console( LogLevel::Warning ) << "Deleting cs: " << this << " with bid: " << body << endl;
   if ( body ) {
-    Console(4) << "WARNING: A collidable shape is being deleted before it is being removed from its rigid body." << endl;
+    Console( LogLevel::Warning ) << "WARNING: A collidable shape is being deleted before it is being removed from its rigid body." << endl;
   }
   removeFromBody( true );
   for( vector<PxGeometry*>::iterator i = geometry.begin(); i != geometry.end(); ++i )
@@ -1268,8 +1272,8 @@ void PhysX3CollidableShape::setParameters ( PhysicsEngineParameters::ShapeParame
 
   // PhysX3 specific collidable options
   if ( _params.haveEngineOptions() ) {
-    if ( PhysX3CollidableParameters* options= 
-      dynamic_cast<PhysX3CollidableParameters*>(_params.getEngineOptions()) ) {
+    if ( PhysXCollidableParameters* options= 
+      dynamic_cast<PhysXCollidableParameters*>(_params.getEngineOptions()) ) {
 
       // restOffset
       if ( options->haveRestOffset() ) {
@@ -1415,7 +1419,7 @@ void PhysX3CollidableShape::addToBodyInternal ( PhysX3RigidBody& _body, PhysX3Ca
         s->setContactOffset( (PxReal)contactOffset );
       shape.push_back ( s );
     }
-    //Console(4)<< "Reset: "  << s->getRestOffset() << "  contact: " << s->getContactOffset() << endl; 
+    //Console( LogLevel::Warning )<< "Reset: "  << s->getRestOffset() << "  contact: " << s->getContactOffset() << endl; 
   }
   updateFilterData(&physx_data);
   }
@@ -1446,7 +1450,7 @@ void PhysX3CollidableShape::updateFilterData( PhysX3Callbacks::PhysX3SpecificDat
   // 1st bit: enabled
   // 2nd bit: Clipped or not.
   // 3rd bit: Supress disabled contacts or not.
-  // 4thd bit: Set flags even for disabled collidables
+  // 4th bit: Set flags even for disabled collidables
   d.word2 = 0;
   if( collisionEnabled )
     d.word2 |= (1);
@@ -1470,7 +1474,7 @@ void PhysX3CollidableShape::updateFilterData( PhysX3Callbacks::PhysX3SpecificDat
     (*i)->resetFiltering();
 #endif
   }
-  //Console (4) << "In UpdateFilterData: "<< d.word0 <<"  "<< d.word3 <<endl;
+  //Console( LogLevel::Warning ) << "In UpdateFilterData: "<< d.word0 <<"  "<< d.word3 <<endl;
 #if PX_PHYSICS_VERSION_MAJOR >= 3 && PX_PHYSICS_VERSION_MINOR >= 3
   if( body && body->getActor() && !dynamic_cast<PhysX3ArticulationLink*>(body) ) {
     // reset filtering with only the shapes
@@ -1532,7 +1536,7 @@ void PhysX3Callbacks::ContactModifyCallback::onContactModify(PxContactModifyPair
     PxContactModifyPair& cmp = pairs[i];
 
     // Add all the clip planes from both shapes
-    std::vector<Vec4f> planes;
+    std::vector<Vec4d> planes;
 
     PhysX3CollidableShape* shape= (PhysX3CollidableShape*)cmp.shape[0]->userData;
     shape->clipPlanes_mutex.lock();
@@ -1547,7 +1551,7 @@ void PhysX3Callbacks::ContactModifyCallback::onContactModify(PxContactModifyPair
     for(PxU32 n=0; n<cmp.contacts.size(); n++){
 
       for( unsigned int p=0; p<planes.size(); p++ ){
-        if (cmp.contacts.getPoint(n).dot(toPxVec3 ( Vec3f( planes[p].x, planes[p].y, planes[p].z ) ) ) + planes[p].w < 0.0 ){
+        if (cmp.contacts.getPoint(n).dot(toPxVec3 ( Vec3f( static_cast< H3DFloat >( planes[p].x ), static_cast< H3DFloat >( planes[p].y ), static_cast< H3DFloat >( planes[p].z ) ) ) ) + static_cast< H3DFloat >( planes[p].w ) < 0.0 ){
           cmp.contacts.ignore(n);
           break;
         }
@@ -1638,13 +1642,13 @@ PeriodicThread::CallbackCode PhysX3Callbacks::initEngine( void *data ) {
   // Initialise the SDK
   physx_data->foundation= PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
   if ( !physx_data->foundation ) { 
-    Console(4) << "Error: Unable to initialize the PhysX3 foundation" << endl; 
+    Console( LogLevel::Warning ) << "Error: Unable to initialize the PhysX3 foundation" << endl; 
     return PeriodicThread::CALLBACK_DONE;
   }
 
   physx_data->sdk = PxCreatePhysics(PX_PHYSICS_VERSION, *physx_data->foundation, PxTolerancesScale());
   if ( !physx_data->sdk ) { 
-    Console(4) << "Error: Unable to initialize the PhysX3 SDK" << endl; 
+    Console( LogLevel::Warning ) << "Error: Unable to initialize the PhysX3 SDK" << endl; 
     return PeriodicThread::CALLBACK_DONE;
   }
 
@@ -1655,12 +1659,12 @@ PeriodicThread::CallbackCode PhysX3Callbacks::initEngine( void *data ) {
 #endif
                                         ));
   if ( !physx_data->cooking ) {
-    Console(4) << "Error: Unable to initialize the Cooking PhysX3 SDK" << endl; 
+    Console( LogLevel::Warning ) << "Error: Unable to initialize the Cooking PhysX3 SDK" << endl; 
     return PeriodicThread::CALLBACK_DONE;
   }
 
   if (!PxInitExtensions(*physx_data->sdk)) {
-    Console(4) << "Error: Unable to initialize PhysX3 extensions" << endl; 
+    Console( LogLevel::Warning ) << "Error: Unable to initialize PhysX3 extensions" << endl; 
     return PeriodicThread::CALLBACK_DONE;
   }
 
@@ -1670,7 +1674,7 @@ PeriodicThread::CallbackCode PhysX3Callbacks::initEngine( void *data ) {
     physx_data->cpu_dispatcher= PxDefaultCpuDispatcherCreate(1);
     sceneDesc.cpuDispatcher= physx_data->cpu_dispatcher;
     if(!sceneDesc.cpuDispatcher) {
-      Console(4) << "PxDefaultCpuDispatcherCreate failed!" <<endl;
+      Console( LogLevel::Warning ) << "PxDefaultCpuDispatcherCreate failed!" <<endl;
       return PeriodicThread::CALLBACK_DONE;
     }
   } 
@@ -1828,13 +1832,13 @@ H3DUtil::PeriodicThread::CallbackCode PhysX3Callbacks::addRigidBody( void *data 
     body_t->setParameters( *params );
     
     if( !body_t->getArticulation() || !physx_data || !physx_data->scene )
-      Console(4)<< "ERROR: while adding articulation " << endl;
+      Console( LogLevel::Warning )<< "ERROR: while adding articulation " << endl;
     physx_data->scene->addArticulation( *body_t->getArticulation() );
     params->setBodyId ( (H3DBodyId)body_t );
 
   } else {
     PhysX3RigidBody* body= new PhysX3RigidBody ( *params );
-    PhysX3RigidBodyParameters* engine_options = static_cast<PhysX3RigidBodyParameters*>(params->getEngineOptions());
+    PhysXRigidBodyParameters* engine_options = static_cast<PhysXRigidBodyParameters*>(params->getEngineOptions());
     if( engine_options && engine_options->haveCreateAsStatic() && engine_options->getCreateAsStatic()) {
       body->createRigidBodyStatic( physx_data );
     }
@@ -1898,7 +1902,7 @@ H3DUtil::PeriodicThread::CallbackCode PhysX3Callbacks::addCollidable( void *data
   PhysicsEngineParameters::ShapeParameters *params =
     dynamic_cast< PhysicsEngineParameters::ShapeParameters *>( data_params );
   if( !params ) {
-    Console(3) << "Warning: Only CollidableShapes are supported by PhysX3!" << endl;
+    Console( LogLevel::Warning ) << "Warning: Only CollidableShapes are supported by PhysX3!" << endl;
     return PeriodicThread::CALLBACK_DONE;
   }
   PhysX3SpecificData *physx_data = 
@@ -1930,7 +1934,7 @@ H3DUtil::PeriodicThread::CallbackCode PhysX3Callbacks::setCollidableParameters( 
   
   params->getEngine()->addNodeToDeleteInSynch( params->getShape() );
   if( !params->haveShape() && params->getShape() ) {
-    Console( 4 ) << "WARNING:POTENTIAL BUG in PhysX3Callbacks::setCollidableParameters" << endl;
+    Console( LogLevel::Warning ) << "WARNING:POTENTIAL BUG in PhysX3Callbacks::setCollidableParameters" << endl;
   }
 
   delete params;
@@ -1996,7 +2000,7 @@ H3DUtil::PeriodicThread::CallbackCode PhysX3Callbacks::addConstraint( void *data
 
   if ( !joint ) {
     // Constraint creation failed
-    Console ( 3 ) << "Warning: Constraint type " << params->getType() << " not supported by PhysX3 in H3DPhysics!" << endl;
+    Console( LogLevel::Warning ) << "Warning: Constraint type " << params->getType() << " not supported by PhysX3 in H3DPhysics!" << endl;
   }
 
   return PeriodicThread::CALLBACK_DONE;

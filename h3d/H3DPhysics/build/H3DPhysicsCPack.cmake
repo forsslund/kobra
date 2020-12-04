@@ -122,7 +122,9 @@ if( GENERATE_H3D_PACKAGE_PROJECT )
                    ${H3D_EXTERNAL_ROOT}/lib32/static/gtest.lib
                    ${H3D_EXTERNAL_ROOT}/lib32/static/gtest_Debug.lib
                    ${H3D_EXTERNAL_ROOT}/lib32/static/HACD_LIB.lib
-                   ${H3D_EXTERNAL_ROOT}/lib32/static/HACD_LIB_DEBUG.lib )
+                   ${H3D_EXTERNAL_ROOT}/lib32/static/HACD_LIB_DEBUG.lib
+                   ${H3D_EXTERNAL_ROOT}/lib32/static/LinearMath.lib
+                   ${H3D_EXTERNAL_ROOT}/lib32/static/LinearMath_Debug.lib )
 
       set( external_binaries ${external_binaries}
                              ${H3D_EXTERNAL_ROOT}/${external_bin_path}/ode_double.dll )

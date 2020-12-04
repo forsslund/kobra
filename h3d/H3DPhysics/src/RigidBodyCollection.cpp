@@ -63,13 +63,15 @@ namespace RigidBodyCollectionInternals {
   FIELDDB_ELEMENT( RigidBodyCollection, stepUpdateTime         , OUTPUT_ONLY )
   FIELDDB_ELEMENT( RigidBodyCollection, useMainThread          , INPUT_OUTPUT )
   FIELDDB_ELEMENT( RigidBodyCollection, engineOptions          , INPUT_OUTPUT )
-  FIELDDB_ELEMENT( RigidBodyCollection, bodies, INPUT_OUTPUT )
-  FIELDDB_ELEMENT( RigidBodyCollection, joints, INPUT_OUTPUT )
-  FIELDDB_ELEMENT( RigidBodyCollection, renderCollidables, INPUT_OUTPUT )
+  FIELDDB_ELEMENT( RigidBodyCollection, bodies                 , INPUT_OUTPUT )
+  FIELDDB_ELEMENT( RigidBodyCollection, joints                 , INPUT_OUTPUT )
+  FIELDDB_ELEMENT( RigidBodyCollection, renderCollidables      , INPUT_OUTPUT )
   FIELDDB_ELEMENT( RigidBodyCollection, renderOnlyEnabledCollidables, INPUT_OUTPUT )
-  FIELDDB_ELEMENT( RigidBodyCollection, useStaticTimeStep, INPUT_OUTPUT )
-  FIELDDB_ELEMENT( RigidBodyCollection, syncGraphicsFrames, INITIALIZE_ONLY )
-  FIELDDB_ELEMENT( RigidBodyCollection, syncPhysicsFrames, INITIALIZE_ONLY )
+  FIELDDB_ELEMENT( RigidBodyCollection, useStaticTimeStep      , INPUT_OUTPUT )
+  FIELDDB_ELEMENT( RigidBodyCollection, syncGraphicsFrames     , INITIALIZE_ONLY )
+  FIELDDB_ELEMENT( RigidBodyCollection, syncPhysicsFrames      , INITIALIZE_ONLY )
+  FIELDDB_ELEMENT( RigidBodyCollection, solverType             , INITIALIZE_ONLY)
+  FIELDDB_ELEMENT( RigidBodyCollection, synchronizedStepCounter, OUTPUT_ONLY )
 }
 
 RigidBodyCollection::RigidBodyCollection( Inst< SFNode  > _metadata,
@@ -102,7 +104,9 @@ RigidBodyCollection::RigidBodyCollection( Inst< SFNode  > _metadata,
                                           Inst< SFBool > _renderOnlyEnabledCollidables,
                                           Inst< SFBool  > _useStaticTimeStep,
                                           Inst< SFInt32 > _syncGraphicsFrames,
-                                          Inst< SFInt32 > _syncPhysicsFrames ) :
+                                          Inst< SFInt32 > _syncPhysicsFrames,
+                                          Inst< SFInt32 > _solverType,
+                                          Inst< SFInt32 > _synchronizedStepCounter ) :
   X3DChildNode( _metadata ),
   H3DDisplayListObject( _displayList ),
   set_contacts( _set_contacts ),
@@ -134,7 +138,9 @@ RigidBodyCollection::RigidBodyCollection( Inst< SFNode  > _metadata,
   useStaticTimeStep( _useStaticTimeStep ),
   syncGraphicsFrames( _syncGraphicsFrames ),
   syncPhysicsFrames( _syncPhysicsFrames ),
-  nr_graphics_steps( 0 ) {
+  synchronizedStepCounter ( _synchronizedStepCounter ),
+  nr_graphics_steps( 0 ),
+  solverType( _solverType ) {
 
   // initialize fields
   type_name = "RigidBodyCollection";
@@ -156,13 +162,13 @@ RigidBodyCollection::RigidBodyCollection( Inst< SFNode  > _metadata,
 
   // set default values
   renderCollidables->setValue( false );
-  autoDisable->setValue( false );
+    autoDisable->setValue( false );
   constantForceMix->setValue( (H3DFloat) 0.00001 );
   contactSurfaceThickness->setValue( 0 );
   disableAngularSpeed->setValue( 0 );
   disableLinearSpeed->setValue( 0 );
   disableTime->setValue( 0 );
-  enabled->setValue( true );
+    enabled->setValue( true );
   errorCorrection->setValue( 0.2f );
   gravity->setValue( Vec3f(0, -9.8f, 0) );
   iterations->setValue( 10 );
@@ -180,10 +186,12 @@ RigidBodyCollection::RigidBodyCollection( Inst< SFNode  > _metadata,
   updateRate->setValue( 0, id );
   stepUpdateTime->setValue( 0, id );
   useMainThread->setValue ( false );
-  renderOnlyEnabledCollidables->setValue( false );
-  useStaticTimeStep->setValue( false );
-  syncGraphicsFrames->setValue( 0 );
-  syncPhysicsFrames->setValue( 0 );
+    renderOnlyEnabledCollidables->setValue( false );
+    useStaticTimeStep->setValue( false );
+    syncGraphicsFrames->setValue( 0 );
+    syncPhysicsFrames->setValue( 0 );
+    solverType->setValue( 0 );
+  synchronizedStepCounter->setValue( 0, id );
 
   // set up routes
   autoDisable->route( valueUpdater );
@@ -197,7 +205,7 @@ RigidBodyCollection::RigidBodyCollection( Inst< SFNode  > _metadata,
   iterations->route( valueUpdater );
   maxCorrectionSpeed->route( valueUpdater );
   preferAccuracy->route( valueUpdater );
-  useStaticTimeStep->route( valueUpdater );
+    useStaticTimeStep->route( valueUpdater );
   engineOptions->route ( valueUpdater );
 }
 
@@ -226,6 +234,7 @@ void RigidBodyCollection::initialize() {
   const string &engine = physicsEngine->getValue();
 
   if( PhysicsEngineThread::supportsPhysicsEngine( engine ) ) {
+    const H3DUInt32 solver = static_cast<H3DUInt32>( solverType->getValue() );
     bool use_synchronization = 
       syncGraphicsFrames->getValue() > 0 && 
       syncPhysicsFrames->getValue() > 0;
@@ -235,7 +244,8 @@ void RigidBodyCollection::initialize() {
                                       PeriodicThreadBase::NORMAL_PRIORITY, 
                                       desiredUpdateRate->getValue(),
                                       useMainThread->getValue(),
-                                      use_synchronization ) );
+                                      use_synchronization,
+                                      solver ) );
     simulationThread->setThreadName( "RigidBodyCollection " + engine + " engine thread" );
   } else {
     Console( 4 ) << "Warning: Unsupported physics engine "
@@ -291,6 +301,10 @@ void RigidBodyCollection::traverseSG(TraverseInfo &ti) {
 
   if( simulationThread.get() ) {
     if( waitForSimulationSteps() ) {
+        //Update the current number of scene steps here, this is incremented 1 for every set of syncGraphicsFrames and syncPhysicsFrames, assuming the simulation is enabled.
+        if ( enabled->getValue() ) {
+            synchronizedStepCounter->setValue( synchronizedStepCounter->getValue() + 1, id );
+        }
       beginSimulationSteps();
       H3DTIMER_BEGIN( "traverseSimulation" )
       traverseSimulation( ti );
@@ -432,6 +446,7 @@ void RigidBodyCollection::EnableDisable::update() {
 
   if ( pbc->simulationThread.get() ) {
     if ( value ) {
+      pbc->synchronizedStepCounter->setValue( pbc->synchronizedStepCounter->getValue() + 1, pbc->id );
       pbc->nr_graphics_steps = pbc->syncGraphicsFrames->getValue();
       pbc->simulationThread->startSimulation();
     } else {

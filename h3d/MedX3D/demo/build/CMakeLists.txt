@@ -8,6 +8,7 @@ set( CMAKE_MODULE_PATH "${MedX3DDemo_SOURCE_DIR}/../../build/modules" )
 set( MedX3DDemo_COMPILE_FLAGS "" )
 
 include( H3DCommonFunctions )
+enableCpp11( FAIL_MESSAGE "Using MedX3DDemo requires C++11 support. This compiler lacks such support." )
 handleCommonCacheVar( CMAKE_INSTALL_PREFIX ${MedX3DDemo_SOURCE_DIR}/../.. )
 
 setupRPathForLib()
@@ -128,7 +129,7 @@ if( MSVC )
                                                LINK_FLAGS "/INCREMENTAL:NO" )
                                                
 elseif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-  addCommonH3DGNUCompileFlags( MedX3DDemo_COMPILE_FLAGS )
+  addCommonH3DGNUCompileFlags( MedX3DDemo_COMPILE_FLAGS TRUE )
 endif()
 
 set_target_properties( MedX3DDemo PROPERTIES COMPILE_FLAGS "${MedX3DDemo_COMPILE_FLAGS}" )

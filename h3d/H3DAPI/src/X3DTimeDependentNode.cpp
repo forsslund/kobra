@@ -127,7 +127,7 @@ void X3DTimeDependentNode::TimeHandler::activate( H3DTime time ) {
   time_node->isActive->setValue( true, time_node->id );
 }
 
-void X3DTimeDependentNode::TimeHandler::deactivate( H3DTime time ) {
+void X3DTimeDependentNode::TimeHandler::deactivate( H3DTime /*time*/ ) {
   X3DTimeDependentNode *time_node = 
     static_cast< X3DTimeDependentNode * >( getOwner() );
   time_node->isActive->setValue( false, time_node->id );

@@ -264,7 +264,7 @@ namespace H3D {
       return static_cast< NavigationInfo * >( X3DBindableNode::getActive( "NavigationInfo" ) );
     }
 
-    inline void setNavType( string type ) { nav_type = type; }
+    inline void setNavType( string _type ) { nav_type = _type; }
 
     string getUsedNavType();
 

@@ -27,7 +27,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 #include <H3D/X3DScriptNode.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 
 #include <fstream>
 using namespace H3D;

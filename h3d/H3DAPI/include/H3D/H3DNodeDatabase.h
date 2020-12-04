@@ -85,7 +85,7 @@ namespace H3D {
 
     /// Given a Node get a pointer to the field in that node that
     /// is represented by this FieldDBElement.
-    virtual Field *getField( const Node *n ) const { return NULL; };
+    virtual Field *getField( const Node * ) const { return NULL; };
     
   protected:
     H3DNodeDatabase *container;
@@ -270,9 +270,9 @@ namespace H3D {
       
     protected:
       FieldDBConstIterator():
+        status( END ),
         inherited_iterator( NULL ),
-        ndb( NULL ),
-        status( END ) {}
+        ndb( NULL ) {}
 
       /// Defines the status of the iterator.
       typedef enum {

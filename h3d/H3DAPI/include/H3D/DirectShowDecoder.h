@@ -147,11 +147,13 @@ struct __declspec(uuid("{71771540-2017-11cf-ae26-0020afd79767}")) CLSID_TextureR
     /// Negative values means playing backwards. 
     /// \returns true if the new rate is supported by the decoder.
     virtual bool setRate( double r ) {
-      HRESULT hr;
-      if( g_pMS ) 
-        hr = g_pMS->SetRate( r ); 
       rate = r;
-      return hr == S_OK;
+      if( g_pMS ) {
+        HRESULT hr;
+        hr = g_pMS->SetRate( r );
+        return hr == S_OK;
+      }
+      return false;
     }
 
     /// Returns the duration in seconds at normal play rate of the currently

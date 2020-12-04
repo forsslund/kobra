@@ -338,8 +338,8 @@ namespace H3DUtil {
         m_main_console_stream( main_console_stream ),
         std::basic_ostream<CharT,TraitsT>(new TemporaryBuffer(main_console_stream)){}
         TemporaryStream( basic_dostream<CharT, TraitsT>& main_console_stream, int level ) :
-        m_main_console_stream( main_console_stream ),
-        std::basic_ostream<CharT,TraitsT>(new TemporaryBuffer(main_console_stream)) {
+        std::basic_ostream<CharT,TraitsT>(new TemporaryBuffer(main_console_stream)),
+        m_main_console_stream( main_console_stream ) {
             main_console_stream.setLevel(level);
         }
     private:

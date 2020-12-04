@@ -481,9 +481,9 @@ SpaceWareSensor::SpaceWareSensor(
   accumulateTimeDependent( _accumulateTimeDependent ),
   resetAccumulatedTranslation( _resetAccumulatedTranslation ),
   resetAccumulatedRotation(_resetAccumulatedRotation ),
-  update( new Update ),
   thread_motion_event( false ),
-  thread_is_active( false ) {
+  thread_is_active( false ),
+  update( new Update ) {
 
   type_name = "SpaceWareSensor";
 

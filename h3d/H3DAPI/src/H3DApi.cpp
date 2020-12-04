@@ -43,7 +43,7 @@
 #include <H3D/LibCurlResolver.h>
 #endif
 
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 
 #ifdef HAVE_FREEIMAGE
 #include <FreeImage.h>

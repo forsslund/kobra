@@ -36,7 +36,7 @@
 #include <H3D/Material.h>
 #include <H3D/FrictionalSurface.h>
 #include <H3D/Shape.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 #include <fstream>
 
 #undef max

@@ -23,7 +23,7 @@
 
 namespace H3D {
 
-  /// \ingroup HMSNode
+  /// \ingroup H3DNodes
   /// \brief The ShaderConstants node is a node will be used to gather all static
   /// shader inputs to be used in the shader. Whenever any parameter value is 
   /// modified, the related shaders shader string will be changed accordingly which

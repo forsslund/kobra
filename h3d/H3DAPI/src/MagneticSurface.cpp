@@ -86,6 +86,10 @@ void MagneticSurface::initialize() {
 #endif
 }
 
+#ifndef HAVE_OPENHAPTICS
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void MagneticSurface::UpdateStiffness::onValueChange( const H3DFloat &f ) {
 #ifdef HAVE_OPENHAPTICS
   MagneticSurface *ms = 
@@ -143,4 +147,6 @@ void MagneticSurface::UpdateSnapDistance::
   }
 #endif
 }
-
+#ifndef HAVE_OPENHAPTICS
+H3D_POP_WARNINGS()
+#endif

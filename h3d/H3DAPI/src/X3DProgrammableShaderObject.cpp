@@ -36,7 +36,7 @@ using namespace H3D;
 bool X3DProgrammableShaderObject::use_bindless_textures = false;
 bool X3DProgrammableShaderObject::use_bindless_textures_set = false;
 
-X3DProgrammableShaderObject::X3DProgrammableShaderObject( H3DNodeDatabase* _database ) {
+X3DProgrammableShaderObject::X3DProgrammableShaderObject( H3DNodeDatabase* /*_database*/ ) {
 
   bool wants_bindless_textures= false;
   if( GlobalSettings* default_settings= GlobalSettings::getActive() ) {

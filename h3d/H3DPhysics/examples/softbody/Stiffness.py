@@ -88,7 +88,7 @@ class KeyHandler ( AutoUpdate ( SFString ) ):
     
     if k == '1':
       # Create another region of different stiffness
-      print "Create another region of different stiffness"
+      print("Create another region of different stiffness")
       SoftBodyUtility.setStiffnessImplicitVolume ( 
         softBody, 
         SoftBodyUtility.ImplicitVolumeSphere(
@@ -97,7 +97,7 @@ class KeyHandler ( AutoUpdate ( SFString ) ):
         stiffness= 0.001 )
     elif k == '2':
       # Clear per edge stiffness
-      print "Clear per edge stiffness"
+      print("Clear per edge stiffness")
       softBody.physicsMaterial.getValue().stiffness.setValue ( createX3DNodeFromString ( "<UniformStiffness stiffness='0.1' />" )[0] )
     
     return k

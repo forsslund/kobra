@@ -34,7 +34,7 @@
 #include <H3D/X3D.h>
 #include <H3D/X3DSAX2Handlers.h>
 #include <H3D/MFNode.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 #include <H3D/GlobalSettings.h>
 
 #ifdef HAVE_PYTHON
@@ -50,7 +50,7 @@
 // undefine _DEBUG since we want to always link to the release version of
 // python and pyconfig.h automatically links debug version if _DEBUG is
 // defined.
-#ifdef _DEBUG
+#if defined _DEBUG && ! defined HAVE_PYTHON_DEBUG_LIBRARY 
 #define _DEBUG_UNDEFED
 #undef _DEBUG
 #endif
@@ -290,16 +290,14 @@ namespace {
 }
 #endif // PYTHON_USE_LOCAL_ENV
 
-/// Initialize the python home environment
-/// \param exe_with_full_path The absolute path to the executable (current process), including the executable
-/// \return True if the python home was found and set properly, False otherwise
-/// \note This function does nothing if the cmake option PYTHON_USE_LOCAL_ENV is not defined or not TRUE
-/// \note Otherwise, it tries to find the python libs near the given executable path, to deduce which
-/// \note directory should be set as python home.
-/// \note This method should be called before Py_Inititalize, i.e. any PythonScript ctor (instanciation)
-/// \warning Keep in mind that most method do not support long path (> 256 characters),
-///          so keep in mind that any dev, installation and deployment must keep a short path
+#ifndef PYTHON_USE_LOCAL_ENV
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 bool PythonScript::initPythonHome( const std::string& exe_with_full_path ) {
+#ifndef PYTHON_USE_LOCAL_ENV
+H3D_POP_WARNINGS()
+#endif
   bool python_home_set = false;
 #ifdef PYTHON_USE_LOCAL_ENV
   // Py_SetPythonHome expects a parameter which is a static buffer always accessible, thus the static keyword
@@ -491,21 +489,29 @@ void findModulesInDict( void * _dict, list< pair< string, Py_ssize_t > > &module
     if( PyString_Check( key ) && PyModule_Check( value ) ) {
       // The name is a module. add it to imported_module_names.
       string mod_name = PyString_AsString( key );
+      if( mod_name == "H3D" || mod_name == "H3DInterface" || mod_name == "H3DUtils" ) {
+        // Ignore the H3D python modules so they are not accidentally removed.
+        continue;
+      }
       list< pair< string, Py_ssize_t > >::iterator i = module_names.begin();
       for( ; i != module_names.end(); ++i )
         if( (*i).first == mod_name )
           break;
       if( i == module_names.end() && value->ob_refcnt > 1 ) {
-        pair< string, Py_ssize_t > data;
-        data.first = mod_name;
-        data.second = value->ob_refcnt;
-        module_names.push_back( data );
+        PyObject *tmp_module_dict = PyModule_GetDict( value ); // borrowed ref
+        if( PyDict_Contains( tmp_module_dict, PyString_FromString( "__scriptnode__" ) ) == 0 ) { // Only consider modules which are not added by a PythonScript node.
+          pair< string, Py_ssize_t > data;
+          data.first = mod_name;
+          data.second = value->ob_refcnt;
+          module_names.push_back( data );
+        }
       }
     }
   }
 }
 
 PythonScript::~PythonScript() {
+  if( !Py_IsInitialized() ) {return;}
  // ensure we have the GIL lock to work with multiple python threads.
   PyGILState_STATE state = PyGILState_Ensure();
 
@@ -545,6 +551,13 @@ PythonScript::~PythonScript() {
                               (char*)module_name.c_str() ) == -1 ) {
       Console(LogLevel::Error) << "Could not remove the python module " << module_name
                  << " from the sys.modules database. " << endl;
+    } else {
+      // Starting from python 3.4, python no longer forcibly break cycles 
+      // through the module globals when the module is deallocated
+      // check https://bugs.python.org/issue28202 for details
+#if PY_VERSION_HEX >= ((3 << 24) | (4 << 16) | (0 <<  8))
+      PyGC_Collect();
+#endif
     }
 
     // Go through imported_module_names. Those modules whose reference count
@@ -560,8 +573,15 @@ PythonScript::~PythonScript() {
         if( module_to_check->ob_refcnt < (*i).second &&
             module_to_check->ob_refcnt == 1 ) {
           // Remove module.
-          PyDict_DelItemString( temp_sys_module_dict,
-                                (*i).first.c_str() );
+          if ( PyDict_DelItemString( temp_sys_module_dict,
+            (*i).first.c_str() )==0 ) {
+#if PY_VERSION_HEX >= ((3 << 24) | (4 << 16) | (0 <<  8))
+            // Starting from python 3.4, python no longer forcibly break cycles 
+            // through the module globals when the module is deallocated
+            // check https://bugs.python.org/issue28202 for details
+            PyGC_Collect();
+#endif
+          }
           imported_module_names.erase( i );
           // There might still be modules left, restart the loop since the
           // removal of this module might have lowered the reference count for
@@ -782,7 +802,7 @@ catchOutErr = CatchOutErr ()\n\
 
 // Traverse the scenegraph. Used in PythonScript to call a function
 // in python once per scene graph loop.
-void PythonScript::traverseSG( TraverseInfo &ti ) {
+void PythonScript::traverseSG( TraverseInfo &/*ti*/ ) {
 #ifdef HAVE_PROFILER
   string timer_string = "PythonScript traverseSG (" + (url->size() > 0 ? url->getValue()[0]:"" ) + ")";
   if( H3D::Profiling::profile_python_fields ) {

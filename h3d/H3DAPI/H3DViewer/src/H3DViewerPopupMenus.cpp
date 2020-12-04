@@ -44,14 +44,14 @@
 
 #include <H3DUtil/LoadImageFunctions.h>
 
-void H3DViewerPopupMenus::OnTreeViewCollapseAll( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewCollapseAll( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   if( id.IsOk() ) {
     treeview_dialog->collapseTree( id );
   }
 }
 
-void H3DViewerPopupMenus::OnTreeViewExpandAll( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewExpandAll( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   if( id.IsOk() ) {
     treeview_dialog->expandTree( id );
@@ -59,7 +59,7 @@ void H3DViewerPopupMenus::OnTreeViewExpandAll( wxCommandEvent& event ) {
 }
 
 //Callback for collapse children menu choice.
-void H3DViewerPopupMenus::OnTreeViewCollapseChildren( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewCollapseChildren( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   wxTreeItemIdValue cookie;
   wxTreeItemId child_id = treeview_dialog->TreeViewTree->GetFirstChild( id, cookie );
@@ -70,7 +70,7 @@ void H3DViewerPopupMenus::OnTreeViewCollapseChildren( wxCommandEvent& event ) {
 }
 
 //Callback for node watch menu choice.
-void H3DViewerPopupMenus::OnTreeViewNodeWatch( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewNodeWatch( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   
   H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
@@ -90,7 +90,7 @@ void H3DViewerPopupMenus::OnTreeViewNodeWatch( wxCommandEvent& event ) {
 }
 
 //Callback for show references menu choice.
-void H3DViewerPopupMenus::OnTreeViewShowNodeReferences( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewShowNodeReferences( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   
   H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
@@ -113,7 +113,7 @@ void H3DViewerPopupMenus::OnTreeViewShowNodeReferences( wxCommandEvent& event ) 
 }
 
 //Callback for show references menu choice.
-void H3DViewerPopupMenus::OnTreeViewDetectCircularReferences( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewDetectCircularReferences( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   
   H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
@@ -131,7 +131,7 @@ void H3DViewerPopupMenus::OnTreeViewDetectCircularReferences( wxCommandEvent& ev
 
 
 //Callback for node save x3d menu choice.
-void H3DViewerPopupMenus::OnTreeViewSaveX3D( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewSaveX3D( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   
   H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
@@ -171,7 +171,7 @@ void H3DViewerPopupMenus::OnTreeViewSaveX3D( wxCommandEvent& event ) {
   }
 }
 
-void H3DViewerPopupMenus::onTreeViewLookAt( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::onTreeViewLookAt( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
   if( ni == treeview_dialog->node_map.end() ) {
@@ -222,7 +222,7 @@ void H3DViewerPopupMenus::onTreeViewLookAt( wxCommandEvent& event ) {
 }
 
 //Callback for node save VRML menu choice.
-void H3DViewerPopupMenus::OnTreeViewSaveVRML( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewSaveVRML( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   
   H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
@@ -264,7 +264,7 @@ void H3DViewerPopupMenus::OnTreeViewSaveVRML( wxCommandEvent& event ) {
 
 
 //Callback for node save x3d menu choice.
-void H3DViewerPopupMenus::OnTreeViewSaveSTL( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewSaveSTL( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   
   H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
@@ -315,7 +315,7 @@ void H3DViewerPopupMenus::OnTreeViewSaveSTL( wxCommandEvent& event ) {
 }
 
 //Callback for node save x3d menu choice.
-void H3DViewerPopupMenus::OnTreeViewSaveTrianglesX3D( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewSaveTrianglesX3D( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   
   H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
@@ -373,7 +373,7 @@ void H3DViewerPopupMenus::OnTreeViewSaveTrianglesX3D( wxCommandEvent& event ) {
   }
 }
 
-void H3DViewerPopupMenus::OnTreeViewDeleteNode( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewDeleteNode( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   
   H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
@@ -446,7 +446,7 @@ void H3DViewerPopupMenus::OnTreeViewDeleteNode( wxCommandEvent& event ) {
   
 }
 
-void H3DViewerPopupMenus::OnTreeViewAddChildNode( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewAddChildNode( wxCommandEvent& /*event*/ ) {
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   
   H3DViewerTreeViewDialog::TreeIdMap::iterator ni = treeview_dialog->node_map.find( id.m_pItem );
@@ -547,7 +547,7 @@ void H3DViewerPopupMenus::OnTreeViewAddChildNode( wxCommandEvent& event ) {
 }
 
 // Callback for node save Nrrd menu choice.
-void H3DViewerPopupMenus::OnTreeViewSaveNrrd( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewSaveNrrd( wxCommandEvent& /*event*/ ) {
 #ifdef HAVE_TEEM
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   
@@ -608,7 +608,7 @@ void H3DViewerPopupMenus::OnTreeViewSaveNrrd( wxCommandEvent& event ) {
 }
 
 // Callback for node save Png menu choice.
-void H3DViewerPopupMenus::OnTreeViewSavePng( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewSavePng( wxCommandEvent& /*event*/ ) {
 #ifdef HAVE_FREEIMAGE
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   
@@ -668,7 +668,7 @@ void H3DViewerPopupMenus::OnTreeViewSavePng( wxCommandEvent& event ) {
 #endif
 }
 
-void H3DViewerPopupMenus::OnTreeViewShowImage ( wxCommandEvent& event ) {
+void H3DViewerPopupMenus::OnTreeViewShowImage ( wxCommandEvent& /*event*/ ) {
 #ifdef HAVE_FREEIMAGE
   wxTreeItemId id = treeview_dialog->TreeViewTree->GetSelection();
   

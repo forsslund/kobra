@@ -73,6 +73,8 @@ namespace HAPI {
       typedef HAPI::Constraints Constraints;
       //typedef std::vector< Collision::PlaneConstraint > Constraints;
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
       /// Get constraint planes of the object. A proxy of a haptics renderer
       /// will always stay above any constraints added.
       /// \param point The point to constrain.
@@ -134,7 +136,8 @@ namespace HAPI {
                                           const Vec3 &from, 
                                           const Vec3 &to,
                                           IntersectionInfo &result){ return false; }
-    
+H3D_POP_WARNINGS()
+
     /// Render the object. The caller of the function need to set up OpenGL
     /// state in case the rendering should be done differently
     /// (wireframe for example).
@@ -733,7 +736,13 @@ namespace HAPI {
       } CylinderPart;
 
       /// Default constructor.
-      Cylinder() {}
+      Cylinder() :
+        height( 0 ),
+        radius( 0 ),
+        start_cap( true ),
+        end_cap( true )
+      {
+      }
 
       /// Constructor.
       /// \param _radius The cylinder radius.
@@ -1166,6 +1175,8 @@ namespace HAPI {
       /// Update the bound primitive to contain all the given points.
       virtual void fitAroundPoints( const std::vector< Vec3 > &points );
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
       /// Detect collision between a line segment and the object.
       /// \param from The start of the line segment.
       /// \param to The end of the line segment.
@@ -1181,6 +1192,7 @@ namespace HAPI {
                                   FaceType face = Collision::FRONT_AND_BACK ) {
         return boundIntersect( from, to );
       }
+H3D_POP_WARNINGS()
 
       /// Detect collision between a moving sphere and the object.
       /// \param radius The radius of the sphere
@@ -1275,6 +1287,8 @@ namespace HAPI {
       /// Update the bound primitive to contain all the given points.
       virtual void fitAroundPoints( const std::vector< Vec3 > &points );
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
       /// Detect collision between a line segment and the object.
       /// \param from The start of the line segment.
       /// \param to The end of the line segment.
@@ -1290,6 +1304,7 @@ namespace HAPI {
                                   FaceType face = Collision::FRONT_AND_BACK ) {
         return boundIntersect( from, to );
       }
+H3D_POP_WARNINGS()
 
       /// The boundIntersect returns true if the line segment intersects the
       /// bound or if the line segment is totally inside the bound.

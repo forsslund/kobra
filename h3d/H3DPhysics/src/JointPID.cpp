@@ -29,6 +29,7 @@
 #include <H3D/H3DPhysics/JointPID.h>
 #include <H3D/H3DPhysics/SingleAxisHingeJoint.h>
 #include <H3D/H3DPhysics/DoubleAxisHingeJoint.h>
+#include <H3D/H3DPhysics/Generic6DOFJoint.h>
 #include <H3D/H3DPhysics/SliderJoint.h>
 
 using namespace H3D;
@@ -44,6 +45,7 @@ namespace JointPIDInternals {
   FIELDDB_ELEMENT( JointPID, linearControl, INPUT_OUTPUT )
   FIELDDB_ELEMENT( JointPID, angularControl1, INPUT_OUTPUT )
   FIELDDB_ELEMENT( JointPID, angularControl2, INPUT_OUTPUT )
+  FIELDDB_ELEMENT( JointPID, angularControl3, INPUT_OUTPUT )
   FIELDDB_ELEMENT( JointPID, joint, INPUT_OUTPUT )
   FIELDDB_ELEMENT( JointPID, errorSleepThreshold, INPUT_OUTPUT )
   FIELDDB_ELEMENT( JointPID, useJointMotor, INPUT_OUTPUT )
@@ -61,11 +63,13 @@ JointPID::JointPID(
   Inst< SFFloat > _errorSleepThreshold,
   Inst< SFBool > _useJointMotor,
   Inst< SFBool > _switchForcesToBody2,
-  Inst< SFBool > _applyTorqueAsForce ) :
+  Inst< SFBool > _applyTorqueAsForce,
+  Inst< SFPIDController >  _angularControl3 ) :
   H3DPIDNode( _metadata ),
   linearControl( _linearControl ),
   angularControl1( _angularControl1 ),
   angularControl2( _angularControl2 ),
+  angularControl3( _angularControl3 ),
   joint( _joint ),
   errorSleepThreshold( _errorSleepThreshold ),
   useJointMotor( _useJointMotor ),
@@ -76,25 +80,28 @@ JointPID::JointPID(
   linear_PID( NULL ),
   angular_PID1( NULL ),
   angular_PID2( NULL ),
+  angular_PID3( NULL ),
   joint_type( JointType::Unsupported ),
   fixed( false ),
   switchForcesToBody2( _switchForcesToBody2 ),
   applyTorqueAsForce( _applyTorqueAsForce ),
-  rt_switch_force_to_body2( false ) {
+  rt_switch_force_to_body2( false ),
+  rt_apply_torque_as_force( false ),
+  rt_error_sleep_threshold( 0 ) {
 
   type_name = "JointPID";
   database.initFields( this );
 
-  errorSleepThreshold->setValue( 0 );
+  errorSleepThreshold->setValue( rt_error_sleep_threshold );
   useJointMotor->setValue( false );
-  applyTorqueAsForce->setValue( false );
-  switchForcesToBody2->setValue( false );
+  applyTorqueAsForce->setValue( rt_apply_torque_as_force );
+  switchForcesToBody2->setValue( rt_switch_force_to_body2 );
 }
 
 void JointPID::traverseSG( TraverseInfo &ti ) {
   H3DPIDNode::traverseSG( ti );
 
-  PhysicsEngineThread *pt;
+  PhysicsEngineThread *pt = NULL;
   // obtain the physics thread
   ti.getUserData( "PhysicsEngine", (void * *)&pt );
 
@@ -107,6 +114,9 @@ void JointPID::traverseSG( TraverseInfo &ti ) {
     }
     if( angular_PID2 ) {
       angular_PID2->traverseSG( ti );
+    }
+    if( angular_PID3 ) {
+      angular_PID3->traverseSG( ti );
     }
   }
 
@@ -131,7 +141,8 @@ void JointPID::updateActuation() {
         (bodyParams1->getEnabled() ||
         (linear_PID && H3DAbs( linear_PID->getCurrentError() ) > rt_error_sleep_threshold) ||
         (angular_PID1 && H3DAbs( angular_PID1->getCurrentError() ) > rt_error_sleep_threshold) ||
-        (angular_PID2 && H3DAbs( angular_PID2->getCurrentError() ) > rt_error_sleep_threshold)) ) {
+        (angular_PID2 && H3DAbs( angular_PID2->getCurrentError() ) > rt_error_sleep_threshold) ||
+        (angular_PID3 && H3DAbs( angular_PID3->getCurrentError() ) > rt_error_sleep_threshold)) ) {
 
       // Get the params for body and joint from physics engine
       RigidBodyParameters* bodyParams2 = new RigidBodyParameters;
@@ -168,6 +179,13 @@ void JointPID::updateActuation() {
           torque += doPIDControl( *angular_PID2, *bodyParams1, *bodyParams2, *jointParams, ControlType::Angular, AxisType::Axis2, use_joint_motor, !switch_forces_to_body2 );
         }
       }
+      if( angular_PID3 ) {
+        if( apply_torque_as_force ) {
+          force += doPIDControl( *angular_PID3, *bodyParams1, *bodyParams2, *jointParams, ControlType::Angular, AxisType::Axis3, use_joint_motor, !switch_forces_to_body2, true );
+        } else {
+          torque += doPIDControl( *angular_PID3, *bodyParams1, *bodyParams2, *jointParams, ControlType::Angular, AxisType::Axis3, use_joint_motor, !switch_forces_to_body2 );
+        }
+      }
 
       if( !use_joint_motor ) {
         if( !fixed && switch_forces_to_body2 ) {
@@ -202,6 +220,9 @@ void JointPID::updateActuation() {
       if( angular_PID2 ) {
         angular_PID2->resetPID();
       }
+      if( angular_PID3 ) {
+        angular_PID3->resetPID();
+      }
       delete bodyParams1;
     }
   }
@@ -226,6 +247,7 @@ void JointPID::initialize( PhysicsEngineThread& pt ) {
           linear_PID = linearControl->getValue();
           angular_PID1 = angularControl1->getValue();
           angular_PID2 = angularControl2->getValue();
+          angular_PID3 = angularControl3->getValue();
 
           fixed = !j->body2->getValue();
 
@@ -236,6 +258,8 @@ void JointPID::initialize( PhysicsEngineThread& pt ) {
             joint_type = JointType::DoubleAxisHinge;
           } else if( dynamic_cast<SliderJoint*>(j) ) {
             joint_type = JointType::Slider;
+          } else if( dynamic_cast<Generic6DOFJoint*>(j) ) {
+            joint_type = JointType::Generic6DOF;
           } else {
             joint_type = JointType::Unsupported;
             Console(4) << "Warning: Joint type " << j->getTypeName() << " is not supported by JointPID!" << endl;
@@ -256,6 +280,8 @@ JointParameters* JointPID::createJointParameters() {
       return new DoubleAxisHingeJointParameters;
     case JointType::Slider:
       return new SliderJointParameters;
+    case JointType::Generic6DOF:
+      return new Generic6DOFJointParameters;
     default:;
   }
 
@@ -286,6 +312,21 @@ H3DFloat JointPID::getValue( JointParameters& _joint, ControlType::e control_typ
     case JointType::Slider: {
       SliderJointParameters* params = static_cast<SliderJointParameters*>(&_joint);
       value = (control_type == ControlType::Linear) ? params->getSeparation() : 0;
+      break;
+    }
+    case JointType::Generic6DOF: {
+      Generic6DOFJointParameters* params = static_cast<Generic6DOFJointParameters*>(&_joint);
+      switch( axis_type ) {
+      case AxisType::Axis1:
+        value = (control_type == ControlType::Angular) ? params->getHinge1Angle() : 0;
+        break;
+      case AxisType::Axis2:
+        value = (control_type == ControlType::Angular) ? params->getHinge2Angle() : 0;
+        break;
+      case AxisType::Axis3:
+        value = (control_type == ControlType::Angular) ? params->getHinge3Angle() : 0;
+        break;
+      }
       break;
     }
     default: {
@@ -322,6 +363,21 @@ H3DFloat JointPID::getVelocity( JointParameters& _joint, ControlType::e control_
       velocity = (control_type == ControlType::Linear) ? params->getSeparationRate() : 0;
       break;
     }
+    case JointType::Generic6DOF: {
+      Generic6DOFJointParameters* params = static_cast<Generic6DOFJointParameters*>(&_joint);
+      switch( axis_type ) {
+      case AxisType::Axis1:
+        velocity = (control_type == ControlType::Angular) ? params->getHinge1AngleRate() : 0;
+        break;
+      case AxisType::Axis2:
+        velocity = (control_type == ControlType::Angular) ? params->getHinge2AngleRate() : 0;
+        break;
+      case AxisType::Axis3:
+        velocity = (control_type == ControlType::Angular) ? params->getHinge3AngleRate() : 0;
+        break;
+      }
+      break;
+    }
     default: {
       Console( LogLevel::Warning ) << "This joint type is currently unsupported" << endl;
     }
@@ -354,6 +410,21 @@ H3DFloat JointPID::getMinTarget( JointParameters& _joint, ControlType::e control
     case JointType::Slider: {
       SliderJointParameters* params = static_cast<SliderJointParameters*>(&_joint);
       target = (control_type == ControlType::Linear) ? params->getMinSeparation() : 1;
+      break;
+    }
+    case JointType::Generic6DOF: {
+      Generic6DOFJointParameters* params = static_cast<Generic6DOFJointParameters*>(&_joint);
+      switch( axis_type ) {
+      case AxisType::Axis1:
+        target = (control_type == ControlType::Angular) ? params->getMinAngle1() : 1;
+        break;
+      case AxisType::Axis2:
+        target = (control_type == ControlType::Angular) ? params->getMinAngle2() : 1;
+        break;
+      case AxisType::Axis3:
+        target = (control_type == ControlType::Angular) ? params->getMinAngle3() : 1;
+        break;
+      }
       break;
     }
     default: {
@@ -390,6 +461,21 @@ H3DFloat JointPID::getMaxTarget( JointParameters& _joint, ControlType::e control
       target = (control_type == ControlType::Linear) ? params->getMaxSeparation() : -1;
       break;
     }
+    case JointType::Generic6DOF: {
+      Generic6DOFJointParameters* params = static_cast<Generic6DOFJointParameters*>(&_joint);
+      switch( axis_type ) {
+      case AxisType::Axis1:
+        target = (control_type == ControlType::Angular) ? params->getMaxAngle1() : -1;
+        break;
+      case AxisType::Axis2:
+        target = (control_type == ControlType::Angular) ? params->getMaxAngle2() : -1;
+        break;
+      case AxisType::Axis3:
+        target = (control_type == ControlType::Angular) ? params->getMaxAngle3() : -1;
+        break;
+      }
+      break;
+    }
     default: {
       Console( LogLevel::Warning ) << "This joint type is currently unsupported" << endl;
     }
@@ -421,8 +507,18 @@ Vec3f JointPID::getAnchorPoint( JointParameters& _joint, ControlType::e control_
       break;
     }
     case JointType::Slider: {
-      SliderJointParameters* params = static_cast<SliderJointParameters*>(&_joint);
       anchor_point = Vec3f();
+      break;
+    }
+    case JointType::Generic6DOF: {
+      Generic6DOFJointParameters* params = static_cast<Generic6DOFJointParameters*>(&_joint);
+      if( (axis_type == AxisType::Axis1 || axis_type == AxisType::Axis2 || axis_type == AxisType::Axis3) && control_type == ControlType::Angular ) {
+        if( apply_to_body1 ) {
+          anchor_point = params->getBody1AnchorPoint();
+        } else {
+          anchor_point = params->getBody2AnchorPoint();
+        }
+      }
       break;
     }
     default: {
@@ -457,6 +553,21 @@ Vec3f JointPID::getAxis( JointParameters& _joint, ControlType::e control_type, A
     case JointType::Slider: {
       SliderJointParameters* params = static_cast<SliderJointParameters*>(&_joint);
       axis = (control_type == ControlType::Linear) ? params->getAxis() : Vec3f();
+      break;
+    }
+    case JointType::Generic6DOF: {
+      Generic6DOFJointParameters* params = static_cast<Generic6DOFJointParameters*>(&_joint);
+      switch( axis_type ) {
+      case AxisType::Axis1:
+        axis = (control_type == ControlType::Angular) ? params->getAxis1() : Vec3f();
+        break;
+      case AxisType::Axis2:
+        axis = (control_type == ControlType::Angular) ? params->getAxis2() : Vec3f();
+        break;
+      case AxisType::Axis3:
+        axis = (control_type == ControlType::Angular) ? params->getAxis3() : Vec3f();
+        break;
+      }
       break;
     }
     default: {

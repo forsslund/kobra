@@ -32,6 +32,11 @@
 #ifdef HAVE_GLUT
 
 #include <GL/glew.h>
+
+H3D_PUSH_WARNINGS()
+#ifdef _MSC_VER
+#pragma warning( disable : 4505 ) // To get rid of warning about unused function in freeglut_std.h.
+#endif
 #ifdef MACOSX
 #include <GLUT/glut.h>
 #else
@@ -40,6 +45,7 @@
 #ifdef FREEGLUT
 #include <GL/freeglut.h>
 #endif
+H3D_POP_WARNINGS()
 
 #include <H3D/X3DKeyDeviceSensorNode.h>
 #include <H3D/MouseSensor.h>
@@ -99,6 +105,7 @@ GLUTWindow::GLUTWindow( Inst< SFInt32     > _width,
   H3DWindowNode( _width, _height, _fullscreen, _mirrored, _renderMode,
                  _viewpoint, _posX, _posY, _manualCursorControl, _cursorType ),
   gameMode( _gameMode ),
+  window_id( 0 ),
   last_x_pos( -1 ),
   last_y_pos( -1 ),
   last_width( -1 ),
@@ -377,7 +384,7 @@ int GLUTWindow::setCursorType(const std::string & cursor_type) {
 
 
 void GLUTWindow::glutKeyboardDownCallback( unsigned char key, 
-                                     int x, int y ) {
+                                     int /*x*/, int /*y*/ ) {
   GLUTWindow *window = GLUTWindow::getGLUTWindow( glutGetWindow() );
   if( window ) {
     window->onKeyDown( key, false );
@@ -386,7 +393,7 @@ void GLUTWindow::glutKeyboardDownCallback( unsigned char key,
 }
 
 void GLUTWindow::glutSpecialDownCallback( int key, 
-                                    int x, int y ) {
+                                    int /*x*/, int /*y*/ ) {
   GLUTWindow *window = GLUTWindow::getGLUTWindow( glutGetWindow() );
   if( window ) {
     switch( key ) {
@@ -446,7 +453,7 @@ void GLUTWindow::glutSpecialDownCallback( int key,
 }
 
 void GLUTWindow::glutKeyboardUpCallback( unsigned char key, 
-                                   int x, int y ) {
+                                   int /*x*/, int /*y*/ ) {
   GLUTWindow *window = GLUTWindow::getGLUTWindow( glutGetWindow() );
   if( window ) {
     window->onKeyUp( key, false );
@@ -454,7 +461,7 @@ void GLUTWindow::glutKeyboardUpCallback( unsigned char key,
 }
 
 void GLUTWindow::glutSpecialUpCallback( int key, 
-                                  int x, int y ) {
+                                  int /*x*/, int /*y*/ ) {
   GLUTWindow *window = GLUTWindow::getGLUTWindow( glutGetWindow() );
   if( window ) {
     switch( key ) {
@@ -512,7 +519,7 @@ void GLUTWindow::glutSpecialUpCallback( int key,
 
 
 void GLUTWindow::glutMouseCallback( int button, int state, 
-                                   int x, int y ) {
+                                   int /*x*/, int /*y*/ ) {
   GLUTWindow *window = GLUTWindow::getGLUTWindow( glutGetWindow() );
   if( window ) {
     switch( button ) {
@@ -531,18 +538,6 @@ void GLUTWindow::glutMouseCallback( int button, int state,
                                      state == GLUT_DOWN ?
                                      MouseSensor::DOWN : MouseSensor::UP );
         break;
-
-      // ------------------------------------------------------------------------
-      // Modification 2019-06-11 by Jonas Forsslund
-      // Sometimes (always?) with glut in Linux the mouse wheel is implemented
-      // as buttons 3 and 4 (0 is left, 1 is middle/wheel push, 2 is right).
-      case 3:
-        window->onMouseWheelAction( MouseSensor::FROM);
-        break;
-      case 4:
-        window->onMouseWheelAction( MouseSensor::TOWARDS);
-        break;
-      // ------------------------------------------------------------------------
       default: {}
     }
   }
@@ -556,8 +551,8 @@ void GLUTWindow::glutMotionCallback( int x, int y ) {
 }
 
 
-void GLUTWindow::glutMouseWheelCallback( int wheel, 
-                                        int direction, int x, int y ) {
+void GLUTWindow::glutMouseWheelCallback( int /*wheel*/, 
+                                        int direction, int /*x*/, int /*y*/ ) {
   GLUTWindow *window = GLUTWindow::getGLUTWindow( glutGetWindow() );
   if( window ) {
     if( direction == 1 )
@@ -590,5 +585,6 @@ string GLUTWindow::getCursorForMode( const string &mode ) {
 
   return "DEFAULT";
 }
+
 #endif // HAVE_GLUT
 

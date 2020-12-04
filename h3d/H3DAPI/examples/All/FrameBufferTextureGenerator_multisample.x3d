@@ -17,7 +17,7 @@
         
       </FrameBufferTextureGenerator>
 
-      <!-- Shape for rendering depth texture on -->
+      <!-- Shape for rendering color texture on -->
       <Shape>
         <Appearance DEF="APP" >
           <Material/>

@@ -227,12 +227,12 @@ namespace H3D {
     /// Get the varying variables used by the shader generator.
     /// Should be implemented by subclasses to add all the varying
     /// variables that are needed by the shader generator.
-    virtual void getVaryingVariables( vector< VaryingVariable > &variables ) {}
+    virtual void getVaryingVariables( vector< VaryingVariable > &/*variables*/ ) {}
 
     /// Get the attribues used by the shader generator.
     /// Should be implemented by subclasses to add all the varying
     /// variables that are needed by the shader generator.
-    virtual void getAttributes( vector< Attribute > &attributes ) {}
+    virtual void getAttributes( vector< Attribute > &/*attributes*/ ) {}
 
     /// Returns the string that is the last thing that is done in the
     /// fragment shader. Usually this transfers the value of 

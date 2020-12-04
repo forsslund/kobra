@@ -39,6 +39,7 @@
 // vrml.bison && stack.hh
 #if _MSC_VER >= 1500
 #pragma warning( disable : 4267 )
+#pragma warning( disable : 4127 )
 #endif
 
 /* Line 311 of lalr1.cc  */
@@ -250,7 +251,7 @@ namespace yy {
   `--------------------------------*/
 
   inline void
-  VrmlParser::yy_symbol_value_print_ (int yytype,
+  VrmlParser::yy_symbol_value_print_ (int /*yytype*/,
          const semantic_type* yyvaluep, const location_type* yylocationp)
   {
     YYUSE (yylocationp);
@@ -1667,4 +1668,5 @@ int yylex (YYSTYPE* yylval, yy::location* yylloc, VrmlDriver& driver) {
 // vrml.bison && stack.hh
 #if _MSC_VER >= 1500
 #pragma warning( default : 4267 )
+#pragma warning( default : 4127 )
 #endif

@@ -74,8 +74,8 @@ H3DLabeledWidget::H3DLabeledWidget( Inst< SFNode          > _metadata,
   fontStyle( _fontStyle ),
   appearance( _appearance ),
   textAppearance( _textAppearance ),
-  widgetGeometry( new SFGeometryNode ),
-  customNodes ( _customNodes ) {
+  customNodes ( _customNodes ),
+  widgetGeometry( new SFGeometryNode ) {
 
   Group* custom_group = new Group;
   customNodes->route( custom_group->children );
@@ -158,8 +158,7 @@ void H3DLabeledWidget::resize( const Vec3f &new_size ) {
   BoxBound *bb = dynamic_cast< BoxBound *>( widget_xf->bound->getValue() );
   if( bb ) {
     const Vec3f &bound_size = bb->size->getValue();
-    const Vec3f &bound_center = bb->center->getValue();
-    
+
     widget_xf->scale->setValue(Vec3f( bound_size.x > Constants::f_epsilon ?
                                       new_size.x / bound_size.x : 1,
                                       bound_size.y > Constants::f_epsilon ?
@@ -178,8 +177,7 @@ void H3DLabeledWidget::resize( const Vec3f &new_size ) {
     dynamic_cast< BoxBound *>( text_xf->bound->getValue() );
   if( text_bb ) {
     const Vec3f &bound_size = text_bb->size->getValue();
-    const Vec3f &bound_center = text_bb->center->getValue();
- 
+
     Vec3f s( bound_size.x > Constants::f_epsilon &&
              bound_size.x > new_size.x ?
              new_size.x / bound_size.x : 1,
@@ -189,7 +187,6 @@ void H3DLabeledWidget::resize( const Vec3f &new_size ) {
              bound_size.z > Constants::f_epsilon &&
              bound_size.z > new_size.z ?
              new_size.z / bound_size.z: 1 );
-    H3DFloat min_scale = H3DMin( s.x, H3DMin( s.y, s.z ) );
     Vec3f center(0,0,0);
     if( _text ) {
       X3DFontStyleNode *font = _text->fontStyle->getValue();

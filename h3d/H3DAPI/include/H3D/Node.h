@@ -93,6 +93,8 @@ namespace H3D {
     /// of the scene-graph. 
     virtual void render()     { };
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// traverseSG is called once per scenegraph loop on the scene in order to
     /// traverse the scenegraph. During this traversal things can be updated
     /// in the node and HapticObject instances to be rendered should be added 
@@ -101,6 +103,7 @@ namespace H3D {
     /// traversal.
     /// 
     virtual void traverseSG( TraverseInfo &ti ) {}
+H3D_POP_WARNINGS()
 
     /// Used as input to intersection functions.
     /// If the intersection function succeeds this struct will contain
@@ -301,6 +304,8 @@ namespace H3D {
       stack< PointingDeviceResultStruct > current_pt_device;
     };
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// Detect intersection between a line segment and the Node.
     /// \param from The start of the line segment.
     /// \param to The end of the line segment.
@@ -335,6 +340,7 @@ namespace H3D {
                                         NodeIntersectResult &result ){
       return false;
     }
+H3D_POP_WARNINGS()
 
     /// Returns the default xml containerField attribute value.
     /// For this node it is "children".

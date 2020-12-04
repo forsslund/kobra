@@ -397,16 +397,18 @@ void H3DViewerTreeViewDialog::addNodeToTree(wxTreeItemId tree_id,
   H3DNodeDatabase *db = H3DNodeDatabase::lookupNodeInstance(n);
   for(H3DNodeDatabase::FieldDBConstIterator i = db->fieldDBBegin();
   db->fieldDBEnd() != i; ++i) {
-    Field *f = i.getField(n); //n->getField( *i );
+    if( n != (*Scene::scenes.begin())->getDefaultShadowCaster() ) {
+      Field *f = i.getField( n ); //n->getField( *i );
 
-    if(SFNode *sfnode = dynamic_cast<SFNode *>(f)) {
-      if(sfnode->getAccessType() != Field::INPUT_ONLY) {
-        addNodeToTree(new_id, sfnode->getValue(), sfnode->getName(), expand_new_id?expand:H3DViewerTreeViewDialog::EXPAND_NONE);
-      }
-    } else if(MFNode *mfnode = dynamic_cast<MFNode *>(f)) {
-      if(mfnode->getAccessType() != Field::INPUT_ONLY) {
-        for(MFNode::const_iterator i = mfnode->begin(); i != mfnode->end(); ++i) {
-          addNodeToTree(new_id, *i, mfnode->getName(), expand_new_id?expand:H3DViewerTreeViewDialog::EXPAND_NONE);
+      if(SFNode *sfnode = dynamic_cast<SFNode *>(f)) {
+        if(sfnode->getAccessType() != Field::INPUT_ONLY) {
+          addNodeToTree(new_id, sfnode->getValue(), sfnode->getName(), expand_new_id?expand:H3DViewerTreeViewDialog::EXPAND_NONE);
+        }
+      } else if(MFNode *mfnode = dynamic_cast<MFNode *>(f)) {
+        if(mfnode->getAccessType() != Field::INPUT_ONLY) {
+          for(MFNode::const_iterator i = mfnode->begin(); i != mfnode->end(); ++i) {
+            addNodeToTree(new_id, *i, mfnode->getName(), expand_new_id?expand:H3DViewerTreeViewDialog::EXPAND_NONE);
+          }
         }
       }
     }
@@ -446,7 +448,19 @@ bool H3DViewerTreeViewDialog::updateNodeTreeWhenUpdateStopped( wxTreeItemId tree
     h3d_node = node_map[tree_id.m_pItem].get();
     if( h3d_node ) {
       unsigned int ref_count = h3d_node->getRefCount();
-      if ( ref_count <= treeview_node_count_map[h3d_node]) {
+
+      if (selected_node.get() == h3d_node) {
+        // if h3d_node is the node being selected, then there is an extra
+        // ref in selected_node, which means treeview_node_count_map[h3d_node] 
+        // is actually one ref less than it should be
+        --ref_count;
+      }
+      if (field_values_panel->getDisplayedNode() == h3d_node) {
+        // there can also be a hidden reference to the h3d_node from displayed_node,
+        // due to the same reason, reduce the ref_count due to the same reason above for selected_node
+        --ref_count;
+      }
+      if ( ref_count <=  treeview_node_count_map[h3d_node]) {
         node_map[tree_id.m_pItem].reset(NULL);
         tree_node_deleted = true;
       } else {
@@ -627,6 +641,7 @@ void H3DViewerTreeViewDialog::clearTreeView() {
   updateNodeTree(TreeViewTree->GetRootItem(), l);
   updateNodeTree(bindable_tree_id, l, H3DViewerTreeViewDialog::EXPAND_NONE, false);
   displayFieldsFromNode(NULL);
+  selected_node.reset(NULL);
 }
 
 void H3DViewerTreeViewDialog::updateNodeCountMap( wxTreeItemId tree_id ) {
@@ -695,10 +710,6 @@ void H3DViewerTreeViewDialog::OnIdle(wxIdleEvent& event) {
         #endif
         last_tree_update = now;
       }
-    } else if(shown_last_loop) {
-      // make sure we do not hold any references to any nodes by clearing
-      // it.
-      clearTreeView();
     }
 
     shown_last_loop = IsShown();
@@ -805,11 +816,11 @@ void H3DViewerTreeViewDialog::OnTreeRightClick(wxTreeEvent& event) {
 }
 
 
-void H3DViewerTreeViewDialog::OnClose(wxCloseEvent& event) {
+void H3DViewerTreeViewDialog::OnClose( wxCloseEvent& /*event*/ ) {
   Hide();
 }
 
-void H3DViewerTreeViewDialog::btnCloseClick(wxCommandEvent& event) {
+void H3DViewerTreeViewDialog::btnCloseClick( wxCommandEvent& /*event*/ ) {
   Hide();
 }
 
@@ -858,7 +869,7 @@ END_EVENT_TABLE()
 wxImagePanel::wxImagePanel(wxWindow* parent) : wxPanel(parent) {
 }
 
-void wxImagePanel::paintEvent(wxPaintEvent & evt) {
+void wxImagePanel::paintEvent( wxPaintEvent & /*evt*/ ) {
   wxPaintDC dc(this);
   dc.DrawBitmap(image, 0, 0, false);
 }
@@ -873,8 +884,8 @@ void wxImagePanel::setImage(const wxImage& _image) {
 
 H3DViewImage::H3DViewImage(wxWindow* parent, X3DTextureNode& _texture)
   :
-  image_data(NULL),
-  ViewImage(parent) {
+  ViewImage( parent ),
+  image_data( NULL ) {
   draw_pane = new wxImagePanel(m_imagePanel);
   m_imagePanel->GetSizer()->Add(draw_pane, 1, wxEXPAND);
   
@@ -895,7 +906,7 @@ H3DViewImage::~H3DViewImage() {
   }
 }
 
-void H3DViewImage::OnSave(wxCommandEvent& event) {
+void H3DViewImage::OnSave( wxCommandEvent& /*event*/ ) {
   #ifdef HAVE_FREEIMAGE
   auto_ptr< wxFileDialog > file_dialog(new wxFileDialog(this,
                                                         wxT("File to save as.."),
@@ -931,7 +942,7 @@ void H3DViewImage::OnSave(wxCommandEvent& event) {
   #endif
 }
 
-void H3DViewImage::OnRefresh(wxCommandEvent& event) {
+void H3DViewImage::OnRefresh( wxCommandEvent& /*event*/ ) {
   updateImage();
   draw_pane->Refresh();
 }
@@ -944,7 +955,7 @@ void H3DViewImage::OnAutoRefresh(wxCommandEvent& event) {
   }
 }
 
-void H3DViewImage::OnTimer(wxTimerEvent& event) {
+void H3DViewImage::OnTimer( wxTimerEvent& /*event*/ ) {
   updateImage();
   draw_pane->Refresh();
 }

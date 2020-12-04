@@ -106,6 +106,15 @@ namespace H3D {
 
     static void setargv( int _argc, char *_argv[] );
     static void setargv( int _argc, wchar_t *_argv[] );
+    /// Initialize the python home environment
+    /// \param exe_with_full_path The absolute path to the executable (current process), including the executable
+    /// \return True if the python home was found and set properly, False otherwise
+    /// \note This function does nothing if the cmake option PYTHON_USE_LOCAL_ENV is not defined or not TRUE
+    /// \note Otherwise, it tries to find the python libs near the given executable path, to deduce which
+    /// \note directory should be set as python home.
+    /// \note This method should be called before Py_Inititalize, i.e. any PythonScript ctor (instanciation)
+    /// \warning Keep in mind that most method do not support long path (> 256 characters),
+    ///          so keep in mind that any dev, installation and deployment must keep a short path
     static bool initPythonHome( const std::string& exe_with_full_path );
 
     /// Initialize is called once upon the first reference of the 

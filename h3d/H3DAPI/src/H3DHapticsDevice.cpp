@@ -150,10 +150,10 @@ H3DHapticsDevice::H3DHapticsDevice(
   followViewpoint( _followViewpoint ),
   deviceVelocity( _deviceVelocity ),
   trackerVelocity( _trackerVelocity ),
-  deadmansSwitch( new SFBool ),
   forceLimit( new SFFloat ),
-  torqueLimit( new SFFloat ),
   forceScale( new SFFloat ),
+  deadmansSwitch( new SFBool ),
+  torqueLimit( new SFFloat ),
   error_msg_printed( false ),
   deviceAngularVelocity( _deviceAngularVelocity ),
   trackerAngularVelocity( _trackerAngularVelocity ) {

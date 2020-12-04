@@ -115,7 +115,7 @@ namespace H3D {
 
     // Private declarations of constructor for singleton class.
     ProfilesAndComponents();
-    ProfilesAndComponents(const ProfilesAndComponents&) {}
+    ProfilesAndComponents(const ProfilesAndComponents&) : main_profile_set( false ) {}
     ProfilesAndComponents& operator =
       (const ProfilesAndComponents&) { return *this; }
     ~ProfilesAndComponents() {}

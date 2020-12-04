@@ -1,5 +1,4 @@
 from H3DInterface import *
-import string
 
 group, cs, rbc  = references.getValue()
 
@@ -15,7 +14,7 @@ class ContactToText( TypedField( MFString, MFNode ) ):
 
     if( nr_contacts > 0 ):
       c = contacts[0]
-      s.append( "AP: " + string.join(c.appliedParameters.getValue() ) )
+      s.append( "AP: " + ".".join(c.appliedParameters.getValue() ) )
       s.append( "Normal: " + str( c.contactNormal.getValue() ) )
       s.append( "Point: " + str( c.position.getValue() ) )
       s.append( "Depth: " + str( c.depth.getValue() ) )

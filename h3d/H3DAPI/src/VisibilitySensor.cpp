@@ -60,16 +60,17 @@ VisibilitySensor::VisibilitySensor( Inst< SFNode > _metadata ,
                                     Inst< SFBool > _enabled ,
                                     Inst< SFBool > _isActive,
                                     Inst< SFBool > _viewFrustumMode ) :
-                                    X3DEnvironmentalSensorNode( _metadata, 
-                                                                _center, 
-                                                                _enabled, 
-                                                                _size,
-                                                                _enterTime,
-                                                                _exitTime,
-                                                                _isActive ),
-                  viewFrustumMode(_viewFrustumMode),
-                                    set_time( new SetTime ),
-                                    queryId(0){
+  X3DEnvironmentalSensorNode( _metadata,
+                              _center,
+                              _enabled,
+                              _size,
+                              _enterTime,
+                              _exitTime,
+                              _isActive ),
+  set_time( new SetTime ),
+  viewFrustumMode( _viewFrustumMode ),
+  no_instance( 0 ),
+  queryId( 0 ) {
 
   type_name = "VisibilitySensor";
   database.initFields( this );

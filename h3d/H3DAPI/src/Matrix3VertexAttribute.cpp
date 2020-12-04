@@ -42,23 +42,32 @@ H3DNodeDatabase Matrix3VertexAttribute::database(
 
 namespace Matrix3VertexAttributeInternals {
   FIELDDB_ELEMENT( Matrix3VertexAttribute, value, INPUT_OUTPUT )
-  FIELDDB_ELEMENT ( Matrix3VertexAttribute, isDynamic, INPUT_OUTPUT )
+  FIELDDB_ELEMENT( Matrix3VertexAttribute, isDynamic, INPUT_OUTPUT )
+  unsigned int num_components_per_element = 3;
 }
 
 Matrix3VertexAttribute::Matrix3VertexAttribute( Inst< SFNode     > _metadata,
                                                 Inst< SFString   > _name,
                                                 Inst< MFMatrix3f > _value):
   X3DVertexAttributeNode( _metadata, _name ),
-  value( _value ) {
+  value( _value ),
+  attribDataUpToDate( new Field ) {
 
   value->route(propertyChanged);
   value->route(vboFieldsUpToDate);
+  value->route( attribDataUpToDate );
 
   type_name = "Matrix3VertexAttribute";
   database.initFields( this );
 }
 
 Matrix3VertexAttribute::~Matrix3VertexAttribute() {
+  if( attrib_data ) {
+    GLfloat * attrib_data_float = static_cast<GLfloat *>(attrib_data);
+    delete[] attrib_data_float;
+    attrib_data = nullptr;
+    attrib_size = 0;
+  }
 }
 
 // Perform the OpenGL commands to set the vertex attribute
@@ -79,35 +88,30 @@ void Matrix3VertexAttribute::render( int value_index ) {
 // Perform the OpenGL commands to set the vertex attributes
 // as a an vertex attribute array.
 void Matrix3VertexAttribute::renderArray() {
+  using namespace Matrix3VertexAttributeInternals;
   if( GLEW_ARB_vertex_program && attrib_index >= 0 ) {
-    glEnableVertexAttribArrayARB( attrib_index );
-    GLfloat *data = new GLfloat[ 9 * value->size() ];
-    for( unsigned int i = 0; i < value->size(); ++i ) {
-      const Matrix3f &m = value->getValueByIndex( i );
-      data[ i*9   ] = m[0][0];
-      data[ i*9+1 ] = m[1][0];
-      data[ i*9+2 ] = m[2][0];
-      data[ i*9+3 ] = m[0][1];
-      data[ i*9+4 ] = m[1][1];
-      data[ i*9+4 ] = m[2][1];
-      data[ i*9+5 ] = m[0][2];
-      data[ i*9+6 ] = m[1][2];
-      data[ i*9+8 ] = m[2][2];
+    setAttributeData();
+    unsigned int stride = num_components_per_element * num_components_per_element * sizeof( GLfloat );
+    GLfloat * offset = &(static_cast<GLfloat *>(attrib_data)[0]);
+    for( unsigned int i = 0; i < num_components_per_element; ++i ) {
+      glEnableVertexAttribArrayARB( attrib_index + i );
+      glVertexAttribPointerARB( attrib_index + i,
+                                num_components_per_element,
+                                GL_FLOAT,
+                                GL_FALSE,
+                                stride,
+                                offset );
+      offset += num_components_per_element;
     }
-    glVertexAttribPointerARB( attrib_index,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            0,
-            data );
-    delete[] data;
   }
 }
 
 // Disable the array state enabled in renderArray().
 void Matrix3VertexAttribute::disableArray() {
   if( GLEW_ARB_vertex_program && attrib_index >= 0 ) {
-    glDisableVertexAttribArrayARB( attrib_index );
+    for( unsigned int i = 0; i < Matrix3VertexAttributeInternals::num_components_per_element; ++i ) {
+      glDisableVertexAttribArrayARB( attrib_index + i );
+    }
   }
 }
 
@@ -117,38 +121,54 @@ bool Matrix3VertexAttribute::preRenderCheckFail ( ){
 }
 
 void Matrix3VertexAttribute::setAttributeData ( ) {
-  GLfloat *data = new GLfloat[9 * value->size ( )];
-  for ( unsigned int i = 0; i < value->size ( ); ++i ) {
-    const Matrix3f &m = value->getValueByIndex ( i );
-    data[i * 9] = m[0][0];
-    data[i * 9 + 1] = m[1][0];
-    data[i * 9 + 2] = m[2][0];
-    data[i * 9 + 3] = m[0][1];
-    data[i * 9 + 4] = m[1][1];
-    data[i * 9 + 4] = m[2][1];
-    data[i * 9 + 5] = m[0][2];
-    data[i * 9 + 6] = m[1][2];
-    data[i * 9 + 8] = m[2][2];
+  using namespace Matrix3VertexAttributeInternals;
+  if( !attribDataUpToDate->isUpToDate() ) {
+    attribDataUpToDate->upToDate();
+    if( attrib_data ) {
+      GLfloat * attrib_data_float = static_cast<GLfloat *>(attrib_data);
+      delete[] attrib_data_float;
+      attrib_data = nullptr;
+      attrib_size = 0;
+    }
+    unsigned int matrix_size = num_components_per_element * num_components_per_element;
+    GLfloat *data = new GLfloat[matrix_size * value->size()];
+    std::size_t j = 0;
+    for( unsigned int i = 0; i < value->size(); ++i ) {
+      const Matrix3f &m = value->getValueByIndex( i );
+      for( unsigned int row = 0; row < num_components_per_element; ++row ) {
+        for( unsigned int col = 0; col < num_components_per_element; ++col ) {
+          data[j++] = m[col][row];
+        }
+      }
+    }
+    attrib_data = (GLvoid*)data;
+    attrib_size = value->size() * matrix_size * sizeof( GLfloat );
   }
-  attrib_data = (GLvoid*)data;
-  attrib_size = value->size ( ) * 9 * sizeof(GLfloat);
 }
 
 void Matrix3VertexAttribute::renderVBO ( ){
-  glEnableVertexAttribArrayARB ( attrib_index );
+  using namespace Matrix3VertexAttributeInternals;
+  unsigned int stride = num_components_per_element * num_components_per_element * sizeof( GLfloat );
   if ( use_bindless )
   {
-    glVertexAttribFormatNV ( attrib_index, 3, GL_FLOAT, GL_FALSE, 0 );
-    glEnableClientState ( GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV );
-    // vbo is dedicated for this vertex attribute, so there is no offset
-    glBufferAddressRangeNV ( GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, attrib_index, vbo_GPUaddr, attrib_size );
+    glEnableClientState( GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV );
+    for( unsigned int i = 0; i < num_components_per_element; ++i ) {
+      glEnableVertexAttribArrayARB( attrib_index + i );
+      unsigned int offset = i * num_components_per_element * sizeof( GLfloat );
+      glVertexAttribFormatNV( attrib_index + i, num_components_per_element, GL_FLOAT, GL_FALSE, stride );
+      glBufferAddressRangeNV( GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, attrib_index + i, vbo_GPUaddr + offset, attrib_size );
+    }
   } else{
-    glVertexAttribPointerARB ( attrib_index,
-      3,
-      GL_FLOAT,
-      GL_FALSE,
-      0,
-      0 );
+    for( unsigned int i = 0; i < num_components_per_element; ++i ) {
+      glEnableVertexAttribArrayARB( attrib_index + i );
+      size_t offset = i * num_components_per_element * sizeof( GLfloat );
+      glVertexAttribPointerARB( attrib_index + i,
+                                num_components_per_element,
+                                GL_FLOAT,
+                                GL_FALSE,
+                                stride,
+                                (void*)(offset) );
+    }
   }
 }
 
@@ -157,6 +177,8 @@ void Matrix3VertexAttribute::disableVBO ( ){
   {
     glDisableClientState ( GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV );
   }
-  glDisableVertexAttribArrayARB ( attrib_index );
+  for( unsigned int i = 0; i < Matrix3VertexAttributeInternals::num_components_per_element; ++i ) {
+    glDisableVertexAttribArrayARB( attrib_index + i );
+  }
 }
 

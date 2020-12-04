@@ -145,6 +145,8 @@ namespace H3D {
       return 0;
     }
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// Detect collision between a moving sphere and the geometry.
     /// \param radius The radius of the sphere
     /// \param from The start position of the sphere
@@ -158,6 +160,7 @@ namespace H3D {
                                         NodeIntersectResult &result ) {
       return false;
     }
+H3D_POP_WARNINGS()
 
     /// If the color field is not NULL, it shall specify a Color node that
     /// contains at least the number of points contained in the coord

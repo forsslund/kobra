@@ -138,7 +138,9 @@ if( GENERATE_H3D_PACKAGE_PROJECT )
                              ${H3D_EXTERNAL_ROOT}/include/3dconnexion/
                              ${H3D_EXTERNAL_ROOT}/include/FTGL/
                              ${H3D_EXTERNAL_ROOT}/include/DirectShow/
-                             ${H3D_EXTERNAL_ROOT}/include/js/ )
+                             ${H3D_EXTERNAL_ROOT}/include/js/
+                             ${H3D_EXTERNAL_ROOT}/include/libovr/ )
+
       set( external_include_install_paths External/include/xercesc
                                           External/include/curl
                                           External/include/Cg

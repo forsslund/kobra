@@ -75,6 +75,8 @@ namespace H3D{
     class H3DPHYS_API ValueUpdater : 
       public EventCollectingField < PeriodicUpdate < Field > > {
     public:
+      ValueUpdater() : allParams( false ) {}
+
       virtual PhysicsEngineParameters::H3DPhysicsMaterialParameters* getH3DPhysicsMaterialParameters( bool all_params = false );
     protected:
       virtual void update();

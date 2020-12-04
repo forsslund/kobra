@@ -109,7 +109,7 @@ namespace H3D {
     // vertex attribute
     GLuint64 vbo_GPUaddr;
 
-    bool use_bindless;
+    bool use_bindless, bindless_supported_by_system;
 
   };
 }

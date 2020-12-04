@@ -53,7 +53,7 @@ namespace H3D {
 
     /// Perform the OpenGL commands to render a normal given the index
     /// of the normal.
-    virtual void render( int index ) {}
+    virtual void render( int /*index*/ ) {}
 
     /// Perform the OpenGL commands to render all vertices as a vertex
     /// array.

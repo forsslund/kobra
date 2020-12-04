@@ -10,7 +10,7 @@
     <Viewpoint position='0 0.3 0.5' orientation='1 0 0 -0.5' />
 
     <SpotLight DEF='L'
-      ambientIntensity='0' attenuation='1 0 0' beamWidth='0.78'
+      ambientIntensity='0' attenuation='1 0 0' beamWidth='0.68'
       color='1 0 0' cutOffAngle='0.78' direction='0 -1 0' 
       intensity='1' on='true' location='0 0.1 0' />
 

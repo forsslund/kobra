@@ -212,11 +212,11 @@ bool FFmpegDecoder::loadClip( const string &url ) {
   // Find the first video stream
   videoStream=-1;
   audioStream=-1;
-  for(int i=0; i < pFormatCtx->nb_streams; ++i) {
+  for(unsigned int i=0; i < pFormatCtx->nb_streams; ++i) {
     if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO
        &&
          videoStream < 0) {
-      videoStream=i;
+      videoStream=static_cast<int>(i);
     }
 #ifdef WITH_AUDIO
     if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_AUDIO &&

@@ -58,19 +58,19 @@ ClutchedDevice::ClutchedDevice(
                Inst< ResetClutchPosition > _resetClutchPosition,
                Inst< SFVec3f            > _unclutchedPosition,
                Inst< SFRotation         > _unclutchedOrientation ):
+H3DHapticsDevice( _devicePosition, _deviceOrientation, _trackerPosition,
+                  _trackerOrientation, _positionCalibration,
+                  _orientationCalibration, _proxyPosition,
+                  _weightedProxyPosition, _proxyWeighting, _mainButton,
+                  _secondaryButton, _buttons,
+                  _force, _torque, _inputDOF, _outputDOF, _hapticsRate,
+                  _desiredHapticsRate, _stylus ),
   hapticsDevice( _hapticsDevice ),
   enableClutch ( _enableClutch ),
   resetClutchOrientation ( _resetClutchOrientation ),
   resetClutchPosition ( _resetClutchPosition ),
   unclutchedPosition ( _unclutchedPosition ),
-  unclutchedOrientation ( _unclutchedOrientation ),
-  H3DHapticsDevice( _devicePosition, _deviceOrientation, _trackerPosition,
-              _trackerOrientation, _positionCalibration, 
-              _orientationCalibration, _proxyPosition,
-              _weightedProxyPosition, _proxyWeighting, _mainButton,
-                    _secondaryButton, _buttons,
-              _force, _torque, _inputDOF, _outputDOF, _hapticsRate,
-              _desiredHapticsRate, _stylus ) {
+  unclutchedOrientation ( _unclutchedOrientation ) {
 
   type_name = "ClutchedDevice";  
   database.initFields( this );
@@ -149,30 +149,30 @@ void ClutchedDevice::renderShapes( const HapticShapeVector &shapes,
   }
 }
 
-void ClutchedDevice::EnableClutch::onValueChange( const bool &value ) {
+void ClutchedDevice::EnableClutch::onValueChange( const bool &_value ) {
   ClutchedDevice *h3d_device = static_cast< ClutchedDevice * >( getOwner() );
-  HAPI::ClutchedHapticsDevice *hapi_device = static_cast< HAPI::ClutchedHapticsDevice * >( h3d_device->hapi_device.get() );
-  if( hapi_device ) {
-    hapi_device->enableClutch( value );
+  HAPI::ClutchedHapticsDevice *_hapi_device = static_cast< HAPI::ClutchedHapticsDevice * >( h3d_device->hapi_device.get() );
+  if( _hapi_device ) {
+    _hapi_device->enableClutch( _value );
   }
 }
 
-void ClutchedDevice::ResetClutchOrientation::onNewValue( const bool &value ) {
-  if ( value ) {
+void ClutchedDevice::ResetClutchOrientation::onNewValue( const bool &_value ) {
+  if ( _value ) {
     ClutchedDevice *h3d_device = static_cast< ClutchedDevice * >( getOwner() );
-    HAPI::ClutchedHapticsDevice *hapi_device = static_cast< HAPI::ClutchedHapticsDevice * >( h3d_device->hapi_device.get() );
-    if( hapi_device ) {
-      hapi_device->resetClutch( true, false );
+    HAPI::ClutchedHapticsDevice *_hapi_device = static_cast< HAPI::ClutchedHapticsDevice * >( h3d_device->hapi_device.get() );
+    if( _hapi_device ) {
+      _hapi_device->resetClutch( true, false );
     }
   }
 }
 
-void ClutchedDevice::ResetClutchPosition::onNewValue( const bool &value ) {
-  if ( value ) {
+void ClutchedDevice::ResetClutchPosition::onNewValue( const bool &_value ) {
+  if ( _value ) {
     ClutchedDevice *h3d_device = static_cast< ClutchedDevice * >( getOwner() );
-    HAPI::ClutchedHapticsDevice *hapi_device = static_cast< HAPI::ClutchedHapticsDevice * >( h3d_device->hapi_device.get() );
-    if( hapi_device ) {
-      hapi_device->resetClutch( false, true );
+    HAPI::ClutchedHapticsDevice *_hapi_device = static_cast< HAPI::ClutchedHapticsDevice * >( h3d_device->hapi_device.get() );
+    if( _hapi_device ) {
+      _hapi_device->resetClutch( false, true );
     }
   }
 }

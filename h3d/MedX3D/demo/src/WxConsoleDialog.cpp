@@ -124,15 +124,15 @@ BEGIN_EVENT_TABLE(WxConsoleDialog, wxDialog)
 END_EVENT_TABLE()
 
 /*******************Member Functions*********************/
-void WxConsoleDialog::OnConsoleClose(wxCommandEvent &event) {
+void WxConsoleDialog::OnConsoleClose(wxCommandEvent &/*event*/) {
   Close(TRUE);
 }
 
-void WxConsoleDialog::OnConsoleClear(wxCommandEvent &event) {
+void WxConsoleDialog::OnConsoleClear(wxCommandEvent &/*event*/) {
   WxConsoleDialog::logText->Clear();
 }
 
-void WxConsoleDialog::OnIdle(wxIdleEvent &event) {
+void WxConsoleDialog::OnIdle(wxIdleEvent &/*event*/) {
   wxString output;
 
   // transfer text output to console from other threads than

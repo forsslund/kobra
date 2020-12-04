@@ -168,8 +168,8 @@
         <CollidableShape USE='Body2_BoxC' containerField='geometry' />
         <CollidableShape USE='Body3_BoxC' containerField='geometry' />
         <Box size="0.04 0.025 0.025" containerField='massDensityModel' />
-        <PhysX3RigidBodyOptions solverPositionIterations="20" />
-        <PhysX3Joint6DOFLimitOptions/>
+        <PhysXRigidBodyOptions solverPositionIterations="20" />
+        <PhysXJoint6DOFLimitOptions/>
       </ArticulatedRigidBody>
 
     </RigidBodyCollection>

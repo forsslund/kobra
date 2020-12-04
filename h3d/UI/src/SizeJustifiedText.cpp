@@ -246,12 +246,6 @@ Vec3f SizeJustifiedText::getMajorJustification( X3DFontStyleNode *font ) {
 void SizeJustifiedText::SFBound::update() {
   X3DFontStyleNode *font_style = 
     static_cast< SFFontStyleNode * >( routes_in[0] )->getValue(); 
-  const vector<H3DFloat> &_length = 
-    static_cast< MFFloat * >( routes_in[1] )->getValue();
-  H3DFloat max_extent = 
-    static_cast< SFFloat * >( routes_in[2] )->getValue();
-  const vector< string > &text = 
-    static_cast< MFString * >( routes_in[3] )->getValue();
   const Vec2f &_size = 
     static_cast< SFVec2f * >( routes_in[4] )->getValue();
 

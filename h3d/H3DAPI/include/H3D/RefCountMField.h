@@ -212,7 +212,9 @@ namespace H3D {
     virtual RefClass *preOnRemove( RefClass *n ) {
       return n;
     }
-    
+
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// This function will be called when values of RefCountMField
     /// changes. As soon as a Node is added onAdd will
     /// be called on the added value. 
@@ -234,6 +236,7 @@ namespace H3D {
                  << this << ", n = " << n << ") " << endl;
 #endif
     }
+H3D_POP_WARNINGS()
   };
 
 }

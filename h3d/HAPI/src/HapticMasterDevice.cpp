@@ -116,7 +116,7 @@ HapticMasterDevice::device_registration(
 H3DUtil::DynamicLibrary::LIBHANDLE HapticMasterDevice::dll_handle;
 unsigned int HapticMasterDevice::dll_references = 0;
 
-bool HapticMasterDevice::initHapticsDevice( int _thread_frequency ) {
+bool HapticMasterDevice::initHapticsDevice( int /*_thread_frequency*/ ) {
   if (dll_references == 0 ) {
     // Load the DLL library in memory
     dll_handle = H3DUtil::DynamicLibrary::load("HapticMasterDriver.dll");
@@ -178,7 +178,7 @@ bool HapticMasterDevice::initHapticsDevice( int _thread_frequency ) {
   device_handle = OpenHapticMaster( (char * )device_name.c_str() ); 
 
   if (device_handle != -1) {
-    int result = InitialiseHapticMaster(device_handle);
+    InitialiseHapticMaster(device_handle);
 
     // initalize the thread used for communication.
     com_thread = 
@@ -247,8 +247,8 @@ void HAPI::HapticMasterDevice::updateDeviceValues( DeviceValues &dv,
     
 }
 
-void HapticMasterDevice::sendOutput( DeviceOutput &dv,
-                                     HAPITime dt ) {
+void HapticMasterDevice::sendOutput( DeviceOutput &/*dv*/,
+                                     HAPITime /*dt*/ ) {
   if( device_handle != -1 ) {
     //com_lock.lock();
     //current_values.force = dv.force;
@@ -303,7 +303,6 @@ int HapticMasterDevice::deleteSphere( int sphere ) {
 int HapticMasterDevice::setSphereRadius( int sphere, double radius ) {
   if( device_handle == -1 ) return -1;
   Vec3 scaling = position_calibration_inverse.getScalePart();
-  double local_radius = radius * H3DMax( scaling.x, H3DMax( scaling.y, scaling.z ) );
   driver_lock.lock();
   int res = SetSphereRadius( sphere, radius );
   driver_lock.unlock();

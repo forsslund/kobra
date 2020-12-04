@@ -211,7 +211,7 @@ def customizeBricks ():
   """ Choose and customize specific bricks (e.g. add H3D logo) """
   global blockDefs, h3dApiLogoTexture
   
-  blockPool= range ( 0, len(blockDefs) )
+  blockPool= list(range( 0, len(blockDefs)))
   
   if len(blockDefs) < h3dApiLogoBlockCount:
     blockCount= len(blockDefs)

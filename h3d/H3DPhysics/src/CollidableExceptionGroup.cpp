@@ -61,7 +61,7 @@ CollidableExceptionGroup::~CollidableExceptionGroup() {
 
 void CollidableExceptionGroup::traverseSG(H3D::TraverseInfo &ti) {
   X3DChildNode::traverseSG( ti );
-  H3D::PhysicsEngineThread *pt;
+  H3D::PhysicsEngineThread *pt = NULL;
   ti.getUserData("PhysicsEngine", (void * *) &pt );
   if ( pt ) {
     //if ( engine_thread == NULL ) {

@@ -253,7 +253,7 @@ bool PhantomHapticsDevice::releaseHapticsDevice() {
   hd_handles.clear();
 
   hdDisableDevice( device_handle );
-  device_handle = 0;
+  device_handle = HD_INVALID_HANDLE;
   HLThread *hl_thread = static_cast< HLThread * >( thread );
   if( nr_of_scheduled == 0)
     hl_thread->setActive( false );
@@ -315,7 +315,7 @@ void PhantomHapticsDevice::updateDeviceValues( DeviceValues &dv,
 }
 
 void PhantomHapticsDevice::sendOutput( DeviceOutput &dv,
-                                       HAPITime dt ) {
+                                       HAPITime /*dt*/ ) {
   hdMakeCurrentDevice( device_handle );
   HDdouble v[3];
   v[0] = dv.force.x;

@@ -66,16 +66,25 @@ class PrintMessageDependingOnBool( TypedField(MFString, SFBool) ):
     return self.on_false_message
 
 # Used by GlobalSettings.x3d and GraphicsOptions.x3d and WorldInfo.x3d.
-def MultipleFieldValue2StringList( base_classes_tuple ):
+def MultipleFieldValue2StringList( base_classes_tuple, format_strings = None ):
   class Value2StringListClass( TypedField( MFString, base_classes_tuple ) ):
+    def __init__( self, format_strings ):
+      super( Value2StringListClass, self ).__init__()
+      self.format_strings = format_strings
+
     def update( self, event ):
       output = []
-      for f in self.getRoutesIn():
+      
+      for i, f in enumerate( self.getRoutesIn() ):
         if len(output) == 0:
           output.append( f.getOwner().getTypeName() + " fields:" )
-        output.append( str( f.getName() ) + " = " + str(f.getValue()) )
+        if self.format_strings != None and i < len( self.format_strings ) and self.format_strings[i] != None:
+          value_as_str = str(self.format_strings[i].format(f.getValue()))
+        else:
+          value_as_str = str(f.getValue())
+        output.append( str( f.getName() ) + " = " + value_as_str )
       return output
-  return Value2StringListClass()
+  return Value2StringListClass(format_strings)
 
 # Used by GlobalSettings.x3d, GraphicsOptions.x3d and WorldInfo.x3d.
 def getFieldsForMultipleFieldValue2StringList( node, field_access_types = [3] ):

@@ -95,7 +95,7 @@ class KeyHandler ( AutoUpdate ( SFString ) ):
       fireRigidBody ()
       
     elif key == 'g':
-      print "re-generating geometry"
+      print("re-generating geometry")
       generateGeometry ()
       
     return key

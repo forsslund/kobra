@@ -125,7 +125,8 @@ kinematicControl ( _kinematicControl ),
 valueUpdater( _valueUpdater ),
 engineOptions ( _engineOptions ),
 transform( _transform ),
-debug ( new SFBool ) {
+debug ( new SFBool ),
+nbframes_collidables_without_ids( 0 ) {
 
   // init fields
   type_name = "RigidBody";

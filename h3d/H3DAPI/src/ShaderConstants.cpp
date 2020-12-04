@@ -38,31 +38,31 @@ ShaderConstants::ShaderConstants( Inst< DisplayList > _displaylist ) :
     database.initFields(this);
 }
 
-bool ShaderConstants::addField( const std::string& name,
-	const Field::AccessType& access, Field* field ) {
+bool ShaderConstants::addField( const std::string& _name, 
+                                const Field::AccessType& access, Field* field ) {
 
-	bool success = H3DDynamicFieldsObject::addField( name, access, field );
-	if ( !success ) {
-		Console( LogLevel::Warning )<<"Warning: ShaderConstants: "<<this->getName()
-			<<". field "<<name<<" is already added once. "<<std::endl;
-		return false;
-	}
-	field->route( displayList );
+  bool success = H3DDynamicFieldsObject::addField( _name, access, field );
+  if( !success ) {
+    Console( LogLevel::Warning ) << "Warning: ShaderConstants: " << this->getName()
+      << ". field " << _name << " is already added once. " << std::endl;
+    return false;
+  }
+  field->route( displayList );
 
-	return success;
+  return success;
 }
 
-bool ShaderConstants::addFieldNoEvent( const std::string &name,
-	const Field::AccessType &access, Field *field ) {
+bool ShaderConstants::addFieldNoEvent( const std::string &_name,
+                                       const Field::AccessType &access, Field *field ) {
 
-	bool success = H3DDynamicFieldsObject::addField( name, access, field );
-	if ( !success ) {
-		Console( LogLevel::Debug )<<"Warning: ShaderConstants: "<<this->getName()
-			<<". field "<<name<<" is already added once. "<<std::endl;
-		return false;
-	}
-	field->routeNoEvent( displayList );
-	return success;
+  bool success = H3DDynamicFieldsObject::addField( _name, access, field );
+  if( !success ) {
+    Console( LogLevel::Debug ) << "Warning: ShaderConstants: " << this->getName()
+      << ". field " << _name << " is already added once. " << std::endl;
+    return false;
+  }
+  field->routeNoEvent( displayList );
+  return success;
 }
 
 bool ShaderConstants::removeField(const std::string& _name) {

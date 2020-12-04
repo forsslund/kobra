@@ -72,7 +72,7 @@ namespace H3D {
   }
   
   
-  string X3DVolumeRenderStyleNode::addUniforms( ComposedShader *s ) {
+  string X3DVolumeRenderStyleNode::addUniforms( ComposedShader * ) {
     return "";
   }
 

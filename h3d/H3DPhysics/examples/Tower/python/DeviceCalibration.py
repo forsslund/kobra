@@ -54,9 +54,9 @@ class DeviceCalibration ( AutoUpdate ( SFBool ) ):
         self.device.stylus.setValue ( None )
 
         try:
-          print "Start calibration of device: " + str(self.device.deviceName.getValue())
+          print("Start calibration of device: " + str(self.device.deviceName.getValue()))
         except AttributeError:
-          print "Start calibration of device: " + str ( self.device )
+          print("Start calibration of device: " + str ( self.device ))
 
     def endCalibration ( self ):
         if self.marker:
@@ -92,9 +92,9 @@ class DeviceCalibration ( AutoUpdate ( SFBool ) ):
                                0, 0, 0, 1 ) )
 
             try:
-              print "End calibration of device: " + str(self.device.deviceName.getValue())
+              print("End calibration of device: " + str(self.device.deviceName.getValue()))
             except AttributeError:
-              print "End calibration of device: " + str ( self.device )
+              print("End calibration of device: " + str ( self.device ))
             
             
-            print str(self.device.positionCalibration.getValue())
+            print(str(self.device.positionCalibration.getValue()))

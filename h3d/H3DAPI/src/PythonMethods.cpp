@@ -43,7 +43,7 @@
 #include <H3D/X3D.h>
 #include <H3D/VrmlParser.h>
 #include <H3D/Scene.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 #include <H3D/Field.h>
 #include "H3DInterface.py.h"
 
@@ -59,6 +59,8 @@
 
 using namespace H3D;
 using namespace PythonInternals;
+
+std::set<H3D::PythonFieldBase * > H3D::PythonFieldBase::python_fields;
 
 namespace H3D {
   namespace PythonInternals {
@@ -125,18 +127,20 @@ namespace H3D {
 
     H3D_VALUE_EXCEPTION( string, UnableToCreatePythonField );
 
-    PythonAutoRef H3D_module( NULL );
-    PythonAutoRef H3DInterface_module( NULL );
+    PythonAutoRef H3D_module( nullptr );
+    PythonAutoRef H3DInterface_module( nullptr );
 
     // borrowed references so do not need autoref
-    PyObject * H3DInterface_dict = NULL;
-    PyObject * H3D_dict = NULL;
+    PyObject * H3DInterface_dict = nullptr;
+    PyObject * H3D_dict = nullptr;
+    
+    PyObject* field_type_in_h3dinterface = nullptr;
 
 #ifndef H3DINTERFACE_AS_FILE
     // H3DUtils when not loading the module as a file.
-    PythonAutoRef H3DUtils_module( NULL );
+    PythonAutoRef H3DUtils_module( nullptr );
     // borrowed references so do not need autoref
-    PyObject * H3DUtils_dict = NULL;
+    PyObject * H3DUtils_dict = nullptr;
 #endif
 
     // Macro used by pythonCreateField to create a new PythonField depending
@@ -159,7 +163,7 @@ f = new PythonField< AutoUpdate< field_type > >( field );
                        value_type, field_type, \
                        field, value ) \
     value_type va; \
-    PyThreadState *_save = NULL; \
+    PyThreadState *_save = nullptr; \
     try { \
       Py_UNBLOCK_THREADS \
       va = static_cast< field_type * >( field )->getValue();    \
@@ -170,7 +174,7 @@ f = new PythonField< AutoUpdate< field_type > >( field );
       ostringstream errstr;                                     \
       errstr << e;                                                   \
       PyErr_SetString( PyExc_ValueError, errstr.str().c_str() );     \
-      return 0;                                                      \
+      return nullptr;                                                      \
     } catch( ... ) {                                                 \
       Py_BLOCK_THREADS                                               \
       throw;                                                         \
@@ -182,7 +186,11 @@ f = new PythonField< AutoUpdate< field_type > >( field );
                        value_type, field_type, \
                        field, value ) \
   field_type *mfield = static_cast< field_type* >( field ); \
-  PyObject *list = PyList_New( (int)mfield->size() ); \
+  PyThreadState *_save = NULL; \
+  Py_UNBLOCK_THREADS \
+  int mfield_size = (int)mfield->size();  \
+  Py_BLOCK_THREADS \
+  PyObject *list = PyList_New( mfield_size ); \
   for( size_t i = 0; i < mfield->size(); ++i ) { \
     PyObject *v = from_func( (*mfield)[i] ); \
     PyList_SetItem( list, i, v ); \
@@ -204,7 +212,7 @@ f = new PythonField< AutoUpdate< field_type > >( field );
  if( static_cast< field_type * >( field )->empty() ) { \
     PyErr_SetString( PyExc_ValueError,  \
                      "Trying to call front() on empty MField" ); \
-    return 0; \
+    return nullptr; \
   } \
   value_type front = static_cast< field_type * >( field )->front(); \
   return from_func( front );
@@ -216,7 +224,7 @@ f = new PythonField< AutoUpdate< field_type > >( field );
   if( static_cast< field_type * >( field )->empty() ) { \
     PyErr_SetString( PyExc_ValueError,  \
                      "Trying to call back() on empty MField" ); \
-    return 0; \
+    return nullptr; \
   } \
   value_type back = static_cast< field_type * >( field )->back(); \
   return from_func( back );
@@ -243,7 +251,7 @@ f = new PythonField< AutoUpdate< field_type > >( field );
  if( ! value || ! check_func( value ) ) { \
     PyErr_SetString( PyExc_ValueError,  \
                      "Invalid argument type to push_back() function" ); \
-    return 0; \
+    return nullptr; \
  } \
  static_cast< field_type *> \
     (field_ptr)->push_back( (value_type)value_func( v ) ); 
@@ -256,7 +264,7 @@ f = new PythonField< AutoUpdate< field_type > >( field );
  if( ! value || ! check_func( value ) ) { \
     PyErr_SetString( PyExc_ValueError,  \
                      "Invalid argument type to erase() function"  ); \
-    return 0; \
+    return nullptr; \
  } \
  static_cast< field_type *> \
     (field_ptr)->erase( (value_type)value_func( v ) ); 
@@ -272,10 +280,11 @@ f = new PythonField< AutoUpdate< field_type > >( field );
                        value_type, field_type, \
                        field, value ) \
 if( check_func( value ) ) { \
-  PyThreadState *_save = NULL; \
+  PyThreadState *_save = nullptr; \
   try { \
+    auto _value = (value_type) value_func( value ); \
     Py_UNBLOCK_THREADS \
-    static_cast<field_type*>(field)->setValue( (value_type) value_func( value ) ); \
+    static_cast<field_type*>(field)->setValue( _value ); \
     Py_BLOCK_THREADS \
   } \
   catch ( H3D::Exception::H3DException &e ) { \
@@ -283,7 +292,7 @@ if( check_func( value ) ) { \
     ostringstream errstr; \
     errstr << e; \
     PyErr_SetString( PyExc_ValueError, errstr.str().c_str() ); \
-    return 0; \
+    return nullptr; \
   } catch( ... ) { \
     Py_BLOCK_THREADS \
     throw; \
@@ -291,7 +300,7 @@ if( check_func( value ) ) { \
 } else {                                                            \
   PyErr_SetString( PyExc_ValueError,                                \
                    "Invalid argument type to setValue() function " );            \
-  return 0;                                                         \
+  return nullptr;                                                         \
 } 
 
     // Macro used by pythonFieldSetValue to set the value of a SField.
@@ -301,7 +310,7 @@ if( check_func( value ) ) { \
   if( ! value || ! PyList_Check( value ) ) {                     \
     PyErr_SetString( PyExc_ValueError,                         \
   "Argument type must be a list of values in MField.setValue()" );      \
-    return 0;                                                  \
+    return nullptr;                                                  \
   }                                                            \
   Py_ssize_t n = PyList_GET_SIZE( value );                     \
   vector< value_type > fv;                                     \
@@ -312,7 +321,7 @@ if( check_func( value ) ) { \
     } else { \
       PyErr_SetString( PyExc_ValueError, \
                        "Invalid argument type to setValue() function " ); \
-      return 0;                                                \
+      return nullptr;                                                \
     }                                                          \
   }                                                          \
   static_cast<field_type *>(field)->setValue(fv);                  
@@ -617,79 +626,92 @@ if( check_func( value ) ) { \
     }
     
     static PyMethodDef H3DMethods[] = {
-      { "createField", pythonCreateField, METH_VARARGS, NULL },
-      { "fieldSetValue", pythonFieldSetValue, METH_VARARGS, NULL  },
-      { "fieldGetValue", pythonFieldGetValue, METH_O, NULL  },
-      { "fieldSetAccessType", pythonFieldSetAccessType, METH_VARARGS, NULL  },
-      { "fieldGetAccessType", pythonFieldGetAccessType, METH_O, NULL  },
-      { "fieldSetAccessCheck", pythonFieldSetAccessCheck, METH_VARARGS, NULL },
-      { "fieldIsAccessCheckOn", pythonFieldIsAccessCheckOn, METH_O, NULL },
-      { "fieldRoute", pythonFieldRoute, METH_VARARGS, NULL },
-      { "fieldRouteNoEvent", pythonFieldRouteNoEvent, METH_VARARGS, NULL },
-      { "fieldUnroute", pythonFieldUnroute, METH_VARARGS, NULL },
-      { "fieldReplaceRoute", pythonFieldReplaceRoute, METH_VARARGS, NULL },
-      { "fieldReplaceRouteNoEvent", pythonFieldReplaceRouteNoEvent, METH_VARARGS, NULL },
-      { "fieldUnrouteAll", pythonFieldUnrouteAll, METH_O, NULL },
-      { "getCPtr", pythonGetCPtr, METH_O, NULL },
-      { "writeNodeAsX3D", pythonWriteNodeAsX3D, METH_O, NULL },
-      { "createX3DFromURL", pythonCreateX3DFromURL, METH_O, NULL },
-      { "createX3DFromString", pythonCreateX3DFromString, METH_O, NULL },
-      { "createX3DNodeFromURL", pythonCreateX3DNodeFromURL, METH_O, NULL },
-      { "createX3DNodeFromString", pythonCreateX3DNodeFromString, METH_O, NULL },
-      { "createVRMLFromURL", pythonCreateVRMLFromURL, METH_O, NULL },
-      { "createVRMLFromString", pythonCreateVRMLFromString, METH_O, NULL },
-      { "createVRMLNodeFromURL", pythonCreateVRMLNodeFromURL, METH_O, NULL  },
-      { "createVRMLNodeFromString", pythonCreateVRMLNodeFromString, METH_O, NULL },
-      { "fieldRoutesTo", pythonFieldRoutesTo, METH_VARARGS, NULL },
-      { "fieldHasRouteFrom", pythonFieldHasRouteFrom, METH_VARARGS, NULL },
-      { "fieldGetRoutesIn", pythonFieldGetRoutesIn, METH_O, NULL },
-      { "fieldGetRoutesOut", pythonFieldGetRoutesOut , METH_O, NULL },
-      { "getCurrentScenes", pythonGetCurrentScenes, METH_NOARGS, NULL },
-      { "getActiveDeviceInfo", pythonGetActiveDeviceInfo, METH_NOARGS, NULL },
-      { "getActiveViewpoint", pythonGetActiveViewpoint, METH_NOARGS, NULL },
-      { "getActiveBindableNode", pythonGetActiveBindableNode, METH_O, NULL },
-      { "getActiveNavigationInfo", pythonGetActiveNavigationInfo, METH_NOARGS, NULL },
-      { "getActiveFog", pythonGetActiveFog, METH_NOARGS, NULL },
-      { "getActiveGlobalSettings", pythonGetActiveGlobalSettings, METH_NOARGS, NULL },
-      { "getActiveStereoInfo", pythonGetActiveStereoInfo, METH_NOARGS, NULL },
-      { "getActiveBackground", pythonGetActiveBackground, METH_NOARGS, NULL },
-      { "MFieldErase", pythonMFieldErase, METH_VARARGS, NULL },
-      { "MFieldPushBack", pythonMFieldPushBack, METH_VARARGS, NULL },
-      { "MFieldClear", pythonMFieldClear, METH_O, NULL },
-      { "MFieldBack", pythonMFieldBack, METH_O, NULL },
-      { "MFieldFront", pythonMFieldFront, METH_O, NULL },
-      { "MFieldEmpty", pythonMFieldEmpty, METH_O, NULL },
-      { "MFieldPopBack", pythonMFieldPopBack, METH_O, NULL },
-      { "MFieldSize", pythonMFieldSize, METH_O, NULL },
-      { "fieldTouch", pythonFieldTouch, METH_O, NULL },
-      { "resolveURLAsFile", pythonResolveURLAsFile, METH_O, NULL },
-      { "resolveURLAsFolder", pythonResolveURLAsFolder, METH_O, NULL },
-      { "throwQuitAPIException", throwQuitAPIException, METH_NOARGS, NULL },
-      { "createNode", (PyCFunction)pythonCreateNode, METH_VARARGS|METH_KEYWORDS, NULL },
-      { "getHapticsDevice", pythonGetHapticsDevice, METH_O, NULL },
-      { "getNrHapticsDevices", pythonGetNrHapticsDevices, METH_NOARGS, NULL },
-      { "getNamedNode", pythonGetNamedNode, METH_O, NULL },
-      { "fieldSetName", pythonFieldSetName, METH_VARARGS, NULL },
-      { "fieldGetName", pythonFieldGetName, METH_O, NULL },
-      { "fieldGetFullName", pythonFieldGetFullName, METH_O, NULL },
-      { "fieldGetTypeName", pythonFieldGetTypeName, METH_O, NULL },
-      { "fieldGetOwner", pythonFieldGetOwner, METH_O, NULL },
-      { "fieldSetOwner", pythonFieldSetOwner, METH_VARARGS, NULL },
-      { "fieldSetValueFromString", pythonFieldSetValueFromString, METH_VARARGS, NULL },
-      { "fieldGetValueAsString", pythonFieldGetValueAsString, METH_O, NULL },
-      { "fieldUpToDate", pythonFieldUpToDate, METH_O, NULL },
-      { "fieldIsUpToDate", pythonFieldIsUpToDate, METH_O, NULL },
-      { "addProgramSetting", pythonAddProgramSetting, METH_VARARGS, NULL },
-      { "findNodes", pythonFindNodes, METH_VARARGS, NULL },
-      { "takeScreenshot", pythonTakeScreenshot, METH_O, NULL },
-      { "addURNResolveRule", pythonAddURNResolveRule, METH_VARARGS, NULL },
-      { "SFStringIsValidValue", pythonSFStringIsValidValue, METH_VARARGS, NULL },
-      { "SFStringGetValidValues", pythonSFStringGetValidValues, METH_O, NULL },
-      { "exportGeometryAsSTL", pythonExportGeometryAsSTL, METH_VARARGS, NULL },
-      { NULL, NULL, 0, NULL }      
+      { "createField", pythonCreateField, METH_VARARGS, nullptr },
+      { "fieldSetValue", pythonFieldSetValue, METH_VARARGS, nullptr  },
+      { "fieldGetValue", pythonFieldGetValue, METH_O, nullptr  },
+      { "fieldSetAccessType", pythonFieldSetAccessType, METH_VARARGS, nullptr  },
+      { "fieldGetAccessType", pythonFieldGetAccessType, METH_O, nullptr  },
+      { "fieldSetAccessCheck", pythonFieldSetAccessCheck, METH_VARARGS, nullptr },
+      { "fieldIsAccessCheckOn", pythonFieldIsAccessCheckOn, METH_O, nullptr },
+      { "fieldRoute", pythonFieldRoute, METH_VARARGS, nullptr },
+      { "fieldRouteNoEvent", pythonFieldRouteNoEvent, METH_VARARGS, nullptr },
+      { "fieldUnroute", pythonFieldUnroute, METH_VARARGS, nullptr },
+      { "fieldReplaceRoute", pythonFieldReplaceRoute, METH_VARARGS, nullptr },
+      { "fieldReplaceRouteNoEvent", pythonFieldReplaceRouteNoEvent, METH_VARARGS, nullptr },
+      { "fieldUnrouteAll", pythonFieldUnrouteAll, METH_O, nullptr },
+      { "getCPtr", pythonGetCPtr, METH_O, nullptr },
+      { "writeNodeAsX3D", pythonWriteNodeAsX3D, METH_O, nullptr },
+      { "createX3DFromURL", pythonCreateX3DFromURL, METH_O, nullptr },
+      { "createX3DFromString", pythonCreateX3DFromString, METH_O, nullptr },
+      { "createX3DNodeFromURL", pythonCreateX3DNodeFromURL, METH_O, nullptr },
+      { "createX3DNodeFromString", pythonCreateX3DNodeFromString, METH_O, nullptr },
+      { "createVRMLFromURL", pythonCreateVRMLFromURL, METH_O, nullptr },
+      { "createVRMLFromString", pythonCreateVRMLFromString, METH_O, nullptr },
+      { "createVRMLNodeFromURL", pythonCreateVRMLNodeFromURL, METH_O, nullptr  },
+      { "createVRMLNodeFromString", pythonCreateVRMLNodeFromString, METH_O, nullptr },
+      { "fieldRoutesTo", pythonFieldRoutesTo, METH_VARARGS, nullptr },
+      { "fieldHasRouteFrom", pythonFieldHasRouteFrom, METH_VARARGS, nullptr },
+      { "fieldGetRoutesIn", pythonFieldGetRoutesIn, METH_O, nullptr },
+      { "fieldGetRoutesOut", pythonFieldGetRoutesOut , METH_O, nullptr },
+      { "getCurrentScenes", pythonGetCurrentScenes, METH_NOARGS, nullptr },
+      { "getActiveDeviceInfo", pythonGetActiveDeviceInfo, METH_NOARGS, nullptr },
+      { "getActiveViewpoint", pythonGetActiveViewpoint, METH_NOARGS, nullptr },
+      { "getActiveBindableNode", pythonGetActiveBindableNode, METH_O, nullptr },
+      { "getActiveNavigationInfo", pythonGetActiveNavigationInfo, METH_NOARGS, nullptr },
+      { "getActiveFog", pythonGetActiveFog, METH_NOARGS, nullptr },
+      { "getActiveGlobalSettings", pythonGetActiveGlobalSettings, METH_NOARGS, nullptr },
+      { "getActiveStereoInfo", pythonGetActiveStereoInfo, METH_NOARGS, nullptr },
+      { "getActiveBackground", pythonGetActiveBackground, METH_NOARGS, nullptr },
+      { "MFieldErase", pythonMFieldErase, METH_VARARGS, nullptr },
+      { "MFieldPushBack", pythonMFieldPushBack, METH_VARARGS, nullptr },
+      { "MFieldClear", pythonMFieldClear, METH_O, nullptr },
+      { "MFieldBack", pythonMFieldBack, METH_O, nullptr },
+      { "MFieldFront", pythonMFieldFront, METH_O, nullptr },
+      { "MFieldEmpty", pythonMFieldEmpty, METH_O, nullptr },
+      { "MFieldPopBack", pythonMFieldPopBack, METH_O, nullptr },
+      { "MFieldSize", pythonMFieldSize, METH_O, nullptr },
+      { "fieldTouch", pythonFieldTouch, METH_O, nullptr },
+      { "resolveURLAsFile", pythonResolveURLAsFile, METH_O, nullptr },
+      { "resolveURLAsFolder", pythonResolveURLAsFolder, METH_O, nullptr },
+      { "throwQuitAPIException", throwQuitAPIException, METH_NOARGS, nullptr },
+      { "createNode", (PyCFunction)pythonCreateNode, METH_VARARGS|METH_KEYWORDS, nullptr },
+      { "getHapticsDevice", pythonGetHapticsDevice, METH_O, nullptr },
+      { "getNrHapticsDevices", pythonGetNrHapticsDevices, METH_NOARGS, nullptr },
+      { "getNamedNode", pythonGetNamedNode, METH_O, nullptr },
+      { "fieldSetName", pythonFieldSetName, METH_VARARGS, nullptr },
+      { "fieldGetName", pythonFieldGetName, METH_O, nullptr },
+      { "fieldGetFullName", pythonFieldGetFullName, METH_O, nullptr },
+      { "fieldGetTypeName", pythonFieldGetTypeName, METH_O, nullptr },
+      { "fieldGetOwner", pythonFieldGetOwner, METH_O, nullptr },
+      { "fieldSetOwner", pythonFieldSetOwner, METH_VARARGS, nullptr },
+      { "fieldSetValueFromString", pythonFieldSetValueFromString, METH_VARARGS, nullptr },
+      { "fieldGetValueAsString", pythonFieldGetValueAsString, METH_O, nullptr },
+      { "fieldUpToDate", pythonFieldUpToDate, METH_O, nullptr },
+      { "fieldIsUpToDate", pythonFieldIsUpToDate, METH_O, nullptr },
+      { "addProgramSetting", pythonAddProgramSetting, METH_VARARGS, nullptr },
+      { "findNodes", pythonFindNodes, METH_VARARGS, nullptr },
+      { "takeScreenshot", pythonTakeScreenshot, METH_O, nullptr },
+      { "addURNResolveRule", pythonAddURNResolveRule, METH_VARARGS, nullptr },
+      { "SFStringIsValidValue", pythonSFStringIsValidValue, METH_VARARGS, nullptr },
+      { "SFStringGetValidValues", pythonSFStringGetValidValues, METH_O, nullptr },
+      { "exportGeometryAsSTL", pythonExportGeometryAsSTL, METH_VARARGS, nullptr },
+      { nullptr, nullptr, 0, nullptr }      
     };
 
-    
+    void finishH3DInternal() {
+
+      if (!Py_IsInitialized()) {
+        return;
+      }
+      while (!H3D::PyNodePtr::python_node_ptrs.empty()) {
+        (*H3D::PyNodePtr::python_node_ptrs.begin())->setNodePtr(NULL);
+      }
+
+      while (!H3D::PythonFieldBase::python_fields.empty()) {
+        delete *H3D::PythonFieldBase::python_fields.begin();
+      }
+      field_type_in_h3dinterface = NULL;
+    }
 
     PyObject *initH3DInternal() {
       if( H3D_module.get() )
@@ -702,10 +724,10 @@ if( check_func( value ) ) { \
         "This is a module for all H3DAPI base types",  /* m_doc */
         -1,                  /* m_size */
         H3DMethods,    /* m_methods */
-        NULL,                /* m_reload */
-        NULL,                /* m_traverse */
-        NULL,                /* m_clear */
-        NULL,                /* m_free */
+        nullptr,                /* m_reload */
+        nullptr,                /* m_traverse */
+        nullptr,                /* m_clear */
+        nullptr,                /* m_free */
       };
 
       H3D_module.reset( PyModule_Create(&moduledef) );
@@ -739,12 +761,12 @@ if( check_func( value ) ) { \
 #ifdef H3DINTERFACE_AS_FILE
       PythonInternals::H3DInterface_module.reset( 
         PyImport_ImportModule( "H3DInterface" ) );
-      if ( PythonInternals::H3DInterface_module.get() == NULL ) {
+      if ( PythonInternals::H3DInterface_module.get() == nullptr ) {
         PyErr_Print();
         Console(LogLevel::Error) << "PythonScript::initialiseParser() - ";
         Console(LogLevel::Error) << "  Error importing H3DInterface module, check that you have a valid PYTHONPATH environment variable and try again." << endl;
-        H3D_module.reset(NULL);
-        return NULL; 
+        H3D_module.reset(nullptr);
+        return nullptr; 
       }
       PythonInternals::H3DInterface_dict = 
         PyModule_GetDict( PythonInternals::H3DInterface_module.get() );
@@ -755,9 +777,9 @@ if( check_func( value ) ) { \
         PythonInternals::H3DInterface_dict = 
           PyModule_GetDict( PythonInternals::H3DInterface_module.get() );
         // install the buildins in the module
-        if( PythonInternals::H3DInterface_dict != NULL ) {
+        if( PythonInternals::H3DInterface_dict != nullptr ) {
           if (PyDict_GetItemString(  PythonInternals::H3DInterface_dict, 
-            "__builtins__") == NULL) {
+            "__builtins__") == nullptr) {
               if (PyDict_SetItemString(  PythonInternals::H3DInterface_dict, 
                 "__builtins__",
                 PyEval_GetBuiltins()) != 0)
@@ -770,7 +792,7 @@ if( check_func( value ) ) { \
           Py_file_input,
           PythonInternals::H3DInterface_dict,
           PythonInternals::H3DInterface_dict );
-        if ( r == NULL ) {
+        if ( r == nullptr ) {
           Console( LogLevel::Error ) << "Python error in file H3DInterface.py.h:" << endl;
           PyErr_Print();
         }
@@ -778,7 +800,7 @@ if( check_func( value ) ) { \
 
 #endif
 
-      if ( PythonInternals::H3DInterface_dict == NULL )
+      if ( PythonInternals::H3DInterface_dict == nullptr )
         PyErr_Print();
       PyObject *time = (PyObject*)fieldAsPythonObject( Scene::time.get(), false );
       PyDict_SetItem( PythonInternals::H3DInterface_dict, 
@@ -798,9 +820,9 @@ if( check_func( value ) ) { \
         PythonInternals::H3DUtils_dict = 
           PyModule_GetDict( PythonInternals::H3DUtils_module.get() );
         // install the buildins in the module
-        if( PythonInternals::H3DUtils_dict != NULL ) {
+        if( PythonInternals::H3DUtils_dict != nullptr ) {
           if (PyDict_GetItemString(  PythonInternals::H3DUtils_dict, 
-            "__builtins__") == NULL) {
+            "__builtins__") == nullptr) {
               if (PyDict_SetItemString(  PythonInternals::H3DUtils_dict, 
                 "__builtins__",
                 PyEval_GetBuiltins()) != 0)
@@ -813,7 +835,7 @@ if( check_func( value ) ) { \
           Py_file_input,
           PythonInternals::H3DUtils_dict,
           PythonInternals::H3DUtils_dict );
-        if ( r == NULL ) {
+        if ( r == nullptr ) {
           Console( LogLevel::Error ) << "Python error in file H3DUtils.py.h:" << endl;
           PyErr_Print();
         }
@@ -831,16 +853,43 @@ if( check_func( value ) ) { \
       initH3DInternal();
     }
 #endif  
+    namespace PyFunctions {
+      int H3DPyDouble_Check(PyObject *v) {
+        return PyFloat_Check(v) || PyInt_Check(v) || PyLong_Check(v);
+      }
+
+      double H3DPyDouble_AsDouble(PyObject *v) {
+        if (PyFloat_Check(v))
+          return PyFloat_AsDouble(v);
+        else if (PyInt_Check(v))
+          return (double)PyInt_AsLong(v);
+        else if (PyLong_Check(v))
+          return PyLong_AsDouble(v);
+        return 0.0;
+      }
+
+      int H3DPyField_Check(PyObject *v) {
+        if (PythonInternals::field_type_in_h3dinterface == nullptr) {
+          PythonInternals::field_type_in_h3dinterface = PyDict_GetItemString(PythonInternals::H3DInterface_dict, "Field");
+        }
+        return PyObject_IsInstance(v, field_type_in_h3dinterface);
+      }
+
+      PyObject *H3DPyString_FromString(const string &s) {
+        return PyString_FromString(s.c_str());
+      }
+
+    }
 
     void fieldDestructor( PyObject *f ) {
-      Field *field = static_cast<Field*>(PyCapsule_GetPointer(f, NULL ) );
+      Field *field = static_cast<Field*>(PyCapsule_GetPointer(f, nullptr ) );
       if ( field ) {
         delete field;
       }
     }
 
     void fieldDestructorDeRefOwnerPyNode( PyObject *f ) {
-      PyNode* owner_pynode = static_cast<PyNode*>( PyCapsule_GetPointer(f, NULL ) );
+      PyNode* owner_pynode = static_cast<PyNode*>( PyCapsule_GetPointer(f, nullptr ) );
       Py_DECREF( owner_pynode);
     }
 
@@ -853,22 +902,22 @@ if( check_func( value ) ) { \
                                          f->classTypeName().c_str() );
       }
       // create the field instance with the owner flag set to zero.
-      PyObject *py_field = PyType_GenericNew( (PyTypeObject *)obj, NULL, NULL );
+      PyObject *py_field = PyType_GenericNew( (PyTypeObject *)obj, nullptr, nullptr );
       if ( !py_field ) {
         PyErr_Print();
         throw UnableToCreatePythonField( "fieldAsPythonObject()", "" );
       }
       PyObject *field_ptr;
       if ( destruct ) {
-        field_ptr = PyCapsule_New( f, NULL, fieldDestructor );
+        field_ptr = PyCapsule_New( f, nullptr, fieldDestructor );
       } else {
-        field_ptr = PyCapsule_New( f, NULL, NULL );
+        field_ptr = PyCapsule_New( f, nullptr, nullptr );
       }
 
       PyObject * owner_pynode_capsule = Py_None;
       if( owner_pynode ) {
         Py_INCREF( owner_pynode );
-        owner_pynode_capsule = PyCapsule_New( owner_pynode, NULL, fieldDestructorDeRefOwnerPyNode );
+        owner_pynode_capsule = PyCapsule_New( owner_pynode, nullptr, fieldDestructorDeRefOwnerPyNode );
       }
 
       PyObject_SetAttrString( py_field, "__fieldptr__", field_ptr );
@@ -882,31 +931,43 @@ if( check_func( value ) ) { \
 
     // Methods for the H3D Module:
     
-    PyObject *pythonCreateField( PyObject *self, PyObject *args ) {
-      if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 3  ) {
+    PyObject *pythonCreateField( PyObject * /*self*/, PyObject *args ) {
+      if( PyTuple_Size( args ) != 3 ) {
         ostringstream err;
-        err << "Invalid argument(s) to function H3D.createField( Field, int auto_update, name )";
+        err << "Invalid number of arguments to function H3D.createField( Field, int auto_update, name )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return NULL;
+        return nullptr;
       }
       PyObject *field = PyTuple_GetItem( args, 0 );
       PyObject *autoupdateobj = PyTuple_GetItem( args, 1 );
       PyObject *name = PyTuple_GetItem( args, 2 );
+      if ( !PyInt_Check(autoupdateobj) ) {
+        PyErr_SetString(PyExc_ValueError,
+          "The second argument to function H3D.createField( Field, int auto_update, name ) "
+          "must be a int. There might be more parameters then needed sent in as arguments");
+        return nullptr;
+      }
 
       bool autoupdate = PyInt_AsLong( autoupdateobj ) != 0;
       
       if( field && PyObject_TypeCheck( field, &PyBaseObject_Type ) ){
-        //PyObject_SetAttrString( field, "__fieldtype__", field );
-
         PyObject *fieldtype = PyObject_GetAttrString( field, "type" );
-        if( !fieldtype ) {
+        if( !fieldtype || !PyFunctions::H3DPyField_Check(field)) {
           PyErr_SetString( PyExc_ValueError,
                            "First argument to function H3D.createField( Field, int auto_update, name )"
                            "is not a valid Field type." );
-          return 0;
+          return nullptr;
         }
         int field_type = PyInt_AsLong( fieldtype );
         Py_DECREF( fieldtype );
+
+        if( !PyString_Check( name ) ) {
+          PyErr_SetString( PyExc_ValueError,
+                           "Third argument to function H3D.createField( Field, int auto_update, name ) "
+                           "must be a string." );
+          return nullptr;
+        }
+
         Field *f;
 
         if ( autoupdate ) {
@@ -919,7 +980,7 @@ if( check_func( value ) ) { \
             f = 0; /*
             PyErr_SetString( PyExc_ValueError, 
                              "Error: not a valid Field instance" );
-                             return 0;*/  
+                             return nullptr;*/  
           }
         } else {
           bool success;
@@ -930,24 +991,19 @@ if( check_func( value ) ) { \
           if( !success ) {
             f = 0 ; /*PyErr_SetString( PyExc_ValueError, 
                              "Error: not a valid Field instance" );
-                             return 0; */ 
+                             return nullptr; */ 
           }
-        }
-
-        if( !PyString_Check( name ) ) {
-          PyErr_SetString( PyExc_ValueError,
-                           "Third argument to function H3D.createField( Field, int auto_update, name ) "
-                           "must be a string." );
-          return 0;
         }
 
         if( f ) f->setName( PyString_AsString( name ) );
         
-        PyObject *pfield = PyCapsule_New( f, NULL, fieldDestructor );
-        PyObject_SetAttrString( field, "__fieldptr__", pfield );
-        // field now holds a reference to pfield so we can remove the extra reference
-        // from the all to PyCObject_FromVoidPtr()
-        Py_DECREF( pfield );
+        PyObject *pfield = PyCapsule_New( f, nullptr, fieldDestructor );
+        if( pfield ) {
+          PyObject_SetAttrString( field, "__fieldptr__", pfield );
+          // field now holds a reference to pfield so we can remove the extra reference
+          // from the all to PyCObject_FromVoidPtr()
+          Py_DECREF( pfield );
+        }
         PyObject *update = PyObject_GetAttrString( field, "update" );
         if( update ) {
           if( PyMethod_Check( update ) ) {
@@ -958,7 +1014,7 @@ if( check_func( value ) ) { \
             Py_DECREF( update );
             PyErr_SetString( PyExc_ValueError, 
                              "Symbol 'update' must be a method!" );
-            return NULL;
+            return nullptr;
           }
           Py_DECREF( update );
         } else PyErr_Clear();
@@ -973,7 +1029,7 @@ if( check_func( value ) ) { \
             Py_DECREF( typeinfo );
             PyErr_SetString( PyExc_ValueError, 
                              "Symbol '__type_info__' must be a tuple!" );
-            return NULL;
+            return nullptr;
           }
           Py_DECREF( typeinfo );
         } else PyErr_Clear();
@@ -989,7 +1045,7 @@ if( check_func( value ) ) { \
             Py_DECREF( opttypeinfo );
             PyErr_SetString( PyExc_ValueError, 
                              "Symbol '__opt_type_info__' must be a tuple!" );
-            return NULL;
+            return nullptr;
           }
           Py_DECREF( opttypeinfo );
         } else PyErr_Clear();
@@ -1000,33 +1056,14 @@ if( check_func( value ) ) { \
       } else {
         PyErr_SetString( PyExc_ValueError, 
                          "H3D.createField() failed due to invalid input!" );
-        return NULL;
+        return nullptr;
         // THROW APPROPRIATE ERROR
       }
       Py_INCREF(Py_None);
       return Py_None;
     }
 
-    namespace PyFunctions {
-      int H3DPyDouble_Check( PyObject *v ) {
-        return PyFloat_Check( v ) || PyInt_Check( v ) || PyLong_Check( v );
-      }
 
-      double H3DPyDouble_AsDouble( PyObject *v ) {
-        if( PyFloat_Check( v ) )
-          return PyFloat_AsDouble( v );
-        else if( PyInt_Check( v ) ) 
-          return (double)PyInt_AsLong( v );
-         else if( PyLong_Check( v ) ) 
-          return PyLong_AsDouble( v );
-        return 0.0;
-      }
-
-      PyObject *H3DPyString_FromString( const string &s ) {
-        return PyString_FromString( s.c_str() );
-      }
-    
-    }
 
     // Return a readable string representing a PyTypeObject.
     std::string getPyTypeObjectTypeName(PyTypeObject *o) {
@@ -1063,7 +1100,7 @@ if( check_func( value ) ) { \
         if( !success ) {
           PyErr_SetString( PyExc_ValueError, 
                            "Error: not a valid Field instance" );
-          return 0;  
+          return nullptr;  
         }
       }
       Py_INCREF(Py_None);
@@ -1072,18 +1109,18 @@ if( check_func( value ) ) { \
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonFieldSetValue( PyObject *self, PyObject *args ) {
-      if( !args || ! PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+    PyObject *pythonFieldSetValue( PyObject * /*self*/, PyObject *args ) {
+      if( PyTuple_Size( args ) != 2 ) {
         PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.fieldSetValue( self, value )" );
-        return 0;
+                         "Invalid number of arguments to function H3D.fieldSetValue( self, value )" );
+        return nullptr;
       }
   
       PyObject *field = PyTuple_GetItem( args, 0 );
-      if( !PyObject_TypeCheck( field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( field ) ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Invalid Field type given as argument to H3D.fieldSetValue( self, value )" );
-        return 0;
+        return nullptr;
       }
       PyObject *py_field_ptr = PyObject_GetAttrString( field, "__fieldptr__" );
       if( !py_field_ptr ) {
@@ -1091,10 +1128,16 @@ if( check_func( value ) ) { \
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       Field *field_ptr = getFieldPointer( py_field_ptr );
       Py_DECREF( py_field_ptr );
+      if( !field_ptr && PyErr_Occurred() ) {
+        PyErr_Clear();
+        PyErr_SetString( PyExc_ValueError,
+                         "Error: Field NULL pointer" );
+        return nullptr;
+      }
 
       PyObject *v = PyTuple_GetItem( args, 1 );
       return PythonInternals::pythonSetFieldValueFromObject( field_ptr, v );
@@ -1102,20 +1145,14 @@ call the base class __init__ function." );
     
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonFieldGetValue( PyObject *self, PyObject *arg ) {
-      if(!arg || !PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.fieldGetValue( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonFieldGetValue( PyObject * /*self*/, PyObject *arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer(  py_field_ptr );
@@ -1130,30 +1167,24 @@ call the base class __init__ function." );
         if( !success ) {
            PyErr_SetString( PyExc_ValueError, 
                            "Error: not a valid Field instance" );
-          return 0;  
+          return nullptr;  
         }
       }
       PyErr_SetString( PyExc_ValueError, 
                        "Error: Field NULL pointer" );
-      return 0;  
+      return nullptr;  
     }
     
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonFieldGetAccessType( PyObject *self, PyObject *arg ) {
-      if(!arg || !PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.fieldGetAccessType( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonFieldGetAccessType( PyObject * /*self*/, PyObject * arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer(  py_field_ptr );
@@ -1165,23 +1196,23 @@ call the base class __init__ function." );
       }
       PyErr_SetString( PyExc_ValueError, 
                        "Error: Field NULL pointer" );
-      return 0;  
+      return nullptr;  
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonFieldSetAccessType( PyObject *self, PyObject *arg ) {
-      if( !arg || ! PyTuple_Check( arg ) || PyTuple_Size( arg ) != 2  ) {
+    PyObject *pythonFieldSetAccessType( PyObject * /*self*/, PyObject *arg ) {
+      if( PyTuple_Size( arg ) != 2 ) {
         PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.fieldSetAccessType( self, access_type )" );
-        return 0;
+                         "Invalid number of arguments to function H3D.fieldSetAccessType( self, access_type )" );
+        return nullptr;
       }
   
       PyObject *field = PyTuple_GetItem( arg, 0 );
-      if( !PyObject_TypeCheck( field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check(field) ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Invalid Field type given as argument to H3D.fieldSetAccessType( self, access_type )" );
-        return 0;
+        return nullptr;
       }
       PyObject *py_field_ptr = PyObject_GetAttrString( field, "__fieldptr__" );
       if( !py_field_ptr ) {
@@ -1189,7 +1220,7 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       Field *field_ptr = getFieldPointer( py_field_ptr );
       Py_DECREF( py_field_ptr );
@@ -1210,7 +1241,7 @@ call the base class __init__ function." );
         else {
           PyErr_SetString( PyExc_ValueError,
               "Error: Access type is not valid in H3D.fieldSetAccessType( self, access_type )" );
-          return 0;
+          return nullptr;
         }
         field_ptr->setAccessType( access_type );
         Py_INCREF(Py_None);
@@ -1218,23 +1249,23 @@ call the base class __init__ function." );
       }
       PyErr_SetString( PyExc_ValueError, 
                        "Error: Field NULL pointer" );
-      return 0;  
+      return nullptr;  
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonFieldSetAccessCheck( PyObject *self, PyObject *arg ) {
-      if( !arg || ! PyTuple_Check( arg ) || PyTuple_Size( arg ) != 2  ) {
+    PyObject *pythonFieldSetAccessCheck( PyObject * /*self*/, PyObject *arg ) {
+      if( PyTuple_Size( arg ) != 2 ) {
         PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.fieldSetAccessCheck( self, access_check )" );  
-        return 0;
+                         "Invalid number of arguments to function H3D.fieldSetAccessCheck( self, access_check )" );  
+        return nullptr;
       }
 
       PyObject *py_field_obj = PyTuple_GetItem( arg, 0 );
-      if( !PyObject_TypeCheck( py_field_obj, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( py_field_obj, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check(py_field_obj) ) {
         PyErr_SetString( PyExc_ValueError, 
  "Invalid Field type given as argument to H3D.fieldSetAccessCheck( self, access_check )" );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_field_ptr = PyObject_GetAttrString( py_field_obj, "__fieldptr__" );
@@ -1243,14 +1274,15 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_access_check = PyTuple_GetItem( arg, 1 );
       if( !PyInt_Check( py_access_check ) ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Invalid argument type. Expecting boolean" );
-        return 0;
+        Py_DECREF(py_field_ptr);
+        return nullptr;
       }
 
       Field *field_ptr = getFieldPointer(  py_field_ptr );
@@ -1264,25 +1296,19 @@ call the base class __init__ function." );
       }
       PyErr_SetString( PyExc_ValueError, 
                        "Error: Field NULL pointer" );
-      return 0;  
+      return nullptr;  
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonFieldIsAccessCheckOn( PyObject *self, PyObject *arg ) {
-      if(!arg || !PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.fieldGetAccessType( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonFieldIsAccessCheckOn( PyObject * /*self*/, PyObject *arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer(  py_field_ptr );
@@ -1295,34 +1321,34 @@ call the base class __init__ function." );
       }
       PyErr_SetString( PyExc_ValueError, 
                        "Error: Field NULL pointer" );
-      return 0;  
+      return nullptr;  
     }
 
     /////////////////////////////////////////////////////////////////////////
 
     // help function for pythonFieldRoute and pythonFieldRouteNoEvent.
-    PyObject *pythonFieldUnroute( PyObject *self, 
+    PyObject *pythonFieldUnroute( PyObject * /*self*/, 
                                   PyObject *args  ) {
-      if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+      if( PyTuple_Size( args ) != 2 ) {
         ostringstream err;
-        err << "Invalid argument(s) to function H3D.fieldUnroute( fromField, toField )";
+        err << "Invalid number of arguments to function H3D.fieldUnroute( fromField, toField )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
 
       PyObject *from_field = PyTuple_GetItem( args, 0 );
       PyObject *to_field = PyTuple_GetItem( args, 1 );
-      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check(from_field) ) {
         ostringstream err;
         err << "Invalid Field type given as fromField argument to H3D.fieldUnroute( fromField, toField )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
-      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck(to_field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check(to_field) ) {
         ostringstream err;
         err << "Invalid Field type given as toField argument to H3D.fieldUnroute( fromField, toField )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
       PyObject *py_from_field_ptr = PyObject_GetAttrString( from_field, 
                                                             "__fieldptr__" );
@@ -1333,7 +1359,13 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        if (py_from_field_ptr) {
+          Py_DECREF(py_from_field_ptr);
+        }
+        if (py_to_field_ptr) {
+          Py_DECREF(py_to_field_ptr);
+        }
+        return nullptr;
       }
       Field *from_field_ptr = getFieldPointer( py_from_field_ptr );
       Field *to_field_ptr = getFieldPointer( py_to_field_ptr );
@@ -1345,13 +1377,13 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Source not a Field class in H3D.fieldUnroute( fromField, toField )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;       
+        return nullptr;       
       }
       if( to_field_ptr == 0 ) {
         ostringstream err;
         err << "Destination not a Field class in call to H3D.fieldUnroute( fromField, toField )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;       
+        return nullptr;       
       }
       try {
         from_field_ptr->unroute( to_field_ptr );
@@ -1359,7 +1391,7 @@ call the base class __init__ function." );
         ostringstream errstr;
         errstr << e;
         PyErr_SetString( PyExc_ValueError, errstr.str().c_str() );
-        return NULL;
+        return nullptr;
       }
       
       Py_INCREF(Py_None);
@@ -1368,16 +1400,8 @@ call the base class __init__ function." );
 
 
     // help function for pythonFieldRoute and pythonFieldRouteNoEvent.
-    PyObject *pythonGetCPtr( PyObject *self, 
+    PyObject *pythonGetCPtr( PyObject * /*self*/, 
                              PyObject *arg  ) {
-      if( !arg || !PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        ostringstream err;
-        err << "Invalid argument(s) to function H3D.getCPtr( Field f )."
-            << " Requires one argument of type Field. ";
-        PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
-      }
-
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, 
                                                             "__fieldptr__" );
       if( !py_field_ptr ) {
@@ -1385,7 +1409,7 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       Field *field_ptr = getFieldPointer( py_field_ptr );
 
@@ -1397,29 +1421,29 @@ call the base class __init__ function." );
     /////////////////////////////////////////////////////////////////////////
 
     // help function for pythonFieldRoute and pythonFieldRouteNoEvent.
-    PyObject *pythonRouteFieldHelp( PyObject *self, 
+    PyObject *pythonRouteFieldHelp( PyObject * /*self*/, 
                                     PyObject *args, 
                                     bool send_event  ) {
-      if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+      if( PyTuple_Size( args ) != 2 ) {
         ostringstream err;
-        err << "Invalid argument(s) to function H3D.fieldRoute( fromField, toField )";
+        err << "Invalid number of arguments to function H3D.fieldRoute( fromField, toField )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
 
       PyObject *from_field = PyTuple_GetItem( args, 0 );
       PyObject *to_field = PyTuple_GetItem( args, 1 );
-      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( from_field ) ) {
         ostringstream err;
         err << "Invalid Field type given as fromField argument to H3D.fieldRoute( fromField, toField )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
-      if( !PyObject_TypeCheck( to_field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( to_field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( to_field ) ) {
         ostringstream err;
         err << "Invalid Field type given as toField argument to H3D.fieldRoute( fromField, toField )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
       PyObject *py_from_field_ptr = PyObject_GetAttrString( from_field, 
                                                             "__fieldptr__" );
@@ -1430,22 +1454,30 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        if (py_from_field_ptr) {
+          Py_DECREF(py_from_field_ptr);
+        }
+        if (py_to_field_ptr) {
+          Py_DECREF(py_to_field_ptr);
+        }
+        return nullptr;
       }
       Field *from_field_ptr = getFieldPointer( py_from_field_ptr );
       Field *to_field_ptr = getFieldPointer( py_to_field_ptr );
+      Py_DECREF(py_to_field_ptr);
+      Py_DECREF(py_from_field_ptr);
       
       if( from_field_ptr == 0 ) {
         ostringstream err;
         err << "Source not a Field class in H3D.fieldRoute( fromField, toField )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;       
+        return nullptr;       
       }
       if( to_field_ptr == 0 ) {
         ostringstream err;
         err << "Destination not a Field class in call to H3D.fieldRoute( fromField, toField )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;       
+        return nullptr;       
       }
       try {
         if( send_event )
@@ -1456,22 +1488,19 @@ call the base class __init__ function." );
         ostringstream errstr;
         errstr << e;
         PyErr_SetString( PyExc_ValueError, errstr.str().c_str() );
-        return NULL;
+        return nullptr;
       }
 
-      Py_DECREF( py_to_field_ptr );
-      Py_DECREF( py_from_field_ptr );
-      Py_INCREF(Py_None);
-      return Py_None; 
+      Py_RETURN_NONE;
     }
     
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonCreateX3DFromURL( PyObject *self, PyObject *arg ) {
+    PyObject* pythonCreateX3DFromURL( PyObject * /*self*/, PyObject * arg ) {
       if( !PyString_Check( arg ) ) {
         setInvalidArgTypePythonError( "H3DInterface.createX3DFromURL( filename )", "filename",
                                       "str", getPyObjectTypeName( arg ) ); 
-        return 0;
+        return nullptr;
       }
       const char *filename = PyString_AsString( arg );
       X3D::DEFNodes dm;
@@ -1483,17 +1512,17 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Error creating X3D from URL: " << e.message;
         PyErr_SetString( PyExc_RuntimeError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonCreateX3DFromString( PyObject *self, PyObject *arg ) {
+    PyObject* pythonCreateX3DFromString( PyObject * /*self*/, PyObject *arg ) {
       if( !PyString_Check( arg ) ) {
         setInvalidArgTypePythonError( "H3DInterface.createX3DFromString( s )", "s",
                                       "str", getPyObjectTypeName( arg ) ); 
-        return 0;
+        return nullptr;
       }
       const char *s = PyString_AsString( arg );
       X3D::DEFNodes dm;
@@ -1505,18 +1534,18 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Error creating X3D from string: " << e.message;
         PyErr_SetString( PyExc_RuntimeError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
     }
 
     /////////////////////////////////////////////////////////////////////////
 
 
-    PyObject* pythonWriteNodeAsX3D( PyObject *self, PyObject *arg ) {
+    PyObject* pythonWriteNodeAsX3D( PyObject * /*self*/, PyObject * arg ) {
       if( !PyNode_Check( arg ) ) {
         setInvalidArgTypePythonError( "H3DInterface.writeNodeAsX3D( node )", "node",
                                       getPyTypeObjectTypeName( &PyNode_Type ), getPyObjectTypeName(arg) );
-        return 0;
+        return nullptr;
       }
 
       Node *n = PyNode_AsNode( arg );
@@ -1531,16 +1560,16 @@ call the base class __init__ function." );
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonCreateX3DNodeFromURL( PyObject *self, PyObject *arg ) {
+    PyObject* pythonCreateX3DNodeFromURL( PyObject * /*self*/, PyObject * arg ) {
       if( !PyString_Check( arg ) ) {
         setInvalidArgTypePythonError( "H3DInterface.createX3DNodeFromURL( filename )", "filename",
                                       "str", getPyObjectTypeName( arg ) ); 
-        return 0;
+        return nullptr;
       }
       const char *filename = PyString_AsString( arg );
       X3D::DEFNodes dm;
 
-       PyThreadState *_save = NULL;
+       PyThreadState *_save = nullptr;
        // release the interpreter lock to let other python threads execute while setting
        // field value. Need to make sure here that that if any exception is thrown we 
        // reaquire the lock with Py_BLOCK_THREADS
@@ -1557,7 +1586,7 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Error creating X3D Node from URL: " << e.message;
         PyErr_SetString( PyExc_RuntimeError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
       catch ( H3D::Exception::H3DException &e ) {
         // H3D error are set as Python exceptions
@@ -1565,7 +1594,7 @@ call the base class __init__ function." );
         ostringstream errstr;
         errstr << e;
         PyErr_SetString( PyExc_RuntimeError, errstr.str().c_str() );
-        return 0;
+        return nullptr;
       } catch( ... ) {
         // rethrow all other exceptions
         Py_BLOCK_THREADS
@@ -1573,11 +1602,11 @@ call the base class __init__ function." );
       }
     }
 
-    PyObject* pythonCreateX3DNodeFromString( PyObject *self, PyObject *arg ) {
+    PyObject* pythonCreateX3DNodeFromString( PyObject * /*self*/, PyObject * arg ) {
       if( !PyString_Check( arg ) ) {
         setInvalidArgTypePythonError( "H3DInterface.createX3DNodeFromString( s )", "s",
                                       "str", getPyObjectTypeName( arg ) ); 
-        return 0;
+        return nullptr;
       }
       const char *s = PyString_AsString( arg );
       X3D::DEFNodes dm;
@@ -1589,17 +1618,17 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Error creating X3D Node from string: " << e.message;
         PyErr_SetString( PyExc_RuntimeError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonCreateVRMLFromURL( PyObject *self, PyObject *arg ) {
+    PyObject* pythonCreateVRMLFromURL( PyObject * /*self*/, PyObject * arg ) {
       if( !PyString_Check( arg ) ) {
         setInvalidArgTypePythonError( "H3DInterface.createVRMLFromURL( filename )", "filename",
                                       "str", getPyObjectTypeName(arg));
-        return 0;
+        return nullptr;
       }
       const char *filename = PyString_AsString( arg );
       X3D::DEFNodes dm;
@@ -1610,17 +1639,17 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Error creating X3D Node from string: " << e.message;
         PyErr_SetString( PyExc_RuntimeError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonCreateVRMLFromString( PyObject *self, PyObject *arg ) {
+    PyObject* pythonCreateVRMLFromString( PyObject * /*self*/, PyObject * arg ) {
       if( !PyString_Check( arg ) ) {
         setInvalidArgTypePythonError( "H3DInterface.createVRMLFromString( s )", "s",
                                       "str", getPyObjectTypeName( arg ) ); 
-        return 0;
+        return nullptr;
       }
       const char *s = PyString_AsString( arg );
       X3D::DEFNodes dm;
@@ -1631,17 +1660,17 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Error creating X3D Node from string: " << e.message;
         PyErr_SetString( PyExc_RuntimeError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonCreateVRMLNodeFromURL( PyObject *self, PyObject *arg ) {
+    PyObject* pythonCreateVRMLNodeFromURL( PyObject * /*self*/, PyObject *arg ) {
       if( !PyString_Check( arg ) ) {
         setInvalidArgTypePythonError( "H3DInterface.createVRMLNodeFromURL( filename )", "filename",
                                       "str", getPyObjectTypeName( arg ) ); 
-        return 0;
+        return nullptr;
       }
       const char *filename = PyString_AsString( arg );
       X3D::DEFNodes dm;
@@ -1652,15 +1681,15 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Error creating X3D Node from string: " << e.message;
         PyErr_SetString( PyExc_RuntimeError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
     }
 
-    PyObject* pythonCreateVRMLNodeFromString( PyObject *self, PyObject *arg ) {
+    PyObject* pythonCreateVRMLNodeFromString( PyObject * /*self*/, PyObject * arg ) {
       if( !PyString_Check( arg ) ) {
         setInvalidArgTypePythonError( "H3DInterface.createVRMLNodeFromString( s )", "s",
                                       "str", getPyObjectTypeName( arg ) ); 
-        return 0;
+        return nullptr;
       }
       const char *s = PyString_AsString( arg );
       X3D::DEFNodes dm;
@@ -1671,33 +1700,33 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Error creating X3D Node from string: " << e.message;
         PyErr_SetString( PyExc_RuntimeError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonFieldRoutesTo( PyObject *self, PyObject *arg ) {
-      if( !arg || !PyTuple_Check( arg ) || PyTuple_Size( arg ) != 2  ) {
+    PyObject* pythonFieldRoutesTo( PyObject * /*self*/, PyObject * arg ) {
+      if( PyTuple_Size( arg ) != 2 ) {
         ostringstream err;
-        err << "Invalid argument(s) to function H3D.fieldRoutesTo( f )";
+        err << "Invalid number of arguments to function H3D.fieldRoutesTo( f )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
 
       PyObject *from_field = PyTuple_GetItem( arg, 0 );
       PyObject *to_field = PyTuple_GetItem( arg, 1 );
-      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( from_field ) ) {
         ostringstream err;
         err << "Invalid Field type given as fromField argument to H3D.fieldRoutesTo( f )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
-      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( to_field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( to_field ) ) {
         ostringstream err;
         err << "Invalid Field type given as toField argument to H3D.fieldRoutesTo( f )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
       PyObject *py_from_field_ptr = PyObject_GetAttrString( from_field, 
                                                             "__fieldptr__" );
@@ -1708,7 +1737,13 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        if (py_from_field_ptr){
+          Py_DECREF(py_from_field_ptr);
+        }
+        if (py_to_field_ptr){
+          Py_DECREF(py_to_field_ptr);
+        }
+        return nullptr;
       }
       Field *from_field_ptr = getFieldPointer( py_from_field_ptr );
       Field *to_field_ptr = getFieldPointer( py_to_field_ptr );
@@ -1720,13 +1755,13 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Source not a Field class in H3D.fieldRoutesTo( f )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;       
+        return nullptr;       
       }
       if( to_field_ptr == 0 ) {
         ostringstream err;
         err << "Destination not a Field class in call to H3D.fieldRoutesTo( f )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;       
+        return nullptr;       
       }
       try {
 
@@ -1738,33 +1773,33 @@ call the base class __init__ function." );
         ostringstream errstr;
         errstr << e;
         PyErr_SetString( PyExc_ValueError, errstr.str().c_str() );
-        return NULL;
+        return nullptr;
       }
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonFieldHasRouteFrom( PyObject *self, PyObject *arg ) {
-      if( !arg || !PyTuple_Check( arg ) || PyTuple_Size( arg ) != 2  ) {
+    PyObject* pythonFieldHasRouteFrom( PyObject * /*self*/, PyObject * arg ) {
+      if( PyTuple_Size( arg ) != 2 ) {
         ostringstream err;
-        err << "Invalid argument(s) to function H3D.fieldHasRouteFrom( f )";
+        err << "Invalid number of arguments to function H3D.fieldHasRouteFrom( f )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
 
       PyObject *field = PyTuple_GetItem( arg, 0 );
       PyObject *from_field = PyTuple_GetItem( arg, 1 );
-      if( !PyObject_TypeCheck( field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( field ) ) {
+        ostringstream err;
+        err << "Invalid Field type given as field argument to H3D.fieldHasRouteFrom( f )";
+        PyErr_SetString( PyExc_ValueError, err.str().c_str() );
+        return nullptr;
+      }
+      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( from_field ) ) {
         ostringstream err;
         err << "Invalid Field type given as fromField argument to H3D.fieldHasRouteFrom( f )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
-      }
-      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) ) {
-        ostringstream err;
-        err << "Invalid Field type given as toField argument to H3D.fieldHasRouteFrom( f )";
-        PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
       PyObject *py_field_ptr = PyObject_GetAttrString( field, 
                                                             "__fieldptr__" );
@@ -1775,7 +1810,13 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        if (py_field_ptr){
+          Py_DECREF(py_field_ptr);
+        }
+        if (py_from_field_ptr){
+          Py_DECREF(py_from_field_ptr);
+        }
+        return nullptr;
       }
       Field *field_ptr = getFieldPointer( py_field_ptr );
       Field *from_field_ptr =getFieldPointer( py_from_field_ptr );
@@ -1787,13 +1828,13 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Source not a Field class in H3D.fieldHasRouteFrom( f )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;       
+        return nullptr;       
       }
       if( from_field_ptr == 0 ) {
         ostringstream err;
         err << "Destination not a Field class in call to H3D.fieldHasRouteFrom( f )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;       
+        return nullptr;       
       }
       try {
 
@@ -1805,20 +1846,13 @@ call the base class __init__ function." );
         ostringstream errstr;
         errstr << e;
         PyErr_SetString( PyExc_ValueError, errstr.str().c_str() );
-        return NULL;
+        return nullptr;
       }
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonFieldGetRoutesIn( PyObject *self, PyObject *arg ) {
-      if( !arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        ostringstream err;
-        err << "Invalid argument(s) to function H3D.fieldGetRoutesIn( Field f )."
-            << " Requires one argument of type Field. ";
-        PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
-      }
+    PyObject* pythonFieldGetRoutesIn( PyObject * /*self*/, PyObject * arg ) {
 
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
@@ -1826,10 +1860,11 @@ call the base class __init__ function." );
              "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
+      Py_DECREF(py_field_ptr);
       Field::FieldVector routes_in =  field_ptr->getRoutesIn();
       PyObject *retval = PyTuple_New( routes_in.size() );
 
@@ -1837,7 +1872,7 @@ call the base class __init__ function." );
         PyObject *t = (PyObject *)PythonInternals::fieldAsPythonObject( routes_in[i] );
         PyTuple_SetItem( retval, i, t );
       }
-      Py_DECREF( py_field_ptr );
+      
       return retval;
     }
 
@@ -1845,14 +1880,7 @@ call the base class __init__ function." );
 
     // function for returning a tuple of the Fields that the field given
     // as arg is routed to.
-    PyObject* pythonFieldGetRoutesOut( PyObject *self, PyObject *arg ) {
-      if( !arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        ostringstream err;
-        err << "Invalid argument(s) to function H3D.fieldGetRoutesOut( Field f )."
-            << " Requires one argument of type Field. ";
-        PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
-      }
+    PyObject* pythonFieldGetRoutesOut( PyObject * /*self*/, PyObject *arg ) {
 
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
@@ -1860,10 +1888,11 @@ call the base class __init__ function." );
              "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
 
       Field *field_ptr = getFieldPointer( py_field_ptr );
+      Py_DECREF(py_field_ptr);
       Field::FieldSet routes_out =  field_ptr->getRoutesOut();
       PyObject *retval = PyTuple_New( routes_out.size() );
 
@@ -1873,7 +1902,6 @@ call the base class __init__ function." );
       PyObject *t = (PyObject *) PythonInternals::fieldAsPythonObject( *fi );
         PyTuple_SetItem( retval, i, t );
       }
-      Py_DECREF( py_field_ptr );
       return retval;
     }
 
@@ -1890,12 +1918,7 @@ call the base class __init__ function." );
     }
 
     /////////////////////////////////////////////////////////////////////////
-    PyObject *pythonFieldUnrouteAll( PyObject *self, PyObject *arg  ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.fieldUnrouteAll( self )" );
-        return 0;
-      }
+    PyObject *pythonFieldUnrouteAll( PyObject * /*self*/, PyObject * arg ) {
       
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
@@ -1903,7 +1926,7 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -1911,7 +1934,7 @@ call the base class __init__ function." );
 
       if( field_ptr ) { 
         string type_name;
-        PyThreadState *_save = NULL;
+        PyThreadState *_save = nullptr;
         // release the interpreter lock to let other python threads execute while updating
         // field value. Need to make sure here that that if any exception is thrown we 
         // reaquire the lock with Py_BLOCK_THREADS
@@ -1926,7 +1949,7 @@ call the base class __init__ function." );
           ostringstream errstr;
           errstr << e;
           PyErr_SetString( PyExc_ValueError, errstr.str().c_str() );
-          return 0;
+          return nullptr;
         } catch( ... ) {
           // rethrow all other exceptions
           Py_BLOCK_THREADS
@@ -1935,38 +1958,38 @@ call the base class __init__ function." );
       } else {
         PyErr_SetString( PyExc_ValueError, 
                          "Error: Field NULL pointer" );
-        return 0;  
+        return nullptr;  
       }      
     }
 
     /////////////////////////////////////////////////////////////////////////
     
     // help function for pythonFieldReplaceRoute and pythonFieldReplaceRouteNoEvent.
-    PyObject *pythonFieldReplaceRouteHelp( PyObject *self, 
+    PyObject *pythonFieldReplaceRouteHelp( PyObject * /*self*/, 
                                     PyObject *args, 
                                     bool send_event  ) {
-      if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 3  ) {
+      if( PyTuple_Size( args ) != 3 ) {
         ostringstream err;
-        err << "Invalid argument(s) to function H3D.fieldReplaceRoute( fromField, toField, index )";
+        err << "Invalid number of arguments to function H3D.fieldReplaceRoute( fromField, toField, index )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
       
       PyObject *from_field = PyTuple_GetItem( args, 0 );
       PyObject *to_field = PyTuple_GetItem( args, 1 );
       PyObject *route_id = PyTuple_GetItem( args, 2 );
       
-      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( from_field ) ) {
         ostringstream err;
         err << "Invalid Field type given as fromField argument to H3D.fieldReplaceRoute( )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
-      if( !PyObject_TypeCheck( from_field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( to_field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( to_field ) ) {
         ostringstream err;
         err << "Invalid Field type given as toField argument to H3D.fieldReplaceRoute( )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
       
       if( !PyInt_Check( route_id ) ) {
@@ -1975,7 +1998,7 @@ call the base class __init__ function." );
         err << "Invalid index argument to function H3D.fieldReplaceRoute(  ).";
         err << "Index should be of int type.";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_from_field_ptr = PyObject_GetAttrString( from_field, 
@@ -1987,7 +2010,13 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        if (py_from_field_ptr) {
+          Py_DECREF(py_from_field_ptr);
+        }
+        if (py_to_field_ptr) {
+          Py_DECREF(py_to_field_ptr);
+        }
+        return nullptr;
       }
       Field *from_field_ptr = getFieldPointer( py_from_field_ptr );
       Field *to_field_ptr = getFieldPointer( py_to_field_ptr );
@@ -1999,13 +2028,13 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Source not a Field class in H3D.fieldReplaceRoute( )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;       
+        return nullptr;       
       }
       if( to_field_ptr == 0 ) {
         ostringstream err;
         err << "Destination not a Field class in call to H3D.fieldReplaceRoute( )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;       
+        return nullptr;       
       }
 
       int route_index = (int)(PyInt_AsLong( route_id ));
@@ -2013,7 +2042,7 @@ call the base class __init__ function." );
         ostringstream err;
         err << "The destination Field has fewer incoming routes than the provided index in H3D.fieldReplaceRoute( ).";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
 
       try {
@@ -2030,25 +2059,25 @@ call the base class __init__ function." );
         ostringstream errstr;
         errstr << e;
         PyErr_SetString( PyExc_ValueError, errstr.str().c_str() );
-        return NULL;
+        return nullptr;
       }
 
     }
     
     /////////////////////////////////////////////////////////////////////////
-    PyObject *pythonFieldReplaceRoute( PyObject *self, PyObject *args ) {
+    PyObject *pythonFieldReplaceRoute( PyObject * self, PyObject * args ) {
       return pythonFieldReplaceRouteHelp( self, args, true );
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonFieldReplaceRouteNoEvent( PyObject *self, PyObject *args ) {
+    PyObject *pythonFieldReplaceRouteNoEvent( PyObject * self, PyObject * args ) {
       return pythonFieldReplaceRouteHelp( self, args, false );
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonGetCurrentScenes( PyObject *self, PyObject *arg ) {
+    PyObject* pythonGetCurrentScenes( PyObject * /*self*/, PyObject * /*arg*/ ) {
       PyObject *scenes = PyTuple_New( Scene::scenes.size() );
       unsigned int counter = 0;
       for( set< Scene * >::const_iterator i = Scene::scenes.begin(); 
@@ -2062,23 +2091,23 @@ call the base class __init__ function." );
     }
 
     /////////////////////////////////////////////////////////////////////////
-    PyObject* pythonGetActiveDeviceInfo( PyObject *self, PyObject *arg ) {
+    PyObject* pythonGetActiveDeviceInfo( PyObject * /*self*/, PyObject * /*arg*/ ) {
       return PyNode_FromNode( DeviceInfo::getActive() );
     }
     
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonGetActiveViewpoint( PyObject *self, PyObject *arg ) {
+    PyObject* pythonGetActiveViewpoint( PyObject * /*self*/, PyObject * /*arg*/ ) {
       return PyNode_FromNode( X3DViewpointNode::getActive() );
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonGetActiveBindableNode( PyObject *self, PyObject *arg ) {
+    PyObject* pythonGetActiveBindableNode( PyObject * /*self*/, PyObject *arg ) {
       if( !PyString_Check( arg ) ) {
         setInvalidArgTypePythonError( "H3DInterface.getActiveBindableNode( bindable )", "bindable",
                                       "str", getPyObjectTypeName( arg ) ); 
-        return 0;
+        return nullptr;
       }
 
       const char *bindable = PyString_AsString( arg );
@@ -2087,48 +2116,54 @@ call the base class __init__ function." );
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonGetActiveFog( PyObject *self, PyObject *arg ) {
+    PyObject* pythonGetActiveFog( PyObject * /*self*/, PyObject * /*arg*/ ) {
       return PyNode_FromNode( Fog::getActive() );
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonGetActiveGlobalSettings( PyObject *self, PyObject *arg ) {
+    PyObject* pythonGetActiveGlobalSettings( PyObject * /*self*/, PyObject * /*arg*/ ) {
       return PyNode_FromNode( GlobalSettings::getActive() );
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonGetActiveNavigationInfo( PyObject *self, PyObject *arg ) {
+    PyObject* pythonGetActiveNavigationInfo( PyObject * /*self*/, PyObject * /*arg*/ ) {
       return PyNode_FromNode( NavigationInfo::getActive() );
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonGetActiveStereoInfo( PyObject *self, PyObject *arg ) {
+    PyObject* pythonGetActiveStereoInfo( PyObject * /*self*/, PyObject * /*arg*/ ) {
       return PyNode_FromNode( StereoInfo::getActive() );
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonGetActiveBackground( PyObject *self, PyObject *arg ) {
+    PyObject* pythonGetActiveBackground( PyObject * /*self*/, PyObject * /*arg*/ ) {
       return PyNode_FromNode( X3DBackgroundNode::getActive() );
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonMFieldErase( PyObject *self, PyObject *args ) {
-      if( !args || ! PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+    PyObject* pythonMFieldErase( PyObject * /*self*/, PyObject *args ) {
+      if( PyTuple_Size( args ) != 2 ) {
         PyErr_SetString( PyExc_ValueError, 
-       "Invalid argument(s) to function H3D.MFieldErase( self, value )" );  
-        return 0;
+       "Invalid number of arguments to function H3D.MFieldErase( self, value )" );  
+        return nullptr;
       }
 
       PyObject *field = PyTuple_GetItem( args, 0 );
-      if( ! PyObject_TypeCheck( field, &PyBaseObject_Type ) ) {
+      if( ! PyObject_TypeCheck( field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( field ) ) {
         PyErr_SetString( PyExc_ValueError, 
- "Invalid Field type given as argument to H3D.MFieldErase( self, value )" );
-        return 0;
+        "Invalid Field type given as argument to H3D.MFieldErase( self, value )" );
+        return nullptr;
+      }
+      PyObject *v = PyTuple_GetItem(args, 1);
+      if (!PyObject_TypeCheck(v, &PyBaseObject_Type)){
+        PyErr_SetString(PyExc_ValueError,
+          "Invalid type given as value argument to H3D.MFieldErase( self, value )");
+        return nullptr;
       }
 
       PyObject *py_field_ptr = PyObject_GetAttrString( field, "__fieldptr__" );
@@ -2137,41 +2172,45 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       Field *field_ptr = getFieldPointer( py_field_ptr );
-
+      Py_DECREF(py_field_ptr);
 
       if( field_ptr ) {
-        PyObject *v = PyTuple_GetItem( args, 1 );
         bool success;
         APPLY_MFIELD_MACRO( field_ptr, field_ptr->getX3DType(), 
                             v, MFIELD_ERASE, success );
         if( !success ) {
           PyErr_SetString( PyExc_ValueError, 
                            "Error: not a valid MField instance" );
-          return 0;  
+          return nullptr;  
         }
       }
-      Py_DECREF( py_field_ptr );
       Py_INCREF(Py_None);
       return Py_None; 
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-   PyObject* pythonMFieldPushBack( PyObject *self, PyObject *args ) {
-      if( !args || ! PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+   PyObject* pythonMFieldPushBack( PyObject * /*self*/, PyObject *args ) {
+      if( PyTuple_Size( args ) != 2 ) {
         PyErr_SetString( PyExc_ValueError, 
-    "Invalid argument(s) to function H3D.MFieldPushBack( self, value )" );  
-        return 0;
+    "Invalid number of arguments to function H3D.MFieldPushBack( self, value )" );  
+        return nullptr;
       }
 
       PyObject *field = PyTuple_GetItem( args, 0 );
-      if( ! PyObject_TypeCheck( field, &PyBaseObject_Type ) ) {
+      if( !PyObject_TypeCheck( field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check(field) ) {
         PyErr_SetString( PyExc_ValueError, 
  "Invalid Field type given as argument to H3D.MFieldPushBack( self, value )" );
-        return 0;
+        return nullptr;
+      }
+      PyObject *v = PyTuple_GetItem(args, 1);
+      if (!PyObject_TypeCheck(v, &PyBaseObject_Type)) {
+        PyErr_SetString(PyExc_ValueError,
+          "Invalid Field type given as value argument to H3D.MFieldPushBack( self, value )");
+        return nullptr;
       }
 
       PyObject *py_field_ptr = PyObject_GetAttrString( field, "__fieldptr__" );
@@ -2180,35 +2219,28 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       Field *field_ptr = getFieldPointer( py_field_ptr );
-
+      Py_DECREF(py_field_ptr);
 
       if( field_ptr ) {
-        PyObject *v = PyTuple_GetItem( args, 1 );
         bool success;
         APPLY_MFIELD_MACRO( field_ptr, field_ptr->getX3DType(), 
                             v, MFIELD_PUSH_BACK, success );
         if( !success ) {
           PyErr_SetString( PyExc_ValueError, 
                            "Error: not a valid MField instance" );
-          return 0;  
+          return nullptr;  
         }
       }
-      Py_DECREF( py_field_ptr );
       Py_INCREF(Py_None);
       return Py_None; 
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonFieldTouch( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.fieldTouch( self )" );
-        return 0;
-      }
+    PyObject *pythonFieldTouch( PyObject * /*self*/, PyObject *arg ) {
       
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
@@ -2216,33 +2248,26 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
+      Py_DECREF(py_field_ptr);
       if( field_ptr ) field_ptr->touch();
-
-      Py_DECREF( py_field_ptr );
       Py_INCREF(Py_None);
       return Py_None; 
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonMFieldClear( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.MFieldClear( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonMFieldClear( PyObject * /*self*/, PyObject *arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2255,24 +2280,19 @@ call the base class __init__ function." );
         if( !success ) {
           PyErr_SetString( PyExc_ValueError, 
                            "Error: not a valid Field instance" );
-          return 0;  
+          return nullptr;  
         }
         Py_INCREF(Py_None);
         return Py_None; 
       }
       PyErr_SetString( PyExc_ValueError, 
                        "Error: Field NULL pointer" );
-      return 0;  
+      return nullptr;  
     }
     
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonMFieldPopBack( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.MFieldPopBack( self )" );
-        return 0;
-      }
+    PyObject *pythonMFieldPopBack( PyObject * /*self*/, PyObject *arg ) {
       
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
@@ -2280,7 +2300,7 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2293,32 +2313,26 @@ call the base class __init__ function." );
         if( !success ) {
           PyErr_SetString( PyExc_ValueError, 
                            "Error: not a valid Field instance" );
-          return 0;  
+          return nullptr;  
         }
         Py_INCREF(Py_None);
         return Py_None; 
       }
       PyErr_SetString( PyExc_ValueError, 
                        "Error: Field NULL pointer" );
-      return 0;  
+      return nullptr;  
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonMFieldEmpty( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.MFieldEmpty( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonMFieldEmpty( PyObject * /*self*/, PyObject *arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2331,22 +2345,17 @@ call the base class __init__ function." );
         if( !success ) {
           PyErr_SetString( PyExc_ValueError, 
                            "Error: not a valid Field instance" );
-          return 0;  
+          return nullptr;  
         }
       }
       PyErr_SetString( PyExc_ValueError, 
                        "Error: Field NULL pointer" );
-      return 0;  
+      return nullptr;  
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonMFieldFront( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.MFieldFront( self )" );
-        return 0;
-      }
+    PyObject *pythonMFieldFront( PyObject * /*self*/, PyObject *arg ) {
       
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
@@ -2354,7 +2363,7 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2367,30 +2376,24 @@ call the base class __init__ function." );
         if( !success ) {
           PyErr_SetString( PyExc_ValueError, 
                            "Error: not a valid Field instance" );
-          return 0;  
+          return nullptr;  
         }
       }
       PyErr_SetString( PyExc_ValueError, 
                        "Error: Field NULL pointer" );
-      return 0;  
+      return nullptr;  
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonMFieldBack( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.MFieldBack( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonMFieldBack( PyObject * /*self*/, PyObject * arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2403,30 +2406,24 @@ call the base class __init__ function." );
         if( !success ) {
           PyErr_SetString( PyExc_ValueError, 
                            "Error: not a valid Field instance" );
-          return 0;  
+          return nullptr;  
         }
       }
       PyErr_SetString( PyExc_ValueError, 
                        "Error: Field NULL pointer" );
-      return 0;  
+      return nullptr;  
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonMFieldSize( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.MFieldSize( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonMFieldSize( PyObject * /*self*/, PyObject *arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2439,32 +2436,26 @@ call the base class __init__ function." );
         if( !success ) {
           PyErr_SetString( PyExc_ValueError, 
                            "Error: not a valid Field instance" );
-          return 0;  
+          return nullptr;  
         }
         Py_INCREF(Py_None);
         return Py_None; 
       }
       PyErr_SetString( PyExc_ValueError, 
                        "Error: Field NULL pointer" );
-      return 0;  
+      return nullptr;  
     }
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject *pythonFieldGetValueAsString( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.fieldGetValueAsString( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonFieldGetValueAsString( PyObject * /*self*/, PyObject *arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2474,7 +2465,7 @@ call the base class __init__ function." );
         ParsableField *parsable_field = dynamic_cast< ParsableField * >( field_ptr );
         if( parsable_field ) {
           string type_name;
-          PyThreadState *_save = NULL;
+          PyThreadState *_save = nullptr;
           // release the interpreter lock to let other python threads execute while setting
           // field value. Need to make sure here that that if any exception is thrown we 
           // reaquire the lock with Py_BLOCK_THREADS
@@ -2489,7 +2480,7 @@ call the base class __init__ function." );
             ostringstream errstr;
             errstr << e;
             PyErr_SetString( PyExc_ValueError, errstr.str().c_str() );
-            return 0;
+            return nullptr;
           } catch( ... ) {
             // rethrow all other exceptions
             Py_BLOCK_THREADS
@@ -2499,27 +2490,27 @@ call the base class __init__ function." );
         } else {
           PyErr_SetString( PyExc_ValueError, 
                            "Field not a ParsableField." );
-          return 0; 
+          return nullptr; 
         }
       } else {
         PyErr_SetString( PyExc_ValueError, 
                          "Error: Field NULL pointer" );
-        return 0;  
+        return nullptr;  
       }
     }
 
-    PyObject *pythonFieldSetValueFromString( PyObject *self, PyObject *args ) {
-      if( !args || ! PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+    PyObject *pythonFieldSetValueFromString( PyObject * /*self*/, PyObject *args ) {
+      if( PyTuple_Size( args ) != 2 ) {
         PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.fieldSetValueFromString( self, value )" );  
-        return 0;
+                         "Invalid number arguments to function H3D.fieldSetValueFromString( self, value )" );  
+        return nullptr;
       }
 
       PyObject *py_field_obj = PyTuple_GetItem( args, 0 );
-      if( ! PyObject_TypeCheck( py_field_obj, &PyBaseObject_Type ) ) {
+      if( ! PyObject_TypeCheck( py_field_obj, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( py_field_obj ) ) {
         PyErr_SetString( PyExc_ValueError, 
  "Invalid Field type given as argument to H3D.fieldSetValueFromString( self, value )" );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_field_ptr = PyObject_GetAttrString( py_field_obj, "__fieldptr__" );
@@ -2528,23 +2519,25 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_value_string = PyTuple_GetItem( args, 1 );
       if( !PyString_Check( py_value_string ) ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Invalid argument type. Expecting string" );
-        return 0;
+        Py_DECREF(py_field_ptr);
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
+      Py_DECREF(py_field_ptr);
       string value_str( PyString_AsString( py_value_string ) );
-      Py_DECREF( py_field_ptr );
+
       if( field_ptr ) {  
         ParsableField *parsable_field = dynamic_cast< ParsableField * >( field_ptr );
         if( parsable_field ) {
-          PyThreadState *_save = NULL;
+          PyThreadState *_save = nullptr;
           // release the interpreter lock to let other python threads execute while setting
           // field value. Need to make sure here that that if any exception is thrown we 
           // reaquire the lock with Py_BLOCK_THREADS
@@ -2559,7 +2552,7 @@ call the base class __init__ function." );
             ostringstream errstr;
             errstr << e;
             PyErr_SetString( PyExc_ValueError, errstr.str().c_str() );
-            return 0;
+            return nullptr;
           } catch( ... ) {
             // rethrow all other exceptions
             Py_BLOCK_THREADS
@@ -2568,12 +2561,12 @@ call the base class __init__ function." );
         } else {
           PyErr_SetString( PyExc_ValueError, 
                            "Field not a ParsableField." );
-          return 0; 
+          return nullptr; 
         }
       } else {
         PyErr_SetString( PyExc_ValueError, 
                          "Error: Field NULL pointer" );
-        return 0;  
+        return nullptr;  
       }
 
       Py_INCREF(Py_None);
@@ -2581,18 +2574,18 @@ call the base class __init__ function." );
        //Console(LogLevel::Error) <<"11" << endl;
     }
 
-    PyObject *pythonFieldSetName( PyObject *self, PyObject *arg ) {
-      if( !arg || ! PyTuple_Check( arg ) || PyTuple_Size( arg ) != 2  ) {
+    PyObject *pythonFieldSetName( PyObject * /*self*/, PyObject *arg ) {
+      if( PyTuple_Size( arg ) != 2 ) {
         PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.fieldSetValueFromString( self, value )" );  
-        return 0;
+                         "Invalid number of arguments to function H3D.fieldSetValueFromString( self, value )" );  
+        return nullptr;
       }
 
       PyObject *py_field_obj = PyTuple_GetItem( arg, 0 );
-      if( ! PyObject_TypeCheck( py_field_obj, &PyBaseObject_Type ) ) {
+      if( ! PyObject_TypeCheck( py_field_obj, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( py_field_obj ) ) {
         PyErr_SetString( PyExc_ValueError, 
  "Invalid Field type given as argument to H3D.fieldSetName( self, value )" );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_field_ptr = PyObject_GetAttrString( py_field_obj, "__fieldptr__" );
@@ -2601,37 +2594,33 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_value_string = PyTuple_GetItem( arg, 1 );
       if( !PyString_Check( py_value_string ) ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Invalid argument type. Expecting string" );
-        return 0;
+        Py_DECREF(py_field_ptr);
+        return nullptr;
       }
 
       Field *field_ptr = getFieldPointer( py_field_ptr );
+      Py_DECREF(py_field_ptr);
       string value_str( PyString_AsString( py_value_string ) );
-      Py_DECREF( py_field_ptr );
       
       if( field_ptr ) {
         field_ptr->setName( value_str );
       } else {
         PyErr_SetString( PyExc_ValueError, 
                          "Error: Field NULL pointer" );
-        return 0;
+        return nullptr;
       }
       Py_INCREF(Py_None);
       return Py_None;
     }
 
-    PyObject *pythonFieldGetName( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.fieldGetName( self )" );
-        return 0;
-      }
+    PyObject *pythonFieldGetName( PyObject * /*self*/, PyObject *arg ) {
       
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
@@ -2639,7 +2628,7 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2651,24 +2640,18 @@ call the base class __init__ function." );
       } else {
         PyErr_SetString( PyExc_ValueError, 
                          "Error: Field NULL pointer" );
-        return 0;  
+        return nullptr;  
       }
     }
 
-    PyObject *pythonFieldGetFullName( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.fieldGetFullName( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonFieldGetFullName( PyObject * /*self*/, PyObject *arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2680,24 +2663,18 @@ call the base class __init__ function." );
       } else {
         PyErr_SetString( PyExc_ValueError, 
                          "Error: Field NULL pointer" );
-        return 0;  
+        return nullptr;  
       }
     }
 
-    PyObject *pythonFieldGetTypeName( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.fieldGetTypeName( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonFieldGetTypeName( PyObject * /*self*/, PyObject *arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2709,24 +2686,18 @@ call the base class __init__ function." );
       } else {
         PyErr_SetString( PyExc_ValueError, 
                          "Error: Field NULL pointer" );
-        return 0;  
+        return nullptr;  
       }
     }
 
-    PyObject *pythonFieldGetOwner( PyObject *self, PyObject *arg ) {
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.fieldGetOwner( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonFieldGetOwner( PyObject * /*self*/, PyObject *arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2737,26 +2708,26 @@ call the base class __init__ function." );
       } else {
         PyErr_SetString( PyExc_ValueError, 
                          "Error: Field NULL pointer" );
-        return 0;  
+        return nullptr;  
       }
     }
 
-    PyObject *pythonFieldSetOwner( PyObject *self, 
+    PyObject *pythonFieldSetOwner( PyObject * /*self*/, 
                                   PyObject *args  ) {
       
-      if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+      if( PyTuple_Size( args ) != 2 ) {
         ostringstream err;
-        err << "Invalid argument(s) to function H3D.fieldSetOwner( n )";
+        err << "Invalid number of arguments to function H3D.fieldSetOwner( n )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_field_obj = PyTuple_GetItem( args, 0 );
-      if( ! PyObject_TypeCheck( py_field_obj, &PyBaseObject_Type ) ) {
+      if( ! PyObject_TypeCheck( py_field_obj, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( py_field_obj ) ) {
         ostringstream err;
         err << "Invalid Field type given as fromField argument to H3D.fieldSetOwner( n )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_field_ptr = PyObject_GetAttrString( py_field_obj, "__fieldptr__" );
@@ -2765,7 +2736,7 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
 
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2775,7 +2746,7 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Source not a Field class in H3D.fieldSetOwner( n )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;       
+        return nullptr;       
       }
       
       try {
@@ -2789,25 +2760,18 @@ call the base class __init__ function." );
         ostringstream errstr;
         errstr << e;
         PyErr_SetString( PyExc_ValueError, errstr.str().c_str() );
-        return 0;
+        return nullptr;
       }     
     }
 
-    PyObject *pythonFieldUpToDate( PyObject *self, PyObject *arg ) {
-      
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                 "Invalid argument(s) to function H3D.fieldUpToDate( self )" );
-        return 0;
-      }
-      
+    PyObject *pythonFieldUpToDate( PyObject * /*self*/, PyObject *arg ) {
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
@@ -2815,7 +2779,7 @@ call the base class __init__ function." );
       
       if( field_ptr ) { 
         string type_name;
-        PyThreadState *_save = NULL;
+        PyThreadState *_save = nullptr;
         // release the interpreter lock to let other python threads execute while updating
         // field value. Need to make sure here that that if any exception is thrown we 
         // reaquire the lock with Py_BLOCK_THREADS
@@ -2832,7 +2796,7 @@ call the base class __init__ function." );
           ostringstream errstr;
           errstr << e;
           PyErr_SetString( PyExc_ValueError, errstr.str().c_str() );
-          return 0;
+          return nullptr;
         } catch( ... ) {
           // rethrow all other exceptions
           Py_BLOCK_THREADS
@@ -2841,18 +2805,12 @@ call the base class __init__ function." );
       } else {
         PyErr_SetString( PyExc_ValueError, 
                          "Error: Field NULL pointer" );
-        return 0;  
+        return nullptr;  
       }
-      return 0;
+      return nullptr;
     }
 
-    PyObject *pythonFieldIsUpToDate( PyObject *self, PyObject *arg ) {
-      
-      if(!arg || ! PyObject_TypeCheck( arg, &PyBaseObject_Type ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.fieldIsUpToDate( self )" );
-        return 0;
-      }
+    PyObject *pythonFieldIsUpToDate( PyObject * /*self*/, PyObject *arg ) {
       
       PyObject *py_field_ptr = PyObject_GetAttrString( arg, "__fieldptr__" );
       if( !py_field_ptr ) {
@@ -2860,10 +2818,11 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       Field *field_ptr = getFieldPointer( py_field_ptr );
+      Py_DECREF(py_field_ptr);
       if( field_ptr ){
         if ( field_ptr->isUpToDate() )
           Py_RETURN_TRUE;
@@ -2872,17 +2831,17 @@ call the base class __init__ function." );
       else {
         PyErr_SetString( PyExc_ValueError, 
                          "Error: Field NULL pointer" );
-        return 0;
+        return nullptr;
       }
     }
 
-    PyObject *pythonResolveURLAsFile( PyObject *self, PyObject *args ) {
+    PyObject *pythonResolveURLAsFile( PyObject * /*self*/, PyObject *args ) {
 
-      if( !args || !PyString_Check( args ) ) {
+      if( !PyString_Check( args ) ) {
         ostringstream err;
         err << "Invalid argument(s) to function H3D.resolveURLAsFile( url )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
 
       const char *url = PyString_AsString( args );
@@ -2890,13 +2849,13 @@ call the base class __init__ function." );
       return PyString_FromString( resolved_url.c_str() );
     }
 
-    PyObject *pythonResolveURLAsFolder( PyObject *self, PyObject *args ) {
+    PyObject *pythonResolveURLAsFolder( PyObject * /*self*/, PyObject *args ) {
 
-      if( !args || !PyString_Check( args ) ) {
+      if( !PyString_Check( args ) ) {
         ostringstream err;
         err << "Invalid argument(s) to function H3D.resolveURLAsFolder( url )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
 
       const char *url = PyString_AsString( args );
@@ -2904,19 +2863,19 @@ call the base class __init__ function." );
       return PyString_FromString( resolved_url.c_str() );
     }
 
-    Scene::CallbackCode exitLater ( void* data ) {
+    Scene::CallbackCode exitLater ( void* /*data*/ ) {
       throw Exception::QuitAPI();
       return Scene::CALLBACK_DONE;
     }
 
-    PyObject *throwQuitAPIException( PyObject *self, PyObject *args ) {
+    PyObject *throwQuitAPIException( PyObject * /*self*/, PyObject * /*args*/ ) {
       // Throw the exception later, after scene traversal to avoid memory leaks
-      Scene::addCallback ( exitLater, NULL );
+      Scene::addCallback ( exitLater, nullptr );
       Py_INCREF(Py_None);
       return Py_None; 
     }
 
-    PyObject* pythonCreateNode( PyObject* self, PyObject* args, PyObject* keywds ) {
+    PyObject* pythonCreateNode( PyObject* /*self*/, PyObject* args, PyObject* keywds ) {
 
       Py_ssize_t nr_args =  PyTuple_Size( args );
       
@@ -2924,7 +2883,7 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Invalid number of arguments to function H3DInterface.createNode( node_type, name ). Expecting 1 or 2, got " << nr_args << ".";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return NULL;
+        return nullptr;
       }
 
       string node_name = "";
@@ -2933,10 +2892,10 @@ call the base class __init__ function." );
       if( !py_name || !PyString_Check( py_name ) ) {
         setInvalidArgTypePythonError( "H3DInterface.createNode( node_type, name  )", "node_type",
                                       "str", getPyObjectTypeName( py_name ) ); 
-        return 0;
+        return nullptr;
       }
       node_name = PyString_AsString( py_name );
-      H3D::Node *node =  H3DNodeDatabase::createNode( node_name );
+      std::unique_ptr<H3D::Node> node(H3DNodeDatabase::createNode(node_name));
 
       string name = "";
       if( nr_args > 1 ) {
@@ -2944,61 +2903,63 @@ call the base class __init__ function." );
         if( !py_name2 || !PyString_Check( py_name2 ) ) {
           setInvalidArgTypePythonError( "H3DInterface.createNode( node_type, name  )", "name",
                                         "str", getPyObjectTypeName( py_name2 ) ); 
-          return 0;
+          return nullptr;
         }
         name = PyString_AsString( py_name2 );
       }
 
-      if( node && name!="" )
-        node->setName(name);
+      if( node.get() ) {
+        if( !name.empty() )
+          node->setName( name );
 
-      // Initialize field values from keyword arguments
-      if( keywds ) {
-        PyObject* key;
-        PyObject* value;
-        Py_ssize_t pos = 0;
+        // Initialize field values from keyword arguments
+        if( keywds ) {
+          PyObject* key;
+          PyObject* value;
+          Py_ssize_t pos = 0;
 
-        while( PyDict_Next( keywds, &pos, &key, &value ) ) {
-          const char* field_name = PyString_AsString( key );
-          if( Field* field = node->getField( field_name ) ) {
-            PyObject* result = PythonInternals::pythonSetFieldValueFromObject( field, value );
-            if( !result ) {
-              return NULL;
+          while( PyDict_Next( keywds, &pos, &key, &value ) ) {
+            const char* field_name = PyString_AsString( key );
+            if( Field* field = node->getField( field_name ) ) {
+              PyObject* result = PythonInternals::pythonSetFieldValueFromObject( field, value );
+              if( !result ) {
+                return nullptr;
+              } else {
+                Py_DECREF( result );
+              }
             } else {
-              Py_DECREF( result );
+              ostringstream err;
+              err << "The field \"" << field_name << "\" does not exist in the node \"" << node_name << "\"!";
+              PyErr_SetString( PyExc_ValueError, err.str().c_str() );
+              return nullptr;
             }
-          } else {
-            ostringstream err;
-            err << "The field \"" << field_name << "\" does not exist in the node \"" << node_name << "\"!";
-            PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-            return NULL;
           }
         }
       }
 
-      return PyNode_FromNode( node );
+      return PyNode_FromNode( node.release() );
     }
 
-    PyObject* pythonGetNrHapticsDevices( PyObject *self, PyObject *arg ) {
+    PyObject* pythonGetNrHapticsDevices( PyObject * /*self*/, PyObject * /*arg*/ ) {
       DeviceInfo *di = DeviceInfo::getActive();
       size_t nr_devices = 0;
       if( di ) nr_devices = di->device->size();
       return PyInt_FromSize_t( nr_devices );
     }
 
-    PyObject* pythonGetHapticsDevice( PyObject *self, PyObject *arg ) {
-      if( !arg || !PyInt_Check( arg ) ) {
+    PyObject* pythonGetHapticsDevice( PyObject * /*self*/, PyObject *arg ) {
+      if( !PyInt_Check( arg ) ) {
         ostringstream err;
         err << "Invalid argument(s) to function H3D.getHapticsDevice( index ).";
         err << " index should be of int type.";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
       
       long index = PyInt_AsLong( arg );
       
       DeviceInfo *di = DeviceInfo::getActive();
-      H3DHapticsDevice *hdev = NULL;
+      H3DHapticsDevice *hdev = nullptr;
       if( di ) {
         size_t nr_devices = di->device->size();
         if( index >=0 && index < static_cast<long long>( nr_devices ) ) {
@@ -3008,18 +2969,18 @@ call the base class __init__ function." );
       return PyNode_FromNode( hdev );
     }
 
-    PyObject* pythonGetNamedNode( PyObject *self, PyObject *arg ) {
-      if( !arg || !PyString_Check( arg ) ) {
+    PyObject* pythonGetNamedNode( PyObject * /*self*/, PyObject *arg ) {
+      if( !PyString_Check( arg ) ) {
         ostringstream err;
         err << "Invalid argument(s) to function H3D.getNamedNode( node_name ).";
         err << " node_name should be of string type.";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
 
       const char *node_name = PyString_AsString( arg );
       PyObject *globals = PyEval_GetGlobals(); // borrowed ref
-      Node *n = NULL;
+      Node *n = nullptr;
       if( globals ) {
         PyObject *py_scriptnode = 
           PyDict_GetItemString( globals, "__scriptnode__"); // borrowed ref
@@ -3031,21 +2992,19 @@ call the base class __init__ function." );
       return PyNode_FromNode( n );
     }
 
-    PyObject *pythonAddProgramSetting( PyObject *self, PyObject *args ) {
+    PyObject *pythonAddProgramSetting( PyObject * /*self*/, PyObject *args ) {
       // args are (field, setting_name = "", section_name = "" )
       Py_ssize_t nr_args = 1;     
-      Field *field = NULL;
+      Field *field = nullptr;
       PyObject *py_field = args;
 
-      if( PyTuple_Check( args ) ) {
-        nr_args =  PyTuple_Size( args );
-        py_field = PyTuple_GetItem( args, 0 ); // borrowed ref ?
-        if( nr_args > 3 || nr_args < 1  ) {
-          PyErr_SetString( PyExc_ValueError, 
-            "Invalid argument(s) to function addProgramSettings( field, setting_name, section_name )" );
-          return NULL;
-        } 
-      }
+      nr_args =  PyTuple_Size( args );
+      py_field = PyTuple_GetItem( args, 0 ); // borrowed ref ?
+      if( nr_args > 3 || nr_args < 1  ) {
+        PyErr_SetString( PyExc_ValueError, 
+          "Invalid number of arguments to function addProgramSettings( field, setting_name, section_name )" );
+        return nullptr;
+      } 
 
       PyObject *py_field_ptr = 
         PyObject_GetAttrString( py_field, "__fieldptr__" ); //ref
@@ -3053,7 +3012,7 @@ call the base class __init__ function." );
       if( !py_field_ptr ) {
         PyErr_SetString( PyExc_ValueError, 
           "Invalid argument 0 to function addProgramSettings. Expecting Field type" );
-        return NULL;
+        return nullptr;
       }
 
       field = getFieldPointer( py_field_ptr );
@@ -3066,7 +3025,7 @@ call the base class __init__ function." );
           ostringstream err;
           err << "Invalid argument 1 to function H3D.addProgramSettings. Should be string.";
           PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-          return 0;
+          return nullptr;
         }
         setting_name = PyString_AsString( py_setting_name );
       }
@@ -3078,7 +3037,7 @@ call the base class __init__ function." );
           ostringstream err;
           err << "Invalid argument 2 to function H3D.addProgramSettings. Should be string.";
           PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-          return 0;
+          return nullptr;
         }
         section_name = PyString_AsString( py_section_name );
       }
@@ -3090,11 +3049,11 @@ call the base class __init__ function." );
       return Py_None; 
     }
 
-    PyObject *pythonFindNodes( PyObject *self, PyObject *args ) {
+    PyObject *pythonFindNodes( PyObject * /*self*/, PyObject * args ) {
       // args are ( node, type_names, node_name= "", field_names= [], exactNodeName= true, verbose= false, node_type_names_to_ignore=[] )
       // return value is [(found_node,(parent0,parent1,...))]
       Py_ssize_t nr_args= 1;
-      Node* node= NULL;
+      Node* node= nullptr;
       Scene::StringVec type_names;
       std::string node_name;
       Scene::SearchFieldNameMap search_field_names;
@@ -3102,169 +3061,165 @@ call the base class __init__ function." );
       bool exact_node_name= true;
       Scene::StringVec node_type_names_to_ignore;
       
-      if( PyTuple_Check ( args ) ) {
-        nr_args =  PyTuple_Size( args );
 
-        // node (arg 0)
-        if ( nr_args > 0 ) {
-          node= PyNode_AsNode ( PyTuple_GetItem( args, 0 ) );
-          if ( !node ) {
-            PyErr_SetString( PyExc_ValueError, 
-              "Invalid argument(s) to function findNodes( node, type_names, node_name= "", field_names= [], exactNodeName= true, verbose= false, node_type_names_to_ignore=[] ): Invalid node argument (1)." );
-            return NULL;
-          }
+      nr_args =  PyTuple_Size( args );
+
+      // node (arg 0)
+      if ( nr_args > 0 ) {
+        node= PyNode_AsNode ( PyTuple_GetItem( args, 0 ) );
+        if ( !node ) {
+          PyErr_SetString( PyExc_ValueError, 
+            "Invalid argument(s) to function findNodes( node, type_names, node_name= "", field_names= [], exactNodeName= true, verbose= false, node_type_names_to_ignore=[] ): Invalid node argument (1)." );
+          return nullptr;
         }
+      }
 
-        // node names (arg 1)
-        if ( nr_args > 1 ) {
-          // Node type names
-          PyObject* py_type_names= PyTuple_GetItem( args, 1 );
-          if ( PyString_Check ( py_type_names ) ) {
-            // Single type name
-            type_names.push_back ( PyString_AsString ( py_type_names ) );
-          } else if ( PyList_Check ( py_type_names ) ) {
-            // List of type names
-            Py_ssize_t size= PyList_Size ( py_type_names );
-            for ( Py_ssize_t i= 0; i < size; ++i ) {
-              PyObject* py_type_name= PyList_GetItem ( py_type_names, i );
-              if ( PyString_Check ( py_type_name ) ) {
-                type_names.push_back ( PyString_AsString ( py_type_name ) );
-              } else {
-                PyErr_SetString( PyExc_ValueError, 
-                  "Invalid argument(s) to function findNodes(): Invalid type_names argument (2)." );
-                return NULL;
-              }
+      // node names (arg 1)
+      if ( nr_args > 1 ) {
+        // Node type names
+        PyObject* py_type_names= PyTuple_GetItem( args, 1 );
+        if ( PyString_Check ( py_type_names ) ) {
+          // Single type name
+          type_names.push_back ( PyString_AsString ( py_type_names ) );
+        } else if ( PyList_Check ( py_type_names ) ) {
+          // List of type names
+          Py_ssize_t size= PyList_Size ( py_type_names );
+          for ( Py_ssize_t i= 0; i < size; ++i ) {
+            PyObject* py_type_name= PyList_GetItem ( py_type_names, i );
+            if ( PyString_Check ( py_type_name ) ) {
+              type_names.push_back ( PyString_AsString ( py_type_name ) );
+            } else {
+              PyErr_SetString( PyExc_ValueError, 
+                "Invalid argument(s) to function findNodes(): Invalid type_names argument (2)." );
+              return nullptr;
             }
-          } else {
-            PyErr_SetString( PyExc_ValueError, 
-              "Invalid argument(s) to function findNodes(): Invalid type_names argument (2)." );
-            return NULL;
           }
+        } else {
+          PyErr_SetString( PyExc_ValueError, 
+            "Invalid argument(s) to function findNodes(): Invalid type_names argument (2)." );
+          return nullptr;
         }
+      }
 
-        // node name (arg 2)
-        if ( nr_args > 2 ) {
-          // Node name
-          PyObject* py_node_name= PyTuple_GetItem( args, 2 );
-          if ( PyString_Check ( py_node_name ) ) {
-            node_name= PyString_AsString ( py_node_name );
-          } else {
-            PyErr_SetString( PyExc_ValueError, 
-              "Invalid argument(s) to function findNodes(): Invalid node_name argument (3)." );
-            return NULL;
-          }
+      // node name (arg 2)
+      if ( nr_args > 2 ) {
+        // Node name
+        PyObject* py_node_name= PyTuple_GetItem( args, 2 );
+        if ( PyString_Check ( py_node_name ) ) {
+          node_name= PyString_AsString ( py_node_name );
+        } else {
+          PyErr_SetString( PyExc_ValueError, 
+            "Invalid argument(s) to function findNodes(): Invalid node_name argument (3)." );
+          return nullptr;
         }
+      }
 
-        // field names (arg 3)
-        if ( nr_args > 3 ) {
-          // List of field names per node type
-          PyObject* py_node_list= PyTuple_GetItem( args, 3 );
-          if ( PyList_Check ( py_node_list ) ) {
-            Py_ssize_t size= PyList_Size ( py_node_list );
-            for ( Py_ssize_t i= 0; i < size; ++i ) {
-              PyObject* py_field_list= PyList_GetItem ( py_node_list, i );
-              if ( PyList_Check ( py_field_list ) ) {
-                Py_ssize_t size1= PyList_Size ( py_field_list );
-                if ( size1 > 1 ) {
-                  std::string type_name;
-                  for ( Py_ssize_t j= 0; j < size1; ++j ) {
-                    PyObject* py_name= PyList_GetItem ( py_field_list, j );
-                    if ( PyString_Check ( py_name ) ) {
-                      if ( j == 0 ) {
-                        type_name= PyString_AsString ( py_name );
-                      } else {
-                        search_field_names[type_name].push_back ( PyString_AsString ( py_name ) );
-                      }
+      // field names (arg 3)
+      if ( nr_args > 3 ) {
+        // List of field names per node type
+        PyObject* py_node_list= PyTuple_GetItem( args, 3 );
+        if ( PyList_Check ( py_node_list ) ) {
+          Py_ssize_t size= PyList_Size ( py_node_list );
+          for ( Py_ssize_t i= 0; i < size; ++i ) {
+            PyObject* py_field_list= PyList_GetItem ( py_node_list, i );
+            if ( PyList_Check ( py_field_list ) ) {
+              Py_ssize_t size1= PyList_Size ( py_field_list );
+              if ( size1 > 1 ) {
+                std::string type_name;
+                for ( Py_ssize_t j= 0; j < size1; ++j ) {
+                  PyObject* py_name= PyList_GetItem ( py_field_list, j );
+                  if ( PyString_Check ( py_name ) ) {
+                    if ( j == 0 ) {
+                      type_name= PyString_AsString ( py_name );
                     } else {
-                      PyErr_SetString( PyExc_ValueError, 
-                        "Invalid argument(s) to function findNodes(): Invalid field_names argument (4)." );
-                      return NULL;
+                      search_field_names[type_name].push_back ( PyString_AsString ( py_name ) );
                     }
+                  } else {
+                    PyErr_SetString( PyExc_ValueError, 
+                      "Invalid argument(s) to function findNodes(): Invalid field_names argument (4)." );
+                    return nullptr;
                   }
-                } else {
-                  PyErr_SetString( PyExc_ValueError, 
-                    "Invalid argument(s) to function findNodes(): Invalid field_names argument (4)." );
-                  return NULL;
                 }
               } else {
                 PyErr_SetString( PyExc_ValueError, 
                   "Invalid argument(s) to function findNodes(): Invalid field_names argument (4)." );
-                return NULL;
+                return nullptr;
               }
+            } else {
+              PyErr_SetString( PyExc_ValueError, 
+                "Invalid argument(s) to function findNodes(): Invalid field_names argument (4)." );
+              return nullptr;
             }
           }
         }
+      }
 
-        // exact_node_name (arg 4)
-        if ( nr_args > 4 ) {
-          // exact_node_name
-          PyObject* py_exact_node_name= PyTuple_GetItem( args, 4 );
-          if ( PyBool_Check( py_exact_node_name ) || PyInt_Check( py_exact_node_name ) ) {
-            exact_node_name= PyObject_IsTrue ( py_exact_node_name ) == 1;
-          } else {
-            PyErr_SetString( PyExc_ValueError, 
-              "Invalid argument(s) to function findNodes(): Invalid exactNodeName argument (5)." );
-            return NULL;
-          }
+      // exact_node_name (arg 4)
+      if ( nr_args > 4 ) {
+        // exact_node_name
+        PyObject* py_exact_node_name= PyTuple_GetItem( args, 4 );
+        if ( PyBool_Check( py_exact_node_name ) || PyInt_Check( py_exact_node_name ) ) {
+          exact_node_name= PyObject_IsTrue ( py_exact_node_name ) == 1;
+        } else {
+          PyErr_SetString( PyExc_ValueError, 
+            "Invalid argument(s) to function findNodes(): Invalid exactNodeName argument (5)." );
+          return nullptr;
         }
+      }
 
-        // verbose (arg 5)
-        if ( nr_args > 5 ) {
-          // Verbose
-          PyObject* py_verbose= PyTuple_GetItem( args, 5 );
-          if ( PyBool_Check( py_verbose ) || PyInt_Check( py_verbose ) ) {
-            verbose= PyObject_IsTrue ( py_verbose ) == 1;
-          } else {
-            PyErr_SetString( PyExc_ValueError, 
-              "Invalid argument(s) to function findNodes(): Invalid verbose argument (6)." );
-            return NULL;
-          }
+      // verbose (arg 5)
+      if ( nr_args > 5 ) {
+        // Verbose
+        PyObject* py_verbose= PyTuple_GetItem( args, 5 );
+        if ( PyBool_Check( py_verbose ) || PyInt_Check( py_verbose ) ) {
+          verbose= PyObject_IsTrue ( py_verbose ) == 1;
+        } else {
+          PyErr_SetString( PyExc_ValueError, 
+            "Invalid argument(s) to function findNodes(): Invalid verbose argument (6)." );
+          return nullptr;
         }
+      }
 
-        // node names (arg 6)
-        if ( nr_args > 6 ) {
-          // Ignore Node type names
-          PyObject* py_ignore_node_names= PyTuple_GetItem( args, 6 );
-          if ( PyString_Check ( py_ignore_node_names ) ) {
-            // Single type name
-            node_type_names_to_ignore.push_back ( PyString_AsString ( py_ignore_node_names ) );
-          } else if ( PyList_Check ( py_ignore_node_names ) ) {
-            // List of type names
-            Py_ssize_t size= PyList_Size ( py_ignore_node_names );
-            for ( Py_ssize_t i= 0; i < size; ++i ) {
-              PyObject* py_node_name= PyList_GetItem ( py_ignore_node_names, i );
-              if ( PyString_Check ( py_node_name ) ) {
-                node_type_names_to_ignore.push_back ( PyString_AsString ( py_node_name ) );
-              } else {
-                PyErr_SetString( PyExc_ValueError, 
-                  "Invalid argument(s) to function findNodes(): Invalid node_type_names_to_ignore argument (7)." );
-                return NULL;
-              }
+      // node names (arg 6)
+      if ( nr_args > 6 ) {
+        // Ignore Node type names
+        PyObject* py_ignore_node_names= PyTuple_GetItem( args, 6 );
+        if ( PyString_Check ( py_ignore_node_names ) ) {
+          // Single type name
+          node_type_names_to_ignore.push_back ( PyString_AsString ( py_ignore_node_names ) );
+        } else if ( PyList_Check ( py_ignore_node_names ) ) {
+          // List of type names
+          Py_ssize_t size= PyList_Size ( py_ignore_node_names );
+          for ( Py_ssize_t i= 0; i < size; ++i ) {
+            PyObject* py_node_name= PyList_GetItem ( py_ignore_node_names, i );
+            if ( PyString_Check ( py_node_name ) ) {
+              node_type_names_to_ignore.push_back ( PyString_AsString ( py_node_name ) );
+            } else {
+              PyErr_SetString( PyExc_ValueError, 
+                "Invalid argument(s) to function findNodes(): Invalid node_type_names_to_ignore argument (7)." );
+              return nullptr;
             }
-          } else {
-            PyErr_SetString( PyExc_ValueError, 
-              "Invalid argument(s) to function findNodes(): Invalid node_type_names_to_ignore argument (7)." );
-            return NULL;
           }
+        } else {
+          PyErr_SetString( PyExc_ValueError, 
+            "Invalid argument(s) to function findNodes(): Invalid node_type_names_to_ignore argument (7)." );
+          return nullptr;
         }
+      }
 
-       } else {
-         PyErr_SetString( PyExc_ValueError, 
-           "Invalid argument(s) to function findNodes ()" );
-         return NULL;
-       } 
+       
 
        AutoRefVector<Node> result;
        Scene::NodeParentsMap parent_map;
        Scene::findNodes (
          *node, result, node_name,
          &parent_map,
-         search_field_names.empty() ? NULL : &search_field_names,
-         type_names.empty() ? NULL : &type_names,
+         search_field_names.empty() ? nullptr : &search_field_names,
+         type_names.empty() ? nullptr : &type_names,
          exact_node_name,
          verbose,
-         NULL,
-         node_type_names_to_ignore.empty() ? NULL : &node_type_names_to_ignore);
+         nullptr,
+         node_type_names_to_ignore.empty() ? nullptr : &node_type_names_to_ignore);
 
        // return value is [(found_node,(parent0,parent1,...))]
        PyObject* py_result= PyList_New(result.size()); // New ref that is returned (no need to decr)
@@ -3292,36 +3247,34 @@ call the base class __init__ function." );
        return py_result; 
     }
 
-    PyObject *pythonTakeScreenshot( PyObject *self, PyObject *args ) {
-      if( !args || !PyString_Check( args ) ) {
+    PyObject *pythonTakeScreenshot( PyObject * /*self*/, PyObject *args ) {
+      if( !PyString_Check( args ) ) {
         ostringstream err;
         err << "Invalid argument(s) to function H3D.takeScreenshot( url ).";
         err << " url should be of string type.";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return NULL;
+        return nullptr;
       }
 
       string url( PyString_AsString( args ) );
       string success = H3DWindowNode::takeScreenshot( url );
       if( success != "" ) {
         PyErr_SetString( PyExc_ValueError, success.c_str() );
-        return NULL;
+        return nullptr;
       }
       Py_RETURN_TRUE;
     }
 
-    PyObject* pythonAddURNResolveRule( PyObject *self, PyObject *args ) {
+    PyObject* pythonAddURNResolveRule( PyObject * /*self*/, PyObject *args ) {
            // args are (field, setting_name = "", section_name = "" )
-      if( PyTuple_Check( args ) ) {
         Py_ssize_t nr_args =  PyTuple_Size( args );
         
-        if( nr_args != 3 ) {
-          ostringstream err;
-          err << "Invalid number of argument(s) to function addURNResolveRule( field, namespace, prefix, path ). Expected 3, got " << nr_args << "."; 
-          PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-          return NULL;
-        } 
-      }
+      if( nr_args != 3 ) {
+        ostringstream err;
+        err << "Invalid number of arguments to function addURNResolveRule( field, namespace, prefix, path ). Expected 3, got " << nr_args << "."; 
+        PyErr_SetString( PyExc_ValueError, err.str().c_str() );
+        return nullptr;
+      } 
       
       // namespace, prefix, path
  
@@ -3330,7 +3283,7 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Invalid argument 0 to function H3D.addURNResolveRule. Should be string.";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }  
       string namespace_name = PyString_AsString( py_namespace_name );
       
@@ -3339,7 +3292,7 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Invalid argument 1 to function H3D.addURNResolveRule. Should be string.";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
       string prefix_name = PyString_AsString( py_prefix_name );
       
@@ -3348,7 +3301,7 @@ call the base class __init__ function." );
         ostringstream err;
         err << "Invalid argument 2 to function H3D.addURNResolveRule. Should be string.";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
-        return 0;
+        return nullptr;
       }
       string path_name = PyString_AsString( py_path_name );
 
@@ -3365,20 +3318,13 @@ call the base class __init__ function." );
 
     }
 
-    PyObject *pythonSFStringGetValidValues( PyObject *self, PyObject *args ) {
-
-      // if 0 or >=2 args
-      if( !args || PyTuple_Check( args ) ) {
-        PyErr_SetString( PyExc_ValueError, 
-       "Invalid argument(s) to function H3D.SFStringGetValidValues( self )" );  
-        return 0;
-      }
+    PyObject *pythonSFStringGetValidValues( PyObject * /*self*/, PyObject *args ) {
 
       PyObject *field =  args;
-      if( ! PyObject_TypeCheck( field, &PyBaseObject_Type ) ) {
+      if( ! PyObject_TypeCheck( field, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check(field) ) {
         PyErr_SetString( PyExc_ValueError, 
  "Invalid Field type given as argument to H3D.SFStringGetValidValues( self ). Expecting SFString." );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_field_ptr = PyObject_GetAttrString( field, "__fieldptr__" );
@@ -3387,13 +3333,19 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
       
       SFString *field_ptr = dynamic_cast< SFString * >
         ( getFieldPointer( py_field_ptr ) );
-
       Py_DECREF( py_field_ptr );
+
+      if( !field_ptr ) {
+        PyErr_SetString( PyExc_ValueError,
+                         "Error: Field NULL pointer" );
+        return nullptr;
+      }
+
       const set< string > &values = field_ptr->getValidValues();
           
        // return value is [(found_node,(parent0,parent1,...))]
@@ -3409,18 +3361,18 @@ call the base class __init__ function." );
        return py_result; 
     }
 
-    PyObject *pythonSFStringIsValidValue( PyObject *self, PyObject *args ) {
-      if( !args || ! PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+    PyObject *pythonSFStringIsValidValue( PyObject * /*self*/, PyObject *args ) {
+      if( PyTuple_Size( args ) != 2 ) {
         PyErr_SetString( PyExc_ValueError, 
-                         "Invalid argument(s) to function H3D.SFStringIsValidValue( self, value )" );  
-        return 0;
+                         "Invalid number of arguments to function H3D.SFStringIsValidValue( self, value )" );  
+        return nullptr;
       }
 
       PyObject *py_field_obj = PyTuple_GetItem( args, 0 );
-      if( ! PyObject_TypeCheck( py_field_obj, &PyBaseObject_Type ) ) {
+      if( ! PyObject_TypeCheck( py_field_obj, &PyBaseObject_Type ) || !PyFunctions::H3DPyField_Check( py_field_obj ) ) {
         PyErr_SetString( PyExc_ValueError, 
  "Invalid Field type given as argument to H3D.SFStringIsValidValue( self, value )" );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_field_ptr = PyObject_GetAttrString( py_field_obj, "__fieldptr__" );
@@ -3429,19 +3381,21 @@ call the base class __init__ function." );
                          "Python object not a Field type. Make sure that if you \
 have defined an __init__ function in a specialized field class, you \
 call the base class __init__ function." );
-        return 0;
+        return nullptr;
       }
 
       PyObject *py_value_string = PyTuple_GetItem( args, 1 );
       if( !PyString_Check( py_value_string ) ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Invalid argument type. Expecting string" );
-        return 0;
+        Py_DECREF(py_field_ptr);
+        return nullptr;
       }
 
       Field *field_ptr = getFieldPointer( py_field_ptr );
+      Py_DECREF(py_field_ptr);
       string value_str( PyString_AsString( py_value_string ) );
-      Py_DECREF( py_field_ptr );
+
       
       if( field_ptr ) {
         SFString *sfstring = dynamic_cast< SFString *>( field_ptr );
@@ -3454,31 +3408,31 @@ call the base class __init__ function." );
         } else {
           PyErr_SetString( PyExc_ValueError, 
                           "Error: Not a SFString field" );
-          return 0;
+          return nullptr;
         }
       } else {
         PyErr_SetString( PyExc_ValueError, 
                          "Error: Field NULL pointer" );
-        return 0;
+        return nullptr;
       }
     }
 
 
     /////////////////////////////////////////////////////////////////////////
 
-    PyObject* pythonExportGeometryAsSTL( PyObject *self, PyObject *args ) {
-      if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) < 2 ) {
+    PyObject* pythonExportGeometryAsSTL( PyObject * /*self*/, PyObject *args ) {
+      if( PyTuple_Size( args ) < 2 ) {
         PyErr_SetString( PyExc_ValueError, 
-                         "Not enough arguments, or invalid arguments, to function\
+                         "Not enough arguments to function\
  H3D.exportGeometryAsSTL( node, url, solid_name, use_binary_format )." );
-        return NULL;
+        return nullptr;
       }
       PyObject *python_geom = PyTuple_GetItem( args, 0 );
 
       if( !PyNode_Check( python_geom ) ) {
         PyErr_SetString( PyExc_ValueError, "Invalid first argument to H3D.exportGeometryAsSTL( node, url, solid_name, use_binary_format ).\
  Must be geometry node." );
-        return NULL;
+        return nullptr;
       }
 
       Node *n = PyNode_AsNode( python_geom );
@@ -3486,24 +3440,24 @@ call the base class __init__ function." );
       if( !n || !g ) {
         PyErr_SetString( PyExc_ValueError,  "Invalid first argument to H3D.exportGeometryAsSTL( node, url, solid_name, use_binary_format ).\
  Must be geometry node." );
-        return NULL;
+        return nullptr;
       }
 
       PyObject *python_url = PyTuple_GetItem( args, 1 );
       if( !PyString_Check( python_url ) ) {
         PyErr_SetString( PyExc_ValueError, "Invalid second argument to H3D.exportGeometryAsSTL( node, url, solid_name, use_binary_format )." );
-        return NULL;
+        return nullptr;
       }
 
       string url = PyString_AsString( python_url );
       string solid_name = "";
       bool use_binary_format = false;
-      if( PyTuple_Check( args ) && PyTuple_Size( args ) > 2 ) {
+      if( PyTuple_Size( args ) > 2 ) {
         PyObject *python_name = PyTuple_GetItem( args, 2 );
         if( !python_name || !PyString_Check( python_name ) ) {
           PyErr_SetString( PyExc_ValueError, 
                            "Invalid third argument to H3D.exportGeometryAsSTL( node, url, solid_name, use_binary_format )." );
-          return NULL;
+          return nullptr;
         }
         solid_name = PyString_AsString( python_name );
 
@@ -3512,7 +3466,7 @@ call the base class __init__ function." );
           if( !python_use_binary_format || !( PyBool_Check( python_use_binary_format ) || PyInt_Check( python_use_binary_format ) ) ) {
             PyErr_SetString( PyExc_ValueError, 
                              "Invalid fourth argument to H3D.exportGeometryAsSTL( node, url, solid_name, use_binary_format )." );
-            return NULL;
+            return nullptr;
           }
           use_binary_format = PyObject_IsTrue ( python_use_binary_format ) == 1;
         }

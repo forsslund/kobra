@@ -14,7 +14,7 @@ height= 0.3
 resolution= 100
 
 def index ( x, y ):
-  return y*int(width*resolution+1) + x
+  return int(y*int(width*resolution+1) + x)
 
 coords= []
 indices= []

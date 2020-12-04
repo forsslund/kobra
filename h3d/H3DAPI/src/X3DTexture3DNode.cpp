@@ -71,9 +71,10 @@ X3DTexture3DNode::X3DTexture3DNode(
   repeatR ( _repeatR  ),
   scaleToPowerOfTwo( _scaleToP2 ),
   textureProperties( _textureProp ),
-  imageUpdated( new Field ),
   updateTextureProperties( new UpdateTextureProperties ),
-  textureUpdated( new Field ){
+  imageUpdated( new Field ),
+  textureUpdated( new Field ),
+  mip_mapping_used( false ) {
 
   type_name = "X3DTexture3DNode";
   
@@ -250,7 +251,8 @@ void X3DTexture3DNode::glTexImage( Image *i, GLenum _texture_target,
     glPixelTransferf( GL_ALPHA_BIAS, bias.w );
   }
 
-  if( texture_properties && texture_properties->generateMipMaps->getValue() ) {
+  mip_mapping_used = texture_properties && texture_properties->generateMipMaps->getValue();
+  if( mip_mapping_used && i->compressionType() == Image::NO_COMPRESSION ) {
 #if( GLU_VERSION_1_3 )
     gluBuild3DMipmaps(  _texture_target, 
                         glInternalFormat( i ),
@@ -286,6 +288,11 @@ void X3DTexture3DNode::glTexImage( Image *i, GLenum _texture_target,
                     glPixelComponentType( i ),
                     image_data );
     } else {
+      if( mip_mapping_used ) {
+        Console( LogLevel::Warning ) << "Mip maps are currently not supported for compressed images. Texture \"" << getName() << "\" will be installed without mip mapping." << endl;
+        mip_mapping_used = false;
+      }
+
       glCompressedTexImage3D( _texture_target,
         0, // mipmap level
         glInternalFormat( i ),
@@ -361,7 +368,7 @@ void X3DTexture3DNode::renderTextureProperties() {
 
   TextureProperties *texture_properties = textureProperties->getValue();
   if( texture_properties ) {
-    texture_properties->renderTextureProperties( texture_target );
+    texture_properties->renderTextureProperties( texture_target, mip_mapping_used );
   } else {
     // set up texture parameters 
     if ( !repeatS->getValue() ) {

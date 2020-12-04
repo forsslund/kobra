@@ -92,6 +92,9 @@ namespace H3DUtil {
     /// a Dicom file containing a 2D-slice.
     void loadImage( const std::vector< std::string > &urls );
 
+    /// Returns the type of image.
+    virtual ImageType getImageType() const override { return ImageType::DICOMIMAGE; };
+
     /// The DcmFileFormat object for the currently loaded image.
     DcmFileFormat dicom_file_info;
     

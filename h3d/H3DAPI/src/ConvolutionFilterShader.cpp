@@ -66,10 +66,10 @@ ConvolutionFilterShader::ConvolutionFilterShader( Inst< DisplayList  > _displayL
   weights( _weights ),
   kernelSize( _kernelSize ),
   pixelStepOffset( _pixelStepOffset ),
-  height(_height),
   width(_width),
-  heightInUse(_heightInUse),
-  widthInUse(_widthInUse){
+  height(_height),
+  widthInUse(_widthInUse),
+  heightInUse(_heightInUse){
   
   type_name = "ConvolutionFilterShader";
   database.initFields( this );

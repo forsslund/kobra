@@ -137,6 +137,8 @@ namespace H3D {
     /// The TimeHandler field is specialized to include the handling
     /// of the TimeSensor specific fields.
     class H3DAPI_API TimeHandler: public X3DTimeDependentNode::TimeHandler {
+    public:
+      TimeHandler() : elapsed_cycle_time( 0 ) {}
     protected:
       /// Set the fields that need to be set due to the time changes
       /// since last loop.

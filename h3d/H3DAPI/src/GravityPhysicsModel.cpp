@@ -58,7 +58,7 @@ GravityPhysicsModel::GravityPhysicsModel(
 
 
 void GravityPhysicsModel::updateParticleValues( 
-                          const X3DParticleEmitterNode::Particle &last_particle,
+                          const X3DParticleEmitterNode::Particle &/*last_particle*/,
                           X3DParticleEmitterNode::Particle &particle,
                           H3DTime last_time,
                           H3DTime current_time ) {

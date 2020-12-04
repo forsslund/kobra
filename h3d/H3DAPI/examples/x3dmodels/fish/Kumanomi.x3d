@@ -5,72 +5,8 @@
     <meta name='description' content='Displays a model in the middle of the scene, if a haptics device is connected the model can be touched.'/>
   </head>
   <Scene>
-  <Viewpoint orientation="1 0 0 0" fieldOfView="0.618" DEF="VP" position="0 0 0.5"/>
 
-    <NavigationInfo nearVisibilityLimit="0.05" type="ANY" visibilityLimit="10" speed="0.01"/>
-    <StereoInfo focalDistance="0.5" interocularDistance="0.06" DEF="stereo"/>
-
-<DeviceInfo>
-  <HaptikfabrikenDevice desiredHapticsRate="5000" positionCalibration="
-  1.00000   0.00000   0.00000   0.00000
-   0.00000   0.50000  -0.86603   0.19143
-   0.00000   0.86603   0.50000  -0.18443
-   0.00000   0.00000   0.00000   1.00000"
- DEF="device" followViewpoint="true" orientationCalibration="1 0 0 1.0472">
-  <!--HaptikfabrikenDevice positionCalibration="
-  1.00000   0.00000   0.00000  -0.18200
-   0.00000   0.50000  -0.86603   0.08307
-   0.00000   0.86603   0.50000  -0.11412
-   0.00000   0.00000   0.00000   1.00000" DEF="device" followViewpoint="false"-->
-  <!--HaptikfabrikenDevice positionCalibration="
-  1.00000   0.00000   0.00000  -0.18200
-   0.00000   1.0000  0.0   0.08307
-   0.00000   0.0    1.0000  -0.11412
-   0.00000   0.00000   0.00000   1.00000" DEF="device" followViewpoint="false"-->
-	<GodObjectRenderer/>
-      <Group containerField="stylus">
-	  <Shape>
-	    <Appearance>
-	      <Material diffuseColor="0 1 0"/>
-	    </Appearance>
-	    <Sphere DEF="PROXY" radius="0.002"/>
-	  </Shape>
-<!--Transform rotation="1 0 0 3.1415"-->
-
-	  <Transform translation="0 0 0.08" rotation="1 0 0 1.570796" >
-	    <Shape>
-	      <Appearance>
-		<Material diffuseColor="1 0 0"/>
-	      </Appearance>
-	      <Cylinder radius="0.005" height="0.1"/>
-	    </Shape>
-	  </Transform>
-<Transform translation="0.05 0 0">
-	    <Shape>
-	      <Appearance>
-		<Material/>
-	      </Appearance>
-	      <Box size="0.1 0.001 0.001"/>
-	    </Shape>
-</Transform>
-<Transform translation="0 0.075 0">
-	    <Shape>
-	      <Appearance>
-		<Material/>
-	      </Appearance>
-	      <Box size="0.001 0.15 0.001"/>
-	    </Shape>
-</Transform>
-
-	</Group>
-  </HaptikfabrikenDevice>
-
-
-</DeviceInfo>
-
-<MatrixTransform DEF="KobraCoordinates">
-
-    <FitToBoxTransform boxCenter="0 0 0" boxSize="0.2 0.2 0.2" uniformScalingOnly="true" active="true">
+    <FitToBoxTransform boxCenter="0 0 0" boxSize="0.4 0.4 0.4" uniformScalingOnly="true" active="true">
       <Shape DEF='Root'>
         <Appearance>
           <FrictionalSurface />
@@ -6274,9 +6210,5 @@
         </IndexedFaceSet>
       </Shape>
     </FitToBoxTransform>
-
-</MatrixTransform>
-<!--ROUTE fromNode="device" fromField="positionCalibration" toNode="KobraCoordinates" toField="matrix"/-->
-
   </Scene>
 </X3D>

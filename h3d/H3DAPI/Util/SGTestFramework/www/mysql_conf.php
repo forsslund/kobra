@@ -1,7 +1,7 @@
 <?php
 
 $dbhost = 'localhost';
-$dbname = 'testserver_new';
+$dbname = 'testdatabase';
 $dbuser = 'ResultReader';
 $dbpass = 'results';
 $svnuser = ''; // Needs to have read and write access to $svnpath.

@@ -9,6 +9,7 @@ set( CMAKE_MODULE_PATH "${UI_SOURCE_DIR}/localModules" "${UI_SOURCE_DIR}/modules
 include( H3DCommonFunctions )
 setCommonH3DCMakePolicies()
 setupRPathForLib()
+enableCpp11( FAIL_MESSAGE "Enabling C++11 support. This compiler lacks such support." )
 handleCommonCacheVar( CMAKE_INSTALL_PREFIX ${UI_SOURCE_DIR}/.. GENERATE_H3D_PACKAGE_PROJECT )
 
 include( "${UI_SOURCE_DIR}/UISourceFiles.txt" )
@@ -133,7 +134,7 @@ if( MSVC )
   set_target_properties( UI PROPERTIES LINK_FLAGS_DEBUG "${UI_LINK_FLAGS_DEBUG} /INCREMENTAL:NO" )
   
 elseif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-  addCommonH3DGNUCompileFlags( UI_COMPILE_FLAGS )
+  addCommonH3DGNUCompileFlags( UI_COMPILE_FLAGS TRUE )
 endif()
 
 set_target_properties( UI PROPERTIES COMPILE_FLAGS "${UI_COMPILE_FLAGS}" )

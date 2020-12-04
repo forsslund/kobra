@@ -83,10 +83,10 @@ namespace H3D {
       viewpoint_groups_changed = true;
     }
 
-    virtual bool windowFromfieldOfView( H3DFloat width, H3DFloat height,
-                                        H3DFloat clip_near,
-                                        H3DFloat &top, H3DFloat &bottom,
-                                        H3DFloat &right, H3DFloat &left ) {
+    virtual bool windowFromfieldOfView( H3DFloat /*width*/, H3DFloat /*height*/,
+                                        H3DFloat /*clip_near*/,
+                                        H3DFloat &/*top*/, H3DFloat &/*bottom*/,
+                                        H3DFloat &/*right*/, H3DFloat &/*left*/ ) {
       return false;
     }
 

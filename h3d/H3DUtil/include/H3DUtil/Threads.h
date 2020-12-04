@@ -40,6 +40,7 @@
 #endif
 #endif
 #include <vector>
+#include <set>
 #include <string>
 #include <algorithm>
 #if defined( _MSC_VER ) && ( _MSC_VER >= 1900 ) && defined( PTHREAD_W32_LEGACY_VERSION )
@@ -57,6 +58,7 @@
 #endif // H3D_WINDOWS
 
 namespace H3DUtil {
+#define THREADSPECIFICCONTAINERMAXTHREAD 4
   /// Mutual exclusion lock class for synchronisation between threads. 
   /// Most common usage is to make sure that only one thread enters a 
   /// "critical section" at a time. E.g. if both threads uses the same 
@@ -306,6 +308,7 @@ namespace H3DUtil {
       ThreadInfo();
 
     public:
+      ~ThreadInfo();
       friend class ThreadSpecificStorage< ThreadInfo >;
       static ThreadInfo& getInstance();
 
@@ -314,7 +317,8 @@ namespace H3DUtil {
 
     protected:
       static MutexLock mutex;
-      static std::size_t next_thread_index;
+      static std::size_t acquireThreadIndex();
+      static std::set<std::size_t> used_thread_indexes;
     };
   };
 
@@ -326,7 +330,7 @@ namespace H3DUtil {
   ///
   /// \c MaxThreads refers to all types of ThreadSpecificContainer not only the instantiated template.
   ///
-  template < typename T, std::size_t MaxThreads = 4 >
+  template < typename T, std::size_t MaxThreads = THREADSPECIFICCONTAINERMAXTHREAD >
   class ThreadSpecificContainer : public ThreadSpecificContainerBase {
   public:
     /// Constructor
@@ -358,7 +362,7 @@ namespace H3DUtil {
   public:
     /// Constructor
     ThreadBase():
-      name( "Unnamed" ) {
+      name( "Unnamed" ), valid( false ) {
       current_threads.push_back( this );
     }
 
@@ -638,6 +642,17 @@ struct hash_pthread
     /// continuing.
     virtual void synchronousCallback( CallbackFunc func, void *data );
 
+    /// An alternative implementation of synchronousCallback() that reduces the 
+    /// likelihood of blocking the calling thread for a long time. By using a separate callback queue 
+    /// for synchronous callback, synchronous callback does not need to fight 
+    /// with asynchronous callback for trying to hold the locks. When that happens,
+    /// the calling thread can get blocked for long time (thread starvation). 
+    /// In general, in comparing to synchronousCallback callbacks from this function
+    /// can get executed earlier hence blocking the calling thread for shorter period.
+    /// NOTE: if thread has a negative frequency, this separate queue won't work due
+    /// to risk of stalling, and it will fall back to use the normal synchronousCallback function internally
+    virtual void synchronousCallbackDedicatedQueue( CallbackFunc func, void *data );
+
     /// Add a callback function to be executed in this thread. The calling
     /// thread will continue executing after adding the callback and will 
     /// not wait for the callback function to execute.
@@ -726,6 +741,13 @@ struct hash_pthread
       callbacks_added.clear();
       callbacks_added_lock.unlock();
     }
+    typedef std::list< std::pair< CallbackFunc, void * > > SyncedCallbacklist;
+    // a dedicated callback queue for synchronous callbacks
+    SyncedCallbacklist synced_callbacks;
+
+    // A lock for synchronizing changes to the synced_callbacks member
+    ConditionLock synced_callback_lock;
+
 
     /// The priority of the thread.
     Priority priority;

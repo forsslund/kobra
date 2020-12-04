@@ -165,8 +165,7 @@ namespace CollisionInternals {
                  const Vec3 &d,
                  const Vec3 &_min,
                  const Vec3 &_max,
-                 const Vec3 &from,
-                 const Vec3 &to ) {
+                 const Vec3 &from ) {
     HAPIFloat tmax = 1.0f;
     // For all three slabs
     for( int i = 0; i < 3; ++i ) {
@@ -411,10 +410,10 @@ bool AABoxBound::boundIntersect( const Vec3 &from,
 
 
 
-void AABoxBound::closestPoint( const Vec3 &p,
-                               Vec3 &closest_point,
-                               Vec3 &normal,
-                               Vec3 &tex_coord ) {
+void AABoxBound::closestPoint( const Vec3 &/*p*/,
+                               Vec3 &/*closest_point*/,
+                               Vec3 &/*normal*/,
+                               Vec3 &/*tex_coord*/ ) {
   assert( false );
 }
 
@@ -427,7 +426,7 @@ bool AABoxBound::insideBound( const Vec3 &p ) {
            p.z >= min.z );
 }
 
-SphereBound::SphereBound() {
+SphereBound::SphereBound() : radius( 0 ) {
 #ifdef HAVE_OPENGL
   CollisionInternals::increaseSphereCounter();
 #endif
@@ -1856,10 +1855,10 @@ bool OrientedBoxBound::boundIntersect( const Vec3 &from,
   return AABoxBound::boundIntersect( rp, rq );
 }
 
-void OrientedBoxBound::closestPoint( const Vec3 &p,
-                                     Vec3 &closest_point,
-                                     Vec3 &normal,
-                                     Vec3 &tex_coord ) {
+void OrientedBoxBound::closestPoint( const Vec3 &/*p*/,
+                                     Vec3 &/*closest_point*/,
+                                     Vec3 &/*normal*/,
+                                     Vec3 &/*tex_coord*/ ) {
   assert( false );
 }
 
@@ -2076,7 +2075,7 @@ void LineSegment::closestPoint( const Vec3 &p,
 bool LineSegment::lineIntersect( const Vec3 &from, 
                                  const Vec3 &to,
                                  IntersectionInfo &result,
-                                 FaceType face ) {
+                                 FaceType /*face*/ ) {
   HAPIFloat s,t;
   Vec3 c0, c1;
   closestPointOnLine( from, to, s, t, c0, c1 );
@@ -2194,7 +2193,7 @@ void Collision::Point::render() {
 bool Collision::Point::lineIntersect( const Vec3 &from, 
                                  const Vec3 &to,
                                  IntersectionInfo &result,
-                                  FaceType face ) {
+                                  FaceType /*face*/ ) {
   Vec3 ab = to - from;
   // Project c onto ab, but deferring divide by Dot( ab, ab )
   HAPIFloat t = ( position - from ) * ab;
@@ -2680,7 +2679,7 @@ void BinaryBoundTree::closestPoint( const Vec3 &p,
       if( children[1]->isLeaf() || v * v < cv * cv ) {
         Vec3 cp, cn, tc;
         children[1]->closestPoint( p, cp, cn, tc );
-        Vec3 v = p - cp;
+        v = p - cp;
         if( v * v < cv * cv ) {
           closest_point = cp;
           closest_normal = cn;
@@ -3087,7 +3086,7 @@ void BBPrimitiveTree::closestPoint( const Vec3 &p,
       if( children[1]->isLeaf() || v * v < cv * cv ) {
         Vec3 cp, cn, tc;
         children[1]->closestPoint( p, cp, cn, tc );
-        Vec3 v = cp - p;
+        v = cp - p;
         if( v * v < cv * cv ) {
           closest_point = cp;
           closest_normal = cn;
@@ -3261,10 +3260,10 @@ bool Triangle::getConstraint(  const Vec3 &point,
   return true;
 }
 
-void GeometryPrimitive::getTangentSpaceMatrix( const Vec3 &point,
-                           Matrix4 &result_mtx ) {}
+void GeometryPrimitive::getTangentSpaceMatrix( const Vec3 &/*point*/,
+                           Matrix4 &/*result_mtx*/ ) {}
 
-void Triangle::getTangentSpaceMatrix( const Vec3 &point,
+void Triangle::getTangentSpaceMatrix( const Vec3 &/*point*/,
                                       Matrix4 &result_mtx ) {
   //http://www.blacksmith-studios.dk/projects/downloads/tangent_matrix_derivation.php
   //code for calculating matrix.
@@ -3397,7 +3396,6 @@ bool Plane::movingSphereIntersect( HAPIFloat radius,
       return true;
     }
   }
-  return false;
 }
 
 bool LineSegment::movingSphereIntersect( HAPIFloat radius,
@@ -4442,7 +4440,7 @@ bool AABox::lineIntersect( const Vec3 &from,
   Vec3 d = to - from;
   Vec3 normal;
   FaceType return_face = face == BACK ? BACK : FRONT;
-  if( !CollisionInternals::findTMin( tmin, normal, d, _min, _max, from, to ) )
+  if( !CollisionInternals::findTMin( tmin, normal, d, _min, _max, from ) )
     return false;
 
   from_location = OUTSIDE;
@@ -4468,7 +4466,7 @@ bool AABox::lineIntersect( const Vec3 &from,
         tmin = 0.0f;
         normal = Vec3();
         if( !CollisionInternals::findTMin( tmin, normal, -d, 
-                                           _min, _max, to, from ) )
+                                           _min, _max, to ) )
           return false;
         tmin = 1 - tmin;
 

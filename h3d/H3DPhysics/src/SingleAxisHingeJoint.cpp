@@ -191,7 +191,6 @@ void SingleAxisHingeJoint::updateOutputFields() {
   PhysicsEngineParameters::SingleAxisHingeJointParameters params;
 
   // look at the forceOutput field to determine which fields to update
-  unsigned int bitmask = 0;
   const vector<string> &output = forceOutput->getValue();
   bool has_none = std::find( output.begin(), output.end(), "NONE" ) != output.end();
 

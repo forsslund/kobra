@@ -115,7 +115,7 @@ MedX3DDemoBlendedVolumeStyleOptions::MedX3DDemoBlendedVolumeStyleOptions( wxWind
   BlendedVolumeStyleStyleChoice->SetStringSelection( style_name );
 }
 
-void MedX3DDemoBlendedVolumeStyleOptions::OnLoadBlendDataButton( wxCommandEvent& event )
+void MedX3DDemoBlendedVolumeStyleOptions::OnLoadBlendDataButton( wxCommandEvent& /*event*/ )
 {
   wxFileDialog *openFileDialog( new wxFileDialog ( this,
                                                    wxT("Open file"),
@@ -150,7 +150,7 @@ void MedX3DDemoBlendedVolumeStyleOptions::OnLoadBlendDataButton( wxCommandEvent&
   }
 }
 
-void MedX3DDemoBlendedVolumeStyleOptions::OnBlendedVolumeStyleStyleChoice( wxCommandEvent& event )
+void MedX3DDemoBlendedVolumeStyleOptions::OnBlendedVolumeStyleStyleChoice( wxCommandEvent& /*event*/ )
 {
   wxString selected_style = BlendedVolumeStyleStyleChoice->GetStringSelection();
 
@@ -197,7 +197,7 @@ void MedX3DDemoBlendedVolumeStyleOptions::OnBlendConstant2Scroll( wxScrollEvent&
   wxGetApp().style_dialog->setStyleModified( true );
 }
 
-void MedX3DDemoBlendedVolumeStyleOptions::OnBlendTable1LoadButton( wxCommandEvent& event )
+void MedX3DDemoBlendedVolumeStyleOptions::OnBlendTable1LoadButton( wxCommandEvent& /*event*/ )
 {
    wxFileDialog *openFileDialog( new wxFileDialog ( this,
                                                    wxT("Open file"),
@@ -219,7 +219,7 @@ void MedX3DDemoBlendedVolumeStyleOptions::OnBlendTable1LoadButton( wxCommandEven
   }
 }
 
-void MedX3DDemoBlendedVolumeStyleOptions::OnBlendTable2LoadButton( wxCommandEvent& event )
+void MedX3DDemoBlendedVolumeStyleOptions::OnBlendTable2LoadButton( wxCommandEvent& /*event*/ )
 {
   wxFileDialog *openFileDialog( new wxFileDialog ( this,
                                                    wxT("Open file"),

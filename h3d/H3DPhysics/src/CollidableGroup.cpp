@@ -61,7 +61,7 @@ CollidableGroup::~CollidableGroup() {
 
 void CollidableGroup::traverseSG(H3D::TraverseInfo &ti) {
   X3DChildNode::traverseSG( ti );
-  H3D::PhysicsEngineThread *pt;
+  H3D::PhysicsEngineThread *pt = NULL;
   ti.getUserData("PhysicsEngine", (void * *) &pt );
   if ( pt ) {
     //if ( engine_thread == NULL ) {
@@ -123,11 +123,10 @@ void CollidableGroup::MFCollidable::onAdd( Node *n ) {
     cn->addToCollidableGroup( cg->collidableGroup_id );
     cg->newX3DNBodyCollidableNodes.push_back( cn );
   }
-  else if ( X3DNBodyCollisionSpaceNode *cs = dynamic_cast< X3DNBodyCollisionSpaceNode * >( n ) )
+  else if ( dynamic_cast< X3DNBodyCollisionSpaceNode * >( n ) )
   {
     CollidableGroup *cg = static_cast< CollidableGroup * >( getOwner() ); 
     cn->addToCollidableGroup( cg->collidableGroup_id );
-    //cg->newX3DNBodyCollisionSpaceNodes.push_back( cs );
   }  
 }
 void CollidableGroup::MFCollidable::onRemove( Node *n ) {

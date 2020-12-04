@@ -101,7 +101,7 @@ string H3DGeneratedShaderNode::getFinalFragmentShaderOutputString() {
   return "  gl_FragColor = generated_color; \n";
 }
 
-string H3DGeneratedShaderNode::addUniformFields( ComposedShader *shader ) {
+string H3DGeneratedShaderNode::addUniformFields( ComposedShader * ) {
   // add dynamic fields for uniform variables and return string for uniform
   // variable specification.
   return "";

@@ -58,7 +58,8 @@ WindPhysicsModel::WindPhysicsModel(
   direction( _direction ),
   gustiness( _gustiness ),
   speed( _speed ),
-  turbulence( _turbulence ) {
+  turbulence( _turbulence ),
+  wind_speed( 0 ) {
 
   type_name = "WindPhysicsModel";
   database.initFields( this );
@@ -71,7 +72,7 @@ WindPhysicsModel::WindPhysicsModel(
 
 
 void WindPhysicsModel::updateParticleValues( 
-                       const X3DParticleEmitterNode::Particle &last_particle,
+                       const X3DParticleEmitterNode::Particle &/*last_particle*/,
                        X3DParticleEmitterNode::Particle &particle,
                        H3DTime last_time,
                        H3DTime current_time ) {

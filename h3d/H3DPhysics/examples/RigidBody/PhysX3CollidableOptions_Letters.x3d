@@ -5,7 +5,7 @@
     <component name="H3DPhysics"/>
 
     <meta name='title' content='PhysX3CollidableOptions_Letters.x3d'/>
-    <meta name='description' content='A demonstration of PhysX3CollidableOptions from the H3DPhysics component.'/>
+    <meta name='description' content='A demonstration of PhysXCollidableOptions from the H3DPhysics component.'/>
     <meta name='author' content='SenseGraphics AB, 2013-2019'/>
   </head>
   <Scene>
@@ -35,7 +35,7 @@
 
         <CollidableShape DEF="CSLetterA" containerField='collidables' scale='0.3 0.3 0.3'>
           <Shape containerField='shape' USE='letter_a_SHAPE' />
-          <PhysX3CollidableOptions 
+          <PhysXCollidableOptions 
             convex='false'
             convexDecomposition='true'
             cookedFilename='models/letterA.cooked'
@@ -48,7 +48,7 @@
 
         <CollidableShape DEF="CSLetterB" containerField='collidables' scale='0.3 0.3 0.3'>
           <Shape containerField='shape' USE='letter_b_SHAPE' />
-          <PhysX3CollidableOptions 
+          <PhysXCollidableOptions 
             convex='false'
             convexDecomposition='true'
             cookedFilename='models/letterB.cooked'
@@ -61,7 +61,7 @@
 
         <CollidableShape DEF="CSLetterC" containerField='collidables' scale='0.3 0.3 0.3'>
           <Shape containerField='shape' USE='letter_c_SHAPE' />
-          <PhysX3CollidableOptions 
+          <PhysXCollidableOptions 
             convex='false'
             convexDecomposition='true'
             cookedFilename='models/letterC.cooked'
@@ -74,7 +74,7 @@
 
         <CollidableShape DEF="CSLetterD" containerField='collidables' scale='0.3 0.3 0.3'>
           <Shape containerField='shape' USE='letter_d_SHAPE' />
-          <PhysX3CollidableOptions 
+          <PhysXCollidableOptions 
             convex='false'
             convexDecomposition='true'
             cookedFilename='models/letterD.cooked'

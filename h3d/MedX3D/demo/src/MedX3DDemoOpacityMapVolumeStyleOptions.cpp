@@ -41,8 +41,8 @@ MedX3DDemoOpacityMapVolumeStyleOptions::MedX3DDemoOpacityMapVolumeStyleOptions( 
 :
   OpacityMapVolumeStyleOptions( parent ),
   opacity_map_style( style ),
-  file_texture( new Image3DTexture ),
-  window_texture( new WindowFunctionTexture )
+  window_texture( new WindowFunctionTexture ),
+  file_texture( new Image3DTexture )
 {
   string type = opacity_map_style->type->getValue();
   X3DTextureNode *t = opacity_map_style->transferFunction->getValue();
@@ -104,7 +104,7 @@ void MedX3DDemoOpacityMapVolumeStyleOptions::OnTransferFunctionChoice( wxCommand
   setTransferFunctionMode( event.GetString() );
 }
 
-void MedX3DDemoOpacityMapVolumeStyleOptions::OnLoadImageButton( wxCommandEvent& event ) {
+void MedX3DDemoOpacityMapVolumeStyleOptions::OnLoadImageButton( wxCommandEvent& /*event*/ ) {
   wxFileDialog *openFileDialog( new wxFileDialog ( this,
                                                    wxT("Open file"),
                                                    wxT(""),
@@ -161,7 +161,7 @@ bool MedX3DDemoOpacityMapVolumeStyleOptions::setTransferFunctionMode( wxString m
     // disable file options
     wxGetApp().disableAllWidgetsInSizer( FileOptionsSizer );
     opacity_map_style->transferFunction->setValue( window_texture );
-    Image *i = window_texture->image->getValue();
+    window_texture->image->getValue();
   } else {
     return false;
   }

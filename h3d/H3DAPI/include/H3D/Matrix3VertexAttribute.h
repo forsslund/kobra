@@ -88,6 +88,9 @@ namespace H3D {
 
     /// The H3DNodeDatabase for this node.
     static H3DNodeDatabase database;
+  protected:
+    /// Internal field used to know if attribute_data has been created.
+    auto_ptr< Field > attribDataUpToDate;
   };
 }
 

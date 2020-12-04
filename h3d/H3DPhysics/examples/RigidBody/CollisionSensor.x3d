@@ -40,12 +40,12 @@
     <RigidBodyCollection DEF='RBC' physicsEngine="Bullet" desiredUpdateRate="100" gravity='0 -0.9 0' constantForceMix='0.001' contactSurfaceThickness='0.001'>
       <CollisionCollection containerField='collider' DEF='CC' bounce='0.2' minBounceSpeed="0.1"  frictionCoefficients='100000 100000'>
 
-        <CollidableShape DEF="CS1" containerField='collidables' translation='0.0 -0 0.0'>
+        <CollidableShape DEF="CS1" containerField='collidables' translation='0 0 0'>
           <Shape containerField='shape' USE='Shape1'/>
         </CollidableShape>
 
 
-        <CollidableShape DEF="CS2" containerField='collidables' translation='0.0 0 0.0'>
+        <CollidableShape DEF="CS2" containerField='collidables' translation='0 0 0'>
           <Shape containerField='shape' USE='Shape2'/>
         </CollidableShape>
 

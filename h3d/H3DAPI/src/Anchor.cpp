@@ -32,7 +32,7 @@
 #include <H3D/TouchSensor.h>
 #include <H3D/X3D.h>
 #include <H3D/H3DNavigation.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 
 using namespace H3D;
 

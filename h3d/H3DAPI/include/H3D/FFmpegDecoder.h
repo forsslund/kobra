@@ -90,7 +90,7 @@ namespace H3D {
 
     /// Set whether the clip should loop and start from the start again
     /// when the end has been reached.
-    virtual void setLooping( bool v ) {
+    virtual void setLooping( bool /*v*/ ) {
 
       // Quick fix - for some reason the incorrect value of v gets passed 
       looping = true;

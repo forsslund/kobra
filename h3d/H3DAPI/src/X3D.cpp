@@ -34,7 +34,7 @@
 #include <H3D/IStreamInputSource.h>
 #endif
 
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 #include <H3D/VrmlParser.h>
 #include <H3D/X3DGeometryNode.h>
 #include <sstream>
@@ -55,11 +55,19 @@ Group* X3D::createX3DFromString( const string &str,
   if ( isVRML( str ) )
     return createVRMLFromString( str, dn, exported_nodes, prototypes );
   Group *g = new Group;
-  AutoRef< Node > n = createX3DNodeFromString( str, dn,
-                                               exported_nodes, 
-                                               prototypes  );
-  if( n.get() )
-    g->children->push_back( n.get() );
+  try{
+    AutoRef< Node > n = createX3DNodeFromString(str, dn,
+      exported_nodes,
+      prototypes);
+    if (n.get()) {
+      g->children->push_back(n.get());
+    }
+  }
+  catch (...){
+    delete g;
+    g = NULL;
+    throw;
+  }
   return g;
 }
 
@@ -191,19 +199,17 @@ Group* X3D::createX3DFromURL( const string &url,
     XERCES_CPP_NAMESPACE_USE
     // else...
     ifstream is( resolved_url.c_str() );
-    XMLCh *url_ch = new XMLCh[ url.size() + 1 ];
-    for( unsigned int i = 0; i < url.size(); ++i ) {
-      url_ch[i] = url[i];
+    unique_ptr< XMLCh > url_ch(new XMLCh[url.size() + 1]);
+    for(unsigned int i = 0; i < url.size(); ++i) {
+      url_ch.get()[i] = url[i];
     }
-    url_ch[ url.size() ] = '\0'; 
+    url_ch.get()[url.size()] = '\0';
     try {
-      parser->parse( IStreamInputSource( is, url_ch ) );
+      parser->parse(IStreamInputSource(is, url_ch.get()));
     } catch(...) {
-      delete[] url_ch;
-      H3DTIMER_END( "createX3DFromURL (" + url + ")" ) 
-      throw;
+      H3DTIMER_END("createX3DFromURL (" + url + ")")
+        throw;
     }
-    delete[] url_ch;
     is.close();
 #endif   
   }
@@ -213,10 +219,18 @@ Group* X3D::createX3DFromURL( const string &url,
 
 #ifdef HAVE_XERCES
   Group *g = new Group;
-  AutoRef< Node > n = handler.getResultingNode();
-  if( n.get() )
-    g->children->push_back( n.get() );
-  H3DTIMER_END( "createX3DFromURL (" + url + ")" ) 
+  try{
+    AutoRef< Node > n = handler.getResultingNode();
+    if (n.get()) {
+      g->children->push_back(n.get());
+    }
+    H3DTIMER_END("createX3DFromURL (" + url + ")")
+  }
+  catch (...){
+    delete g;
+    g = NULL;
+    throw;
+  }
   return g;
 #else
   Console(LogLevel::Warning) << "H3D API compiled without HAVE_XERCES flag. X3D-XML files "
@@ -231,10 +245,18 @@ Group* X3D::createX3DFromStream( istream &is,
                                  PrototypeVector *prototypes,
                                  const string &system_id ) {
   Group *g = new Group;
-  AutoRef< Node > n = createX3DNodeFromStream( is, dn, exported_nodes, 
-                 prototypes,system_id );
-  if( n.get() )
-    g->children->push_back( n.get() );
+  try{
+    AutoRef< Node > n = createX3DNodeFromStream(is, dn, exported_nodes,
+      prototypes, system_id);
+    if (n.get()) {
+      g->children->push_back(n.get());
+    }
+  }
+  catch (...){
+    delete g;
+    g = NULL;
+    throw;
+  }
   return g;
 }
 
@@ -397,13 +419,12 @@ AutoRef< Node > X3D::createX3DNodeFromURL( const string &url,
     XERCES_CPP_NAMESPACE_USE
     // else...
     ifstream is( resolved_url.c_str() );
-    XMLCh *url_ch = new XMLCh[ url.size() + 1 ];
-    for( unsigned int i = 0; i < url.size(); ++i ) {
-      url_ch[i] = url[i];
+    unique_ptr< XMLCh > url_ch(new XMLCh[url.size() + 1]);
+    for(size_t i = 0; i < url.size(); ++i) {
+      url_ch.get()[i] = url[i];
     }
-    url_ch[ url.size() ] = '\0'; 
-    parser->parse( IStreamInputSource( is, url_ch ) );
-    delete[] url_ch;
+    url_ch.get()[url.size()] = '\0';
+    parser->parse(IStreamInputSource(is, url_ch.get()));
     is.close();
 #endif   
   }
@@ -433,13 +454,12 @@ AutoRef< Node > X3D::createX3DNodeFromStream( istream &is,
   parser->setContentHandler(&handler);
   parser->setErrorHandler(&handler);
   parser->setLexicalHandler( &handler ); 
-  XMLCh *system_id_ch = new XMLCh[ system_id.size() + 1 ];
-  for( unsigned int i = 0; i < system_id.size(); ++i ) {
-    system_id_ch[i] = system_id[i];
+  unique_ptr<XMLCh> system_id_ch(new XMLCh[system_id.size() + 1]);
+  for(size_t i = 0; i < system_id.size(); ++i) {
+    system_id_ch.get()[i] = system_id[i];
   }
-  system_id_ch[ system_id.size() ] = '\0'; 
-  parser->parse( IStreamInputSource( is, system_id_ch ) );
-  delete[] system_id_ch;
+  system_id_ch.get()[system_id.size()] = '\0';
+  parser->parse(IStreamInputSource(is, system_id_ch.get()));
   return handler.getResultingNode();
 #else
   Console(LogLevel::Warning) << "H3D API compiled without HAVE_XERCES flag. X3D-XML files "

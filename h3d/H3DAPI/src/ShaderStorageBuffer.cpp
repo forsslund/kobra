@@ -66,7 +66,9 @@ ShaderStorageBuffer::ShaderStorageBuffer(
   dataSize(_dataSize),
   storageName(_storageName),
   rebuildBuffer(new Field),
-  max_ssbo_size( 0 ){
+  max_ssbo_size( 0 ),
+  storage_block_index( 0 ),
+  program_handle( 0 ) {
   type_name = "ShaderStorageBuffer";
   database.initFields(this);
   displayList->setName( "displayList" );

@@ -46,7 +46,7 @@ bool HapticPointSet::lineIntersectShape( const Vec3 &from,
                                          Collision::FaceType face ) { 
   bool have_intersection = false;
   Collision::IntersectionInfo closest_intersection;
-  HAPIFloat min_d2;
+  HAPIFloat min_d2 = 0;
   for( unsigned int i = 0; i < points.size(); ++i ) {
     Collision::Point &p = points[i];
     if( p.lineIntersect( from, to, closest_intersection, face ) ) {
@@ -105,9 +105,9 @@ void HapticPointSet::glRenderShape() {
 void HapticPointSet::closestPointOnShape( const Vec3 &p,
                                           Vec3 &cp,
                                           Vec3 &n,
-                                          Vec3 &tc ) {
+                                          Vec3 &/*tc*/ ) {
   Vec3 temp_cp, temp_n;
-  HAPIFloat distance, temp_distance;
+  HAPIFloat distance = 0, temp_distance;
   for( unsigned int i = 0; i < points.size(); ++i ) {
     temp_cp = points[i].position;
     if( i == 0 ) {

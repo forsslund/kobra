@@ -41,7 +41,7 @@
 #include <H3D/Material.h>
 
 #include <H3D/X3DTextureNode.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 
 #include <H3D/MedX3D/VolumeData.h>
 #include <H3D/MedX3D/OpacityMapVolumeStyle.h>

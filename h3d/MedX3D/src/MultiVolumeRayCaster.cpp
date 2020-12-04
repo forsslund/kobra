@@ -987,13 +987,13 @@ MultiVolumeRayCaster::MultiVolumeRayCaster( Inst< SFNode>  _metadata,
   stochasticJitteringTexture( new SFTexture2DNode ),
   stochasticJitteringTextureDimension( new SFInt32 ),
   depthBufferTexture( new SFNode ),
-  ignore_depth_texture( false ),
-  rebuildShader( new RebuildShader ),
-  localToTexSpace( new MFMatrix4f ),
   texToLocalSpace( new MFMatrix4f ),
+  localToTexSpace( new MFMatrix4f ),
   localToGlobalSpace( new MFMatrix4f ),
   globalToLocalSpace( new MFMatrix4f ),
-  volumeIndex( new SFInt32 ) {
+  volumeIndex( new SFInt32 ),
+  ignore_depth_texture( false ),
+  rebuildShader( new RebuildShader ) {
 
   type_name = "MultiVolumeRayCaster";
   database.initFields( this );
@@ -1222,7 +1222,7 @@ void MultiVolumeRayCaster::drawVolumeBox( const Vec3f &dim ) {
   geom.render();
 }
 
-void MultiVolumeRayCaster::buildShader( X3DVolumeNode *in_volume ) {
+void MultiVolumeRayCaster::buildShader( X3DVolumeNode * /*in_volume*/ ) {
   // get the shader for the volume to render. We ignore the input volume 
   // since we always want to use the shader of the first volume as the
   // shader to run for all volumes. This function will be called when
@@ -1558,7 +1558,7 @@ Scene::CallbackCode MultiVolumeRayCaster::resetVolumesCallback( void *data ){
   return Scene::CALLBACK_DONE;
 }
 
-void MultiVolumeRayCaster::checkIfVolumesChangedCallback( TraverseInfo &ti, 
+void MultiVolumeRayCaster::checkIfVolumesChangedCallback( TraverseInfo &/*ti*/, 
                 void *data ) {
   MultiVolumeRayCaster *raycaster = 
     static_cast< MultiVolumeRayCaster * >( data );
@@ -1608,7 +1608,7 @@ void MultiVolumeRayCaster::checkIfVolumesChangedCallback( TraverseInfo &ti,
 }
 
 
-void MultiVolumeRayCaster::renderDepthPeelCallback( FrameBufferTextureGenerator *gen, int i, void *data ) {
+void MultiVolumeRayCaster::renderDepthPeelCallback( FrameBufferTextureGenerator * /*gen*/, int i, void *data ) {
   
   MultiVolumeRayCaster *ray_caster = 
     static_cast< MultiVolumeRayCaster * >( data );

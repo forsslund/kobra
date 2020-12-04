@@ -82,21 +82,21 @@ namespace H3D {
   class H3DAPI_API InfiniteBound: public Bound {
   public:
     /// Determines if a given point is inside the bound or not.
-    virtual bool isInside( const Vec3f &p ){ 
+    virtual bool isInside( const Vec3f &/*p*/ ){ 
       return true;
     }
 
     /// Returns true always. 
-    virtual bool lineSegmentIntersect( const Vec3f& from,
-                                       const Vec3f &to ) {
+    virtual bool lineSegmentIntersect( const Vec3f& /*from*/,
+                                       const Vec3f &/*to*/ ) {
       return true;
     }
 
     /// Checks a moving sphere for intersection with the bound.
     /// return true always.
-    virtual bool movingSphereIntersect( const Vec3f &from,
-                                        const Vec3f &to,
-                                        H3DFloat radius ) {
+    virtual bool movingSphereIntersect( const Vec3f &/*from*/,
+                                        const Vec3f &/*to*/,
+                                        H3DFloat /*radius*/ ) {
       return true;
     }
     
@@ -111,21 +111,21 @@ namespace H3D {
   class H3DAPI_API EmptyBound: public Bound {
   public:
     /// Determines if a given point is inside the bound or not.
-    virtual bool isInside( const Vec3f &p ){ 
+    virtual bool isInside( const Vec3f &/*p*/ ){ 
       return false;
     }
 
     /// Returns false always. 
-    virtual bool lineSegmentIntersect( const Vec3f& from,
-                                       const Vec3f &to ) {
+    virtual bool lineSegmentIntersect( const Vec3f& /*from*/,
+                                       const Vec3f &/*to*/ ) {
       return false;
     }
 
     /// Checks a moving sphere for intersection with the bound. 
     /// return false always.
-    virtual bool movingSphereIntersect( const Vec3f &from,
-                                        const Vec3f &to,
-                                        H3DFloat radius ) {
+    virtual bool movingSphereIntersect( const Vec3f &/*from*/,
+                                        const Vec3f &/*to*/,
+                                        H3DFloat /*radius*/ ) {
       return false;
     }
 

@@ -55,6 +55,8 @@ namespace H3D{
     class H3DPHYS_API ValueUpdater : 
       public EventCollectingField < Field > {
     public:
+      ValueUpdater() : allParams( false ) {}
+
       virtual PhysicsEngineParameters::EngineOptionParameters* getParameters( bool all_params = false );
     protected:
       virtual void update();

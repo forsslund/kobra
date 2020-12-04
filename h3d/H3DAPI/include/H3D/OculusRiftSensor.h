@@ -286,8 +286,6 @@ namespace H3D {
 
   private:
 
-    bool was_initialized;
-
     /// Transfers the values from the device communication thread to
     /// the scenegraph thread.
     void updateValues();

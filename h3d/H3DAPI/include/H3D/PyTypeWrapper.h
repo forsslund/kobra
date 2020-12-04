@@ -35,7 +35,7 @@
 // undefine _DEBUG since we want to always link to the release version of
 // python and pyconfig.h automatically links debug version if _DEBUG is
 // defined.
-#ifdef _DEBUG
+#if defined _DEBUG && ! defined HAVE_PYTHON_DEBUG_LIBRARY 
 #define _DEBUG_UNDEFED
 #undef _DEBUG
 #endif
@@ -93,12 +93,12 @@ namespace H3D {
 
     /// Install type in the given python module. Must be called if the
     /// type is to be used in a module.
-    static void installType( PyObject* H3D_module ) {
+    static void installType( PyObject* _H3D_module ) {
       if (PyType_Ready( TypeObject ) < 0 )
         return; // THROW ERROR!?
       
       Py_INCREF( TypeObject );
-      PyModule_AddObject( H3D_module, 
+      PyModule_AddObject( _H3D_module,
                           (char *)NameFunc().c_str(), 
                           (PyObject *)TypeObject );
     }
@@ -116,7 +116,7 @@ namespace H3D {
     }
 
     /// Converts to a char* string
-    static PyObject* repr( PyObject *myself, PyObject *args ) {
+    static PyObject* repr( PyObject *myself, PyObject * /*args*/ ) {
       if( CheckFunc( myself ) ) {
         ostringstream s;
         s << ValueFunc( myself );

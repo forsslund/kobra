@@ -82,7 +82,7 @@ std::vector<float> GaussianFilterShader::gauss2D(int _width, int _height, float 
   std::vector<float> result(nr_weights,0.0);
   for(int  x=0; x<_width;x++) {
     for(int y=0;y<_height;y++) {
-      // make use of the symmetry to simplify the calclation
+      // make use of the symmetry to simplify the calculation
       // result[x*sizeX+y] is the xth row, yth column
       float g = 0;
       if(x>midX&&y>midY)

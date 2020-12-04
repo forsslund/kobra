@@ -154,7 +154,7 @@ namespace H3D {
     }
 
     /// Get the value of the field as a string.
-    inline virtual string getValueAsString( const string& separator = " " ) {
+    inline virtual string getValueAsString( const string& /*separator*/ = " " ) {
       stringstream s;
       s << getValue();
       return s.str();

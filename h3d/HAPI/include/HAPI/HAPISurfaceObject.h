@@ -58,9 +58,9 @@ namespace HAPI {
       ContactInfo(): geom_primitive( 0 ),
                      haptic_shape( 0 ),
                      proxy_radius( 0 ),
+                     shape_id( 0 ),
                      has_inverse( false ),
-                     hd( NULL ),
-                     shape_id( 0 ) {}
+                     hd( NULL ) {}
     protected:
       // INPUT
 
@@ -393,6 +393,8 @@ namespace HAPI {
     /// Destructor.
     virtual ~HAPISurfaceObject();
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// This function should be overridden by all subclasses. It determines
     /// the proxy movement of a contact. The function should set the proxy
     /// movement in the contact_info struct before returning using the
@@ -410,6 +412,7 @@ namespace HAPI {
     /// During the call to this function the origin of the local coordinate
     /// system is the proxy position after proxy movement.
     virtual void getForces( ContactInfo &contact_info ) {}
+H3D_POP_WARNINGS()
 
   };
 }

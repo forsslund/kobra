@@ -44,7 +44,7 @@ namespace H3D {
     virtual X3DTypes::X3DType getX3DType() { return X3DTypes::SFBOOL; }
     
     /// Get the value of the field as a string.
-    inline virtual string getValueAsString( const string& separator = " " ) {
+    inline virtual string getValueAsString( const string& /*separator*/ = " " ) {
       if( getValue() )
         return "true";
       else

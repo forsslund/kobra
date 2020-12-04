@@ -29,7 +29,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <H3D/ShaderPart.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 #include <H3D/GlobalSettings.h>
 #include <H3D/ComposedShader.h>
 
@@ -563,7 +563,7 @@ bool H3D::ShaderPart::replaceString(std::string &shader_string,
 }
 
 
-void ShaderPart::updateShaderConstantValues(std::string &shader_string, bool update_all_values) {
+void ShaderPart::updateShaderConstantValues(std::string &/*shader_string*/, bool update_all_values) {
   ComposedShader *parent = getParentComposedShader();
   if(!parent) {
     return;

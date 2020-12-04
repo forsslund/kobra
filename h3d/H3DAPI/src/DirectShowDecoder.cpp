@@ -270,7 +270,9 @@ DirectShowDecoder::DirectShowDecoder( )
                                     data( NULL ), 
                                     have_new_frame( false ),
                                     looping( false ),
-                                    rate( 1 )
+                                    rate( 1 ),
+                                    frame_grabber( NULL ),
+                                    duration( 0 )
 {
   type_name = "DirectShowDecoder";
   event_handler.reset( new DShowEventHandler );

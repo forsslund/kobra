@@ -33,6 +33,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <H3DUtil/AutoRef.h>
+
 #ifdef H3D_REFERENCE_COUNT_DEBUG
 #include <set>
 #include <string>
@@ -46,7 +48,7 @@
 namespace H3DUtil {
 
 #ifdef H3D_REFERENCE_COUNT_DEBUG
-/// Base class that adds functionallity needed for reference count
+/// Base class that adds functionality needed for reference count
 /// debugging.
 class H3DUTIL_API AutoRefVectorBase {
   public:
@@ -64,7 +66,7 @@ class H3DUTIL_API AutoRefVectorBase {
     
     /// Adds the objects encapsulated in this instance to the given vector.
     /// Warning: reference count will not go up for the objects.
-    virtual void getContent( std::vector< RefCountedClass *>&nodes) {}
+    virtual void getContent( std::vector< RefCountedClass *>&/*nodes*/) {}
 
     // lock for use for access to the auto_ref_vectors member.
     static MutexLock auto_ref_vectors_lock;
@@ -226,6 +228,7 @@ class H3DUTIL_API AutoRefVectorBase {
     /// Note: when n is bigger than original size, the newly added value will
     /// point to the same location, unless you want that, otherwise do not specify
     /// value t (will use NULL then) and always set the value manually after resized.
+    /// It is expected that t has a reference of at least 1 when this function is called.
     inline virtual void resize( size_t n, RefCountedClassType * t = NULL ) {
       if( size() > n ) {
         for( size_t i = n; i < size(); ++i )
@@ -237,6 +240,22 @@ class H3DUTIL_API AutoRefVectorBase {
         }
       }
       std::vector<RefCountedClassType*>::resize( n, t );
+    }
+
+    /// Inserts or erases elements at the end such that the size becomes n.
+    /// Note: when n is bigger than original size, the newly added value will
+    /// point to the same location.
+    void resize( size_t n, AutoRef< RefCountedClassType > t ) {
+      if( size() > n ) {
+        for( size_t i = n; i < size(); ++i )
+          unref( std::vector<RefCountedClassType*>::operator[]( i ) );
+      }
+      if( size() < n ) {
+        for( size_t j = 0; j < n - size(); j++ ) {
+          ref( t.get() );
+        }
+      }
+      std::vector<RefCountedClassType*>::resize( n, t.get() );
     }
 
     /// true if the vector's size is 0.

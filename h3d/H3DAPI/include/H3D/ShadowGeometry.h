@@ -186,8 +186,6 @@ namespace H3D {
     /// True if geometry shader was used last time this ShadowGeometry was rendered.
     bool use_geometry_shader_last_loop;
 
-    unsigned int triangles_last_dirty_tick;
-
     // copies of fields that are updated in traverse and are used in computation of shadow volumes
     // these are thread safe copies
     Matrix4f transform_matrix_ts;

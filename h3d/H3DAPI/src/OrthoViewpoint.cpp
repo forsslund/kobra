@@ -88,7 +88,7 @@ OrthoViewpoint::OrthoViewpoint(
 }
 
 bool OrthoViewpoint::windowFromfieldOfView( H3DFloat width, H3DFloat height,
-                                       H3DFloat clip_near,
+                                       H3DFloat /*clip_near*/,
                                        H3DFloat &top, H3DFloat &bottom,
                                        H3DFloat &right, H3DFloat &left ) {
   vector< H3DFloat > field_of_view = fieldOfView->getValue();

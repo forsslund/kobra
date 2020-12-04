@@ -57,22 +57,22 @@ namespace H3D {
     /// Observe that the function is just called once even when stereo 
     /// is enabled. It is not called once per eye. Use renderPostViewpoint()
     /// for this.
-    virtual void renderPreViewpoint( X3DChildNode *scene_root,
-                                     X3DViewpointNode *vp ) {}
+    virtual void renderPreViewpoint( X3DChildNode * /*scene_root*/,
+                                     X3DViewpointNode * /*vp*/ ) {}
 
     /// This function will be called after the viewpoint has been
     /// set up for the scene to be rendered and before the scene is rendered.
     /// In stereo mode it will be called once for each eye.
-    virtual void renderPostViewpoint( X3DChildNode *scene_root,
-                                      X3DViewpointNode *vp ) {}
+    virtual void renderPostViewpoint( X3DChildNode * /*scene_root*/,
+                                      X3DViewpointNode * /*vp*/ ) {}
 
     /// This function will be called after the scene has been rendered. The
     /// In stereo mode it will be called once for each eye.
-    virtual void renderPostScene( X3DChildNode *scene_root,
-                                  X3DViewpointNode *vp) {}
+    virtual void renderPostScene( X3DChildNode * /*scene_root*/,
+                                  X3DViewpointNode * /*vp*/) {}
 
     /// Traverse the scenegraph. 
-    virtual void traverseSG( TraverseInfo &ti ) {
+    virtual void traverseSG( TraverseInfo &/*ti*/ ) {
       ++nr_times_in_scene;
     }
 

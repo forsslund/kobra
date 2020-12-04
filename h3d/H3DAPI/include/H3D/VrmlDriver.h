@@ -61,7 +61,7 @@ struct VRMLFlexLexer : public yyFlexLexer {
 
 // Announce to Flex the prototype we want for lexing function, ...
 # define YY_DECL                                                      \
-  int VRMLFlexLexer::yylex (YYSTYPE* yylval, yy::location* yylloc, VrmlDriver& driver)
+  int VRMLFlexLexer::yylex (YYSTYPE* yylval, yy::location* /*yylloc*/, VrmlDriver& driver)
 // ... and declare it for the parser's sake.
 //YY_DECL;
 

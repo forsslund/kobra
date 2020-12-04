@@ -43,9 +43,14 @@
 #include <OpenGL/glu.h>
 #include <GLUT/glut.h>
 #else
+H3D_PUSH_WARNINGS()
+#ifdef _MSC_VER
+#pragma warning( disable : 4505 ) // To get rid of warning about unused function in freeglut_std.h.
+#endif
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
+H3D_POP_WARNINGS()
 #endif
 
 #ifdef FREEGLUT
@@ -180,5 +185,6 @@ int main(int argc, char* argv[]) {
   hd->disableDevice();
   hd->releaseDevice();
 }
+
 #endif
 

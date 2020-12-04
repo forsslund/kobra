@@ -41,7 +41,7 @@
 // undefine _DEBUG since we want to always link to the release version of
 // python and pyconfig.h automatically links debug version if _DEBUG is
 // defined.
-#ifdef _DEBUG
+#if defined _DEBUG && ! defined HAVE_PYTHON_DEBUG_LIBRARY 
 #define _DEBUG_UNDEFED
 #undef _DEBUG
 #endif
@@ -78,6 +78,8 @@
 #define _DEBUG
 #endif
 #endif
+
+std::set< H3D::PyNodePtr * > H3D::PyNodePtr::python_node_ptrs;
 
 #include <H3D/PythonMethods.h>
 
@@ -159,95 +161,102 @@ namespace H3D {
   /// NODE
   /// 
   PyMethodDef PyNode_methods[] = {
-    { "__repr__", (PyCFunction) PyNode::repr, METH_NOARGS, NULL },
-    { "__str__", (PyCFunction) PyNode::repr, METH_NOARGS, NULL },
-    { "getFieldList", (PyCFunction) PyNode::getFieldList, METH_NOARGS, NULL },
-    { "addField", (PyCFunction) PyNode::addField, METH_VARARGS, NULL },
-    { "removeField", (PyCFunction)PyNode::removeField, METH_O, NULL },
-    { "clearFields", (PyCFunction)PyNode::clearFields , METH_NOARGS, NULL },
-    { "getField", (PyCFunction) PyNode::getSingleField, METH_O, NULL },
-    { "getName", (PyCFunction) PyNode::getName, METH_NOARGS, NULL },
-    { "setName", (PyCFunction) PyNode::setName, METH_O, NULL },
-    { "getTypeName", (PyCFunction) PyNode::getTypeName, METH_NOARGS, NULL },
-    { "clone", (PyCFunction) PyNode::clone, METH_VARARGS, NULL },
-    { "closestPoint", (PyCFunction) PyNode::closestPoint, METH_VARARGS, NULL },
-    { "lineIntersect", (PyCFunction) PyNode::lineIntersect, METH_VARARGS, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__", (PyCFunction) PyNode::repr, METH_NOARGS, nullptr },
+    { "__str__", (PyCFunction) PyNode::repr, METH_NOARGS, nullptr },
+    { "getFieldList", (PyCFunction) PyNode::getFieldList, METH_NOARGS, nullptr },
+    { "addField", (PyCFunction) PyNode::addField, METH_VARARGS, nullptr },
+    { "removeField", (PyCFunction)PyNode::removeField, METH_O, nullptr },
+    { "clearFields", (PyCFunction)PyNode::clearFields , METH_NOARGS, nullptr },
+    { "getField", (PyCFunction) PyNode::getSingleField, METH_O, nullptr },
+    { "getName", (PyCFunction) PyNode::getName, METH_NOARGS, nullptr },
+    { "setName", (PyCFunction) PyNode::setName, METH_O, nullptr },
+    { "getTypeName", (PyCFunction) PyNode::getTypeName, METH_NOARGS, nullptr },
+    { "clone", (PyCFunction) PyNode::clone, METH_VARARGS, nullptr },
+    { "closestPoint", (PyCFunction) PyNode::closestPoint, METH_VARARGS, nullptr },
+    { "lineIntersect", (PyCFunction) PyNode::lineIntersect, METH_VARARGS, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
   PyMemberDef PyNode_members[] = {
   //  {"ptr", T_FLOAT, offsetof(PyNode, ptr), 0,"Node*"},
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
   
 
   PyTypeObject PyNode_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Node",
-    sizeof(PyNode),
+    "H3D.Node",                  /* tp_name */
+    sizeof(PyNode),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyNode::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
     (getattrfunc)PyNode::getAttr,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc)PyNode::compare,  /*tp_compare*/
 #endif
     (reprfunc) PyNode::repr,                         /*tp_repr*/
-    0,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_number*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
     "Node* Object",            /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyNode::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyNode_methods,           /* tp_methods */
     PyNode_members,           /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyNode::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
   
   // Returns an Node * representation of the contents of o.
   Node * PyNode_AsNode( PyObject *o ) {
     if( o == Py_None ) {
-      return NULL;
+      return nullptr;
     } else if( PyNode_Check( o ) ) {
       PyNode *p = (PyNode *)(o);
       return p->nodePtr();
@@ -277,11 +286,11 @@ namespace H3D {
                               PyObject *args ) {
     Node *n = PyNode_AsNode( self );
     
-    if( !PyTuple_Check( args ) || PyTuple_Size( args ) != 3 ) {
+    if( PyTuple_Size( args ) != 3 ) {
       PyErr_SetString( PyExc_ValueError, 
-                       "Invalid argument(s) to function PyNode.addField( \
+                       "Invalid number of arguments to function PyNode.addField( \
 self, name, field_type, access_type )" );
-      return NULL;
+      return nullptr;
     } 
     
     PyObject *name = PyTuple_GetItem( args, 0 );
@@ -293,7 +302,7 @@ self, name, field_type, access_type )" );
       PyErr_SetString( PyExc_ValueError, 
                        "Invalid argument(s) to function PyNode.addField( \
 self, name, field_type, access_type )" );
-      return NULL;
+      return nullptr;
     }
 
     H3DDynamicFieldsObject *dfo =
@@ -301,7 +310,7 @@ self, name, field_type, access_type )" );
     if( !dfo ) {
       PyErr_SetString( PyExc_ValueError, 
         "Trying to add field to Node that is not a H3DDynamicFieldsObject." );
-      return NULL;
+      return nullptr;
     }
     Field *f = X3DTypes::newFieldInstance(
       (X3DTypes::X3DType)PyInt_AsLong( field_type ) );
@@ -320,7 +329,7 @@ self, name, field_type, access_type )" );
     else {
        PyErr_SetString( PyExc_ValueError, 
          "Invalid access type" );
-       return NULL;
+       return nullptr;
     }
     
     dfo->addField( PyString_AsString( name ),
@@ -335,7 +344,7 @@ self, name, field_type, access_type )" );
   PyObject* PyNode::removeField(PyObject *self, PyObject* args) {
     Node *n = PyNode_AsNode(self);
 
-    if (!args || !PyString_Check(args)) {
+    if ( !PyString_Check(args) ) {
       PyErr_SetString(PyExc_ValueError,
         "Invalid argument(s) to function H3D.Node.removeField( self, name )");
       return 0;
@@ -346,7 +355,7 @@ self, name, field_type, access_type )" );
     if (!dfo) {
       PyErr_SetString(PyExc_ValueError,
         "Trying to remove field from Node that is not a H3DDynamicFieldsObject.");
-      return NULL;
+      return nullptr;
     }
 
     dfo->removeField(PyString_AsString(args));
@@ -364,7 +373,7 @@ self, name, field_type, access_type )" );
     if (!dfo) {
       PyErr_SetString(PyExc_ValueError,
         "Trying to clear fields from Node that is not a H3DDynamicFieldsObject.");
-      return NULL;
+      return nullptr;
     }
 
     dfo->clearFields();
@@ -377,7 +386,7 @@ self, name, field_type, access_type )" );
     Node *n = PyNode_AsNode( self );
 
     size_t nr_args = PyTuple_Size( args );
-    PyObject *arg = NULL;
+    PyObject *arg = nullptr;
     if( nr_args > 0 ) {
       arg = PyTuple_GetItem(args, 0);
     }
@@ -387,7 +396,7 @@ self, name, field_type, access_type )" );
       PyErr_SetString( PyExc_ValueError, 
                        "Invalid argument(s) to function PyNode.clone( \
 self, deepCopy )" );
-      return NULL;
+      return nullptr;
     }
     if ( arg ) {
       deepCopy= PyObject_IsTrue ( arg ) == 1;
@@ -400,12 +409,12 @@ self, deepCopy )" );
     Node *n = PyNode_AsNode( self );
 
     PyObject *python_p = args;
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) < 1 ) {
-      if( !args || !( PyVec3f_Check( args ) || PyVec3d_Check( args ) ) ) {
+    if( PyTuple_Size( args ) < 1 ) {
+      if( !( PyVec3f_Check( args ) || PyVec3d_Check( args ) ) ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Not enough arguments, or invalid arguments, to function PyNode.closestPoint( \
   self, p, override_no_collision, collide_invisible )" );
-        return NULL;
+        return nullptr;
       }
     } else {
       python_p = PyTuple_GetItem( args, 0 );
@@ -419,13 +428,13 @@ self, deepCopy )" );
 
     bool override_no_collision = false;
     bool collide_invisible = false;
-    if( PyTuple_Check( args ) && PyTuple_Size( args ) > 1 ) {
+    if( PyTuple_Size( args ) > 1 ) {
       PyObject *python_override_no_collision = PyTuple_GetItem( args, 1 );
       if( !python_override_no_collision || !PythonInternals::isPythonBool( python_override_no_collision ) ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Invalid second argument to PyNode.closestPoint( \
   self, p, override_no_collision, collide_invisible )" );
-        return NULL;
+        return nullptr;
       }
       override_no_collision = PyObject_IsTrue ( python_override_no_collision ) == 1;
 
@@ -435,13 +444,13 @@ self, deepCopy )" );
           PyErr_SetString( PyExc_ValueError, 
                            "Invalid third argument to PyNode.closestPoint( \
     self, p, override_no_collision, collide_invisible )" );
-          return NULL;
+          return nullptr;
         }
         collide_invisible = PyObject_IsTrue ( python_collide_invisible ) == 1;
       }
     }
 
-    Node::NodeIntersectResult result( NULL, override_no_collision, collide_invisible );
+    Node::NodeIntersectResult result( nullptr, override_no_collision, collide_invisible );
     n->closestPoint( p, result );
     if( result.result.empty() ) {
       Py_INCREF( Py_None );
@@ -452,7 +461,7 @@ self, deepCopy )" );
     if( !list ) {
       PyErr_SetString( PyExc_ValueError, 
                            "Failed to create return value (a list). Please report this issue." );
-      return NULL;
+      return nullptr;
     }
     for( size_t i = 0; i < result.result.size(); ++i ) {
       PyObject *dict = PyDict_New();
@@ -460,7 +469,7 @@ self, deepCopy )" );
         PyErr_SetString( PyExc_ValueError, 
                              "Failed to create return value (a dictionary). Please report this issue." );
         Py_DECREF( list );
-        return NULL;
+        return nullptr;
       }
       PyDict_SetItemString( dict, "point", PyVec3f_FromVec3f( Vec3f( result.result[i].point ) ) );
       PyDict_SetItemString( dict, "normal", PyVec3f_FromVec3f( Vec3f( result.result[i].normal ) ) );
@@ -478,11 +487,11 @@ self, deepCopy )" );
   PyObject* PyNode::lineIntersect ( PyObject *self, PyObject *args ) {
     Node *n = PyNode_AsNode( self );
 
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) < 2 ) {
+    if( PyTuple_Size( args ) < 2 ) {
       PyErr_SetString( PyExc_ValueError, 
                          "Not enough arguments, to function PyNode.lineIntersect( \
   self, start, end, override_no_collision, collide_invisible )" );
-      return NULL;
+      return nullptr;
     }
     
     PyObject * python_start = PyTuple_GetItem( args, 0 );
@@ -497,7 +506,7 @@ self, deepCopy )" );
       PyErr_SetString( PyExc_ValueError, 
                          "Invalid first argument to PyNode.lineIntersect( \
   self, start, end, override_no_collision, collide_invisible )" );
-      return NULL;
+      return nullptr;
     }
 
     Vec3f end;
@@ -509,18 +518,18 @@ self, deepCopy )" );
       PyErr_SetString( PyExc_ValueError, 
                          "Invalid second argument to PyNode.lineIntersect( \
   self, start, end, override_no_collision, collide_invisible )" );
-      return NULL;
+      return nullptr;
     }
 
     bool override_no_collision = false;
     bool collide_invisible = false;
-    if( PyTuple_Check( args ) && PyTuple_Size( args ) > 2 ) {
+    if( PyTuple_Size( args ) > 2 ) {
       PyObject *python_override_no_collision = PyTuple_GetItem( args, 2 );
       if( !python_override_no_collision || !PythonInternals::isPythonBool( python_override_no_collision ) ) {
         PyErr_SetString( PyExc_ValueError, 
                          "Invalid third argument to PyNode.lineIntersect( \
   self, start, end, override_no_collision, collide_invisible )" );
-        return NULL;
+        return nullptr;
       }
       override_no_collision = PyObject_IsTrue ( python_override_no_collision ) == 1;
 
@@ -530,13 +539,13 @@ self, deepCopy )" );
           PyErr_SetString( PyExc_ValueError, 
                            "Invalid fourht argument to PyNode.lineIntersect( \
     self, start, end, override_no_collision, collide_invisible )" );
-          return NULL;
+          return nullptr;
         }
         collide_invisible = PyObject_IsTrue ( python_collide_invisible ) == 1;
       }
     }
 
-    Node::LineIntersectResult result( override_no_collision, false, NULL, collide_invisible );
+    Node::LineIntersectResult result( override_no_collision, false, nullptr, collide_invisible );
     n->lineIntersect( start, end, result );
     if( result.result.empty() ) {
       Py_INCREF( Py_None );
@@ -547,7 +556,7 @@ self, deepCopy )" );
     if( !list ) {
       PyErr_SetString( PyExc_ValueError, 
                            "Failed to create return value (a list). Please report this issue." );
-      return NULL;
+      return nullptr;
     }
     for( size_t i = 0; i < result.result.size(); ++i ) {
       PyObject *dict = PyDict_New();
@@ -555,7 +564,7 @@ self, deepCopy )" );
         PyErr_SetString( PyExc_ValueError, 
                              "Failed to create return value (a dictionary). Please report this issue." );
         Py_DECREF( list );
-        return NULL;
+        return nullptr;
       }
       PyDict_SetItemString( dict, "point", PyVec3f_FromVec3f( Vec3f( result.result[i].point ) ) );
       PyDict_SetItemString( dict, "normal", PyVec3f_FromVec3f( Vec3f( result.result[i].normal ) ) );
@@ -623,19 +632,19 @@ self, deepCopy )" );
 #endif
 
   void PyNode::dealloc( PyNode *self ) {
-    if( self->refCountNode && self->ptr ) self->ptr->unref();
+    if( self->refCountNode && self->ptr ) {self->setNodePtr( NULL );}
     Py_TYPE(self)->tp_free( (PyObject*)self );
   }
   
   int PyNode::init(PyNode *self, PyObject *args, PyObject *kwds)  {
-    static char *kwlist[] = {(char *)"ptr", NULL};
+    static char *kwlist[] = {(char *)"ptr", nullptr};
     if (! PyArg_ParseTupleAndKeywords(args, kwds, "|i", kwlist, 
                                       &(self->ptr) ))
       return -1; 
     return 0;
   }
   
-  PyObject* PyNode::repr( PyNode *myself, PyObject *args) {
+  PyObject* PyNode::repr( PyNode *myself, PyObject * /*args*/) {
     ostringstream s;
     if ( myself->ptr )
       s << myself->ptr->getName() << "( " << myself->ptr << ") ";
@@ -644,7 +653,7 @@ self, deepCopy )" );
     return PyString_FromString( s.str().c_str() );
   }
 
-  PyObject* PyNode::getName( PyObject *myself, PyObject *args ) {
+  PyObject* PyNode::getName( PyObject *myself, PyObject * /*args*/ ) {
     PyNode *n = (PyNode*)myself;
     if( n->ptr)
       return PyString_FromString( n->ptr->getName().c_str() );
@@ -654,7 +663,7 @@ self, deepCopy )" );
     }
   }
 
-  PyObject* PyNode::getTypeName( PyObject *myself, PyObject *args ) {
+  PyObject* PyNode::getTypeName( PyObject *myself, PyObject * /*args*/ ) {
     PyNode *n = (PyNode*)myself;
     if( n->ptr)
       return PyString_FromString( n->ptr->getTypeName().c_str() );
@@ -665,7 +674,7 @@ self, deepCopy )" );
   }
 
   PyObject* PyNode::setName( PyObject *self, PyObject *args ) {
-    if(!args || ! PyString_Check( args ) ) {
+    if( ! PyString_Check( args ) ) {
       PyErr_SetString( PyExc_ValueError, 
            "Invalid argument(s) to function H3D.Node.setName( self, name )" );
       return 0;
@@ -708,7 +717,7 @@ self, deepCopy )" );
   }
 
   PyObject* PyNode::getSingleField( PyObject *self, PyObject *args ) {
-    if(!args || ! PyString_Check( args ) ) {
+    if( ! PyString_Check( args ) ) {
       PyErr_SetString( PyExc_ValueError, 
             "Invalid argument(s) to function H3D.Node.getField( self, f )" );
         return 0;
@@ -728,7 +737,7 @@ self, deepCopy )" );
     return Py_None;
   }
   
-  PyObject* PyNode::getFieldList( PyObject *myself, PyObject *args ) {
+  PyObject* PyNode::getFieldList( PyObject *myself, PyObject * /*args*/ ) {
     PyNode *n = (PyNode*)myself;
     H3DNodeDatabase *db = H3DNodeDatabase::lookupNodeInstance( n->ptr );
     // Can't set the size of the list beforehand since dynamic nodes are not
@@ -751,14 +760,14 @@ self, deepCopy )" );
   /// VEC2F
   /// 
   static PyMethodDef PyVec2f_methods[] = {
-    { "__repr__",  PyVec2f::repr, METH_NOARGS, NULL },
-    { "__str__",   PyVec2f::repr, METH_NOARGS, NULL },
-    { "length",    PyVec2f::length, METH_NOARGS, NULL },
-    { "lengthSqr", PyVec2f::lengthSqr, METH_NOARGS, NULL },
-    { "normalize", PyVec2f::normalize,  METH_NOARGS, NULL  },
-    { "normalizeSafe", PyVec2f::normalizeSafe, METH_NOARGS, NULL },
-    { "dotProduct", PyVec2f::dotProduct, METH_O, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__",  PyVec2f::repr, METH_NOARGS, nullptr },
+    { "__str__",   PyVec2f::repr, METH_NOARGS, nullptr },
+    { "length",    PyVec2f::length, METH_NOARGS, nullptr },
+    { "lengthSqr", PyVec2f::lengthSqr, METH_NOARGS, nullptr },
+    { "normalize", PyVec2f::normalize,  METH_NOARGS, nullptr  },
+    { "normalizeSafe", PyVec2f::normalizeSafe, METH_NOARGS, nullptr },
+    { "dotProduct", PyVec2f::dotProduct, METH_O, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
 
 #ifdef __GNUC__
@@ -769,7 +778,7 @@ self, deepCopy )" );
   static PyMemberDef PyVec2f_members[] = {
     {(char *)"x", T_FLOAT, offsetof(PyVec2f, x), 0,(char *)"x"},
     {(char *)"y", T_FLOAT, offsetof(PyVec2f, y), 0,(char *)"y"},
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
 
 #ifdef __GNUC__
@@ -783,122 +792,137 @@ self, deepCopy )" );
 #if PY_MAJOR_VERSION < 3
     (binaryfunc)    PyVec2f::div,   /* nb_divide */
 #endif
-    (binaryfunc)    0,          /* nb_remainder */
-     (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
+    nullptr,          /* nb_remainder */
+     nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
     (unaryfunc)   PyVec2f::neg, /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)   0,                  /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,                  /* nb_hex */
 #endif
       
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-	0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                 /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
       
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
     (binaryfunc)    PyVec2f::div,  /* nb_floor_divide */
     (binaryfunc)    PyVec2f::div,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   
   PyTypeObject PyVec2f_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Vec2f",
-    sizeof(PyVec2f),
+    "H3D.Vec2f",                  /* tp_name */
+    sizeof(PyVec2f),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyVec2f::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0, 
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyVec2f::compare,                         /*tp_compare*/
 #endif    
     (reprfunc) PyVec2f::repr,                         /*tp_repr*/
     &PyVec2f_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE |
     Py_TPFLAGS_CHECKTYPES,     /*tp_flags*/
     "Vec2f Object",            /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyVec2f::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyVec2f_methods,           /* tp_methods */
     PyVec2f_members,           /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyVec2f::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
 
   PyObject* PyVec2f::dotProduct( PyObject *myself, PyObject *args ) {
-    if( !args || !PyVec2f_Check( args ) ) {
+    if( !PyVec2f_Check( args ) ) {
       PyErr_SetString(PyExc_TypeError, 
               "invalid type given as argument to PyVec2f::dotProduct( v )." );
       return 0;
@@ -947,7 +971,7 @@ self, deepCopy )" );
         return -1;
       }
     } else {
-      static char *kwlist[] = {(char *)"x", (char *)"y", NULL};
+      static char *kwlist[] = {(char *)"x", (char *)"y", nullptr};
       if (! PyArg_ParseTupleAndKeywords(args, kwds, "ff", kwlist, 
                                         &(self->x), &(self->y) ))
         return -1; 
@@ -955,17 +979,17 @@ self, deepCopy )" );
     return 0;
   }
 
-  PyObject* PyVec2f::length( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec2f::length( PyObject *myself, PyObject * /*args*/ ) {
     Vec2f vec = PyVec2f_AsVec2f( myself );
     return PyFloat_FromDouble( vec.length() );
   }
   
-  PyObject* PyVec2f::lengthSqr( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec2f::lengthSqr( PyObject *myself, PyObject * /*args*/ ) {
     Vec2f vec = PyVec2f_AsVec2f( myself );
     return PyFloat_FromDouble( vec.lengthSqr() );
   }
   
-  PyObject* PyVec2f::normalize( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec2f::normalize( PyObject *myself, PyObject * /*args*/ ) {
     PyVec2f *v = (PyVec2f*)myself;
     Vec2f *vec = (Vec2f*)v;
     try {
@@ -978,7 +1002,7 @@ self, deepCopy )" );
     return myself;
   }
   
-   PyObject* PyVec2f::normalizeSafe( PyObject *myself, PyObject *args ) {
+   PyObject* PyVec2f::normalizeSafe( PyObject *myself, PyObject * /*args*/ ) {
     PyVec2f *v = (PyVec2f*)myself;
     Vec2f *vec = (Vec2f*)v;
     vec->normalizeSafe();
@@ -990,14 +1014,14 @@ self, deepCopy )" );
   /// VEC2D
   /// 
   static PyMethodDef PyVec2d_methods[] = {
-    { "__repr__", PyVec2d::repr, METH_NOARGS, NULL },
-    { "__str__", PyVec2d::repr, METH_NOARGS, NULL },
-    { "length", PyVec2d::length, METH_NOARGS, NULL },
-    { "lengthSqr", PyVec2d::lengthSqr, METH_NOARGS, NULL },
-    { "normalize", PyVec2d::normalize, METH_NOARGS, NULL },
-    { "normalizeSafe", PyVec2d::normalizeSafe, METH_NOARGS, NULL },
-    { "dotProduct", PyVec2d::dotProduct, METH_O, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__", PyVec2d::repr, METH_NOARGS, nullptr },
+    { "__str__", PyVec2d::repr, METH_NOARGS, nullptr },
+    { "length", PyVec2d::length, METH_NOARGS, nullptr },
+    { "lengthSqr", PyVec2d::lengthSqr, METH_NOARGS, nullptr },
+    { "normalize", PyVec2d::normalize, METH_NOARGS, nullptr },
+    { "normalizeSafe", PyVec2d::normalizeSafe, METH_NOARGS, nullptr },
+    { "dotProduct", PyVec2d::dotProduct, METH_O, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
 #ifdef __GNUC__
@@ -1008,7 +1032,7 @@ self, deepCopy )" );
   static PyMemberDef PyVec2d_members[] = {
     {(char *)"x", T_DOUBLE, offsetof(PyVec2d, x), 0,(char *)"x"},
     {(char *)"y", T_DOUBLE, offsetof(PyVec2d, y), 0,(char *)"y"},
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
 
 #ifdef __GNUC__
@@ -1022,121 +1046,136 @@ self, deepCopy )" );
 #if PY_MAJOR_VERSION < 3
     (binaryfunc)    PyVec2d::div, /* nb_divide */
 #endif
-    (binaryfunc)    0,            /* nb_remainder */
-    (binaryfunc)    0,            /* nb_divmod */
-    (ternaryfunc)   0,            /* nb_power */
+    nullptr,            /* nb_remainder */
+    nullptr,            /* nb_divmod */
+    nullptr,            /* nb_power */
     (unaryfunc)     PyVec2d::neg, /* nb_negative */
-    (unaryfunc)     0,            /* tp_positive */
-    (unaryfunc)     0,            /* tp_absolute */
-    (inquiry)       0,            /* tp_nonzero */
-    (unaryfunc)     0,            /* nb_invert */
-    (binaryfunc)    0,            /* nb_lshift */
-    (binaryfunc)    0,            /* nb_rshift */
-    (binaryfunc)    0,            /* nb_and */
-    (binaryfunc)    0,            /* nb_xor */
-    (binaryfunc)    0,            /* nb_or */
+    nullptr,            /* tp_positive */
+    nullptr,            /* tp_absolute */
+    nullptr,            /* tp_nonzero */
+    nullptr,            /* nb_invert */
+    nullptr,            /* nb_lshift */
+    nullptr,            /* nb_rshift */
+    nullptr,            /* nb_and */
+    nullptr,            /* nb_xor */
+    nullptr,            /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,            /* nb_coerce */
+    nullptr,            /* nb_coerce */
 #endif
-    (unaryfunc)     0,            /* nb_int */
-    (unaryfunc)     0,            /* nb_long */
-    (unaryfunc)     0,            /* nb_float */
+    nullptr,            /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,            /* nb_long */
+#else
+    nullptr,                            /* nb_reserved */
+#endif
+    nullptr,            /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,            /* nb_oct */
-    (unaryfunc)   0,              /* nb_hex */
+    nullptr,            /* nb_oct */
+    nullptr,              /* nb_hex */
 #endif      
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
       
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
     (binaryfunc)    PyVec2d::div,  /* nb_floor_divide */
     (binaryfunc)    PyVec2d::div,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   
   PyTypeObject PyVec2d_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Vec2d",
-    sizeof(PyVec2d),
+    "H3D.Vec2d",                  /* tp_name */
+    sizeof(PyVec2d),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyVec2d::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyVec2d::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyVec2d::repr,                         /*tp_repr*/
     &PyVec2d_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE |
     Py_TPFLAGS_CHECKTYPES,     /*tp_flags*/
     "Vec2d Object",            /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyVec2d::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyVec2d_methods,           /* tp_methods */
     PyVec2d_members,           /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyVec2d::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
   
   PyObject* PyVec2d::dotProduct( PyObject *myself, PyObject *args ) {
-    if( !args || !PyVec2d_Check( args ) ) {
+    if( !PyVec2d_Check( args ) ) {
       PyErr_SetString(PyExc_TypeError, 
          "invalid type given as argument to PyVec2d::dotProduct( v )." );
       return 0;
@@ -1184,7 +1223,7 @@ self, deepCopy )" );
         return -1;
       }
     } else {
-      static char *kwlist[] = {(char *)"x", (char *)"y", NULL};
+      static char *kwlist[] = {(char *)"x", (char *)"y", nullptr};
       if (! PyArg_ParseTupleAndKeywords(args, kwds, "dd", kwlist, 
                                         &(self->x), &(self->y)))
         return -1; 
@@ -1193,17 +1232,17 @@ self, deepCopy )" );
   }
 
   
-  PyObject* PyVec2d::length( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec2d::length( PyObject *myself, PyObject * /*args*/ ) {
     Vec2d vec = PyVec2d_AsVec2d( myself );
     return PyFloat_FromDouble( vec.length() );
   }
   
-  PyObject* PyVec2d::lengthSqr( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec2d::lengthSqr( PyObject *myself, PyObject * /*args*/ ) {
     Vec2d vec = PyVec2d_AsVec2d( myself );
     return PyFloat_FromDouble( vec.lengthSqr() );
   }
   
-  PyObject* PyVec2d::normalize( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec2d::normalize( PyObject *myself, PyObject * /*args*/ ) {
     PyVec2d *v = (PyVec2d*)myself;
     Vec2d *vec = (Vec2d*)v;
     try {
@@ -1216,7 +1255,7 @@ self, deepCopy )" );
     return myself;
   }
   
-   PyObject* PyVec2d::normalizeSafe( PyObject *myself, PyObject *args ) {
+   PyObject* PyVec2d::normalizeSafe( PyObject *myself, PyObject * /*args*/ ) {
     PyVec2d *v = (PyVec2d*)myself;
     Vec2d *vec = (Vec2d*)v;
     vec->normalizeSafe();
@@ -1230,15 +1269,15 @@ self, deepCopy )" );
   /// VEC3F
   /// 
   static PyMethodDef PyVec3f_methods[] = {
-    { "__repr__", PyVec3f::repr, METH_NOARGS, NULL },
-    { "__str__", PyVec3f::repr, METH_NOARGS, NULL },
-    { "length", PyVec3f::length, METH_NOARGS, NULL },
-    { "lengthSqr", PyVec3f::lengthSqr, METH_NOARGS, NULL },
-    { "normalize", PyVec3f::normalize, METH_NOARGS, NULL },
-    { "normalizeSafe", PyVec3f::normalizeSafe, METH_NOARGS, NULL },
-    { "dotProduct", PyVec3f::dotProduct, METH_O, NULL },
-    { "crossProduct", PyVec3f::crossProduct, METH_O, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__", PyVec3f::repr, METH_NOARGS, nullptr },
+    { "__str__", PyVec3f::repr, METH_NOARGS, nullptr },
+    { "length", PyVec3f::length, METH_NOARGS, nullptr },
+    { "lengthSqr", PyVec3f::lengthSqr, METH_NOARGS, nullptr },
+    { "normalize", PyVec3f::normalize, METH_NOARGS, nullptr },
+    { "normalizeSafe", PyVec3f::normalizeSafe, METH_NOARGS, nullptr },
+    { "dotProduct", PyVec3f::dotProduct, METH_O, nullptr },
+    { "crossProduct", PyVec3f::crossProduct, METH_O, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
 #ifdef __GNUC__
@@ -1250,7 +1289,7 @@ self, deepCopy )" );
     {(char *)"x", T_FLOAT, offsetof(PyVec3f, x), 0,(char *)"x"},
     {(char *)"y", T_FLOAT, offsetof(PyVec3f, y), 0,(char *)"y"},
     {(char *)"z", T_FLOAT, offsetof(PyVec3f, z), 0,(char *)"z"},
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
 
 #ifdef __GNUC__
@@ -1265,115 +1304,130 @@ self, deepCopy )" );
     (binaryfunc)  PyVec3f::div, /* nb_divide */
 #endif
     (binaryfunc)  PyVec3f::mod, /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
     (unaryfunc)   PyVec3f::neg, /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)     0,          /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,          /* nb_hex */
 #endif      
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
       
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
     (binaryfunc)    PyVec3f::div,  /* nb_floor_divide */
     (binaryfunc)    PyVec3f::div,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyVec3f_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Vec3f",
-    sizeof(PyVec3f),
+    "H3D.Vec3f",                  /* tp_name */
+    sizeof(PyVec3f),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyVec3f::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyVec3f::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyVec3f::repr,                         /*tp_repr*/
     &PyVec3f_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE | 
     Py_TPFLAGS_CHECKTYPES,     /*tp_flags*/
     "Vec3f Object",            /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyVec3f::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyVec3f_methods,           /* tp_methods */
     PyVec3f_members,           /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyVec3f::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
 
   // Returns an Vec3f representation of the contents of o.
@@ -1416,7 +1470,7 @@ self, deepCopy )" );
         return -1;
       }
     } else {
-      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", NULL};
+      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", nullptr};
       if (! PyArg_ParseTupleAndKeywords(args, kwds, "fff", kwlist, 
                                         &(self->x), &(self->y), &(self->z)))
         return -1; 
@@ -1425,7 +1479,7 @@ self, deepCopy )" );
   }
   
   PyObject* PyVec3f::dotProduct( PyObject *myself, PyObject *args ) {
-    if( !args || !PyVec3f_Check( args ) ) {
+    if( !PyVec3f_Check( args ) ) {
       PyErr_SetString(PyExc_TypeError, 
          "invalid type given as argument to PyVec3f::dotProduct( v )." );
       return 0;
@@ -1437,7 +1491,7 @@ self, deepCopy )" );
   }
 
   PyObject* PyVec3f::crossProduct( PyObject *myself, PyObject *args ) {
-    if( !args || !PyVec3f_Check( args ) ) {
+    if( !PyVec3f_Check( args ) ) {
       PyErr_SetString(PyExc_TypeError, 
          "invalid type given as argument to PyVec3f::crossProduct( v )." );
       return 0;
@@ -1458,17 +1512,17 @@ self, deepCopy )" );
   }
 
     
-  PyObject* PyVec3f::length( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec3f::length( PyObject *myself, PyObject * /*args*/ ) {
     Vec3f vec = PyVec3f_AsVec3f( myself );
     return PyFloat_FromDouble( vec.length() );
   }
   
-  PyObject* PyVec3f::lengthSqr( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec3f::lengthSqr( PyObject *myself, PyObject * /*args*/ ) {
     Vec3f vec = PyVec3f_AsVec3f( myself );
     return PyFloat_FromDouble( vec.lengthSqr() );
   }
   
-  PyObject* PyVec3f::normalize( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec3f::normalize( PyObject *myself, PyObject * /*args*/ ) {
     PyVec3f *v = (PyVec3f*)myself;
     Vec3f *vec = (Vec3f*)v;
     try {
@@ -1481,7 +1535,7 @@ self, deepCopy )" );
     return myself;
   }
   
-   PyObject* PyVec3f::normalizeSafe( PyObject *myself, PyObject *args ) {
+   PyObject* PyVec3f::normalizeSafe( PyObject *myself, PyObject * /*args*/ ) {
     PyVec3f *v = (PyVec3f*)myself;
     Vec3f *vec = (Vec3f*)v;
     vec->normalizeSafe();
@@ -1494,15 +1548,15 @@ self, deepCopy )" );
   /// VEC3D
   /// 
   static PyMethodDef PyVec3d_methods[] = {
-    { "__repr__", PyVec3d::repr, METH_NOARGS, NULL },
-    { "__str__",  PyVec3d::repr, METH_NOARGS, NULL },
-    { "length", PyVec3d::length, METH_NOARGS, NULL },
-    { "lengthSqr", PyVec3d::lengthSqr, METH_NOARGS, NULL },
-    { "normalize", PyVec3d::normalize, METH_NOARGS, NULL },
-    { "normalizeSafe", PyVec3d::normalizeSafe, METH_NOARGS, NULL },
-    { "dotProduct", PyVec3d::dotProduct, METH_O, NULL },
-    { "crossProduct", PyVec3d::crossProduct, METH_O, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__", PyVec3d::repr, METH_NOARGS, nullptr },
+    { "__str__",  PyVec3d::repr, METH_NOARGS, nullptr },
+    { "length", PyVec3d::length, METH_NOARGS, nullptr },
+    { "lengthSqr", PyVec3d::lengthSqr, METH_NOARGS, nullptr },
+    { "normalize", PyVec3d::normalize, METH_NOARGS, nullptr },
+    { "normalizeSafe", PyVec3d::normalizeSafe, METH_NOARGS, nullptr },
+    { "dotProduct", PyVec3d::dotProduct, METH_O, nullptr },
+    { "crossProduct", PyVec3d::crossProduct, METH_O, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
 #ifdef __GNUC__
@@ -1514,7 +1568,7 @@ self, deepCopy )" );
     {(char *)"x", T_DOUBLE, offsetof(PyVec3d, x), 0,(char *)"x"},
     {(char *)"y", T_DOUBLE, offsetof(PyVec3d, y), 0,(char *)"y"},
     {(char *)"z", T_DOUBLE, offsetof(PyVec3d, z), 0,(char *)"z"},
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
 
 #ifdef __GNUC__
@@ -1529,115 +1583,130 @@ self, deepCopy )" );
     (binaryfunc)  PyVec3d::div, /* nb_divide */
 #endif
     (binaryfunc)  PyVec3d::mod, /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
     (unaryfunc)   PyVec3d::neg, /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)     0,          /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,          /* nb_hex */
 #endif      
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
       
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
     (binaryfunc)    PyVec3d::div,  /* nb_floor_divide */
     (binaryfunc)    PyVec3d::div,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyVec3d_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Vec3d",
-    sizeof(PyVec3d),
+    "H3D.Vec3d",                  /* tp_name */
+    sizeof(PyVec3d),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyVec3d::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyVec3d::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyVec3d::repr,                         /*tp_repr*/
     &PyVec3d_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE | 
     Py_TPFLAGS_CHECKTYPES,     /*tp_flags*/
     "Vec3d Object",            /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyVec3d::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyVec3d_methods,           /* tp_methods */
     PyVec3d_members,           /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyVec3d::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
   
   // Returns an Vec3d representation of the contents of o.
@@ -1659,7 +1728,7 @@ self, deepCopy )" );
   }
 
   PyObject* PyVec3d::dotProduct( PyObject *myself, PyObject *args ) {
-    if( !args || !PyVec3d_Check( args ) ) {
+    if( !PyVec3d_Check( args ) ) {
       PyErr_SetString(PyExc_TypeError, 
          "invalid type given as argument to PyVec3d::dotProduct( v )." );
       return 0;
@@ -1671,7 +1740,7 @@ self, deepCopy )" );
   }
 
   PyObject* PyVec3d::crossProduct( PyObject *myself, PyObject *args ) {
-    if( !args || !PyVec3d_Check( args ) ) {
+    if( !PyVec3d_Check( args ) ) {
       PyErr_SetString(PyExc_TypeError, 
          "invalid type given as argument to PyVec3d::crossProduct( v )." );
       return 0;
@@ -1704,7 +1773,7 @@ self, deepCopy )" );
         return -1;
       }
     } else {
-      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", NULL};
+      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", nullptr};
       if (! PyArg_ParseTupleAndKeywords(args, kwds, "ddd", kwlist, 
                                         &(self->x), &(self->y), &(self->z)))
         return -1; 
@@ -1721,17 +1790,17 @@ self, deepCopy )" );
     return Py_NotImplemented;
   }
 
-  PyObject* PyVec3d::length( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec3d::length( PyObject *myself, PyObject * /*args*/ ) {
     Vec3d vec = PyVec3d_AsVec3d( myself );
     return PyFloat_FromDouble( vec.length() );
   }
   
-  PyObject* PyVec3d::lengthSqr( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec3d::lengthSqr( PyObject *myself, PyObject * /*args*/ ) {
     Vec3d vec = PyVec3d_AsVec3d( myself );
     return PyFloat_FromDouble( vec.lengthSqr() );
   }
   
-  PyObject* PyVec3d::normalize( PyObject *myself, PyObject *args ) {
+  PyObject* PyVec3d::normalize( PyObject *myself, PyObject * /*args*/ ) {
     PyVec3d *v = (PyVec3d*)myself;
     Vec3d *vec = (Vec3d*)v;
     try {
@@ -1744,7 +1813,7 @@ self, deepCopy )" );
     return myself;
   }
   
-   PyObject* PyVec3d::normalizeSafe( PyObject *myself, PyObject *args ) {
+   PyObject* PyVec3d::normalizeSafe( PyObject *myself, PyObject * /*args*/ ) {
     PyVec3d *v = (PyVec3d*)myself;
     Vec3d *vec = (Vec3d*)v;
     vec->normalizeSafe();
@@ -1756,9 +1825,9 @@ self, deepCopy )" );
   /// VEC4F
   /// 
   static PyMethodDef PyVec4f_methods[] = {
-    { "__repr__", PyVec4f::repr, METH_NOARGS, NULL },
-    { "__str__",  PyVec4f::repr, METH_NOARGS, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__", PyVec4f::repr, METH_NOARGS, nullptr },
+    { "__str__",  PyVec4f::repr, METH_NOARGS, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
 #ifdef __GNUC__
@@ -1771,7 +1840,7 @@ self, deepCopy )" );
     {(char *)"y", T_FLOAT, offsetof(PyVec4f, y), 0,(char *)"y"},
     {(char *)"z", T_FLOAT, offsetof(PyVec4f, z), 0,(char *)"z"},
     {(char *)"w", T_FLOAT, offsetof(PyVec4f, w), 0,(char *)"w"},
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
 
 #ifdef __GNUC__
@@ -1785,116 +1854,131 @@ self, deepCopy )" );
 #if PY_MAJOR_VERSION < 3
     (binaryfunc)    PyVec4f::div, /* nb_divide */
 #endif
-    (binaryfunc)    0,          /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
+    nullptr,          /* nb_remainder */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
     (unaryfunc)  PyVec4f::neg,  /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)   0,                  /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,                  /* nb_hex */
 #endif
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
       
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
     (binaryfunc)    PyVec4f::div,  /* nb_floor_divide */
     (binaryfunc)    PyVec4f::div,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyVec4f_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Vec4f",
-    sizeof(PyVec4f),
+    "H3D.Vec4f",                  /* tp_name */
+    sizeof(PyVec4f),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyVec4f::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyVec4f::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyVec4f::repr,                         /*tp_repr*/
     &PyVec4f_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE |
     Py_TPFLAGS_CHECKTYPES,     /*tp_flags*/
     "Vec4f Object",            /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyVec4f::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyVec4f_methods,           /* tp_methods */
     PyVec4f_members,           /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyVec4f::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
 
   // Returns an Vec4f representation of the contents of o.
@@ -1939,7 +2023,7 @@ self, deepCopy )" );
         return -1;
       }
     } else {
-      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", (char *)"w", NULL};
+      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", (char *)"w", nullptr};
       if (! PyArg_ParseTupleAndKeywords(args, kwds, "ffff", kwlist, 
                                         &(self->x), &(self->y), 
                                         &(self->z), &(self->w)))
@@ -1952,9 +2036,9 @@ self, deepCopy )" );
   /// VEC4D
   /// 
   static PyMethodDef PyVec4d_methods[] = {
-    { "__repr__",  PyVec4d::repr, METH_NOARGS, NULL },
-    { "__str__",  PyVec4d::repr, METH_NOARGS, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__",  PyVec4d::repr, METH_NOARGS, nullptr },
+    { "__str__",  PyVec4d::repr, METH_NOARGS, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
 #ifdef __GNUC__
@@ -1967,7 +2051,7 @@ self, deepCopy )" );
     {(char *)"y", T_DOUBLE, offsetof(PyVec4d, y), 0,(char *)"y"},
     {(char *)"z", T_DOUBLE, offsetof(PyVec4d, z), 0,(char *)"z"},
     {(char *)"w", T_DOUBLE, offsetof(PyVec4d, w), 0,(char *)"w"},
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
 
 #ifdef __GNUC__
@@ -1981,116 +2065,131 @@ self, deepCopy )" );
 #if PY_MAJOR_VERSION < 3
     (binaryfunc)    PyVec4d::div,   /* nb_divide */
 #endif
-    (binaryfunc)    0,          /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
+    nullptr,          /* nb_remainder */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
     (unaryfunc)   PyVec4d::neg, /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)   0,                  /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,                  /* nb_hex */
 #endif      
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
       
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
     (binaryfunc)    PyVec4d::div,  /* nb_floor_divide */
     (binaryfunc)    PyVec4d::div,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyVec4d_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Vec4d",
-    sizeof(PyVec4d),
+    "H3D.Vec4d",                  /* tp_name */
+    sizeof(PyVec4d),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyVec4d::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyVec4d::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyVec4d::repr,                         /*tp_repr*/
     &PyVec4d_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE |
     Py_TPFLAGS_CHECKTYPES,     /*tp_flags*/
     "Vec4d Object",            /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyVec4d::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyVec4d_methods,           /* tp_methods */
     PyVec4d_members,           /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyVec4d::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
   
   // Returns an Vec4d representation of the contents of o.
@@ -2135,7 +2234,7 @@ self, deepCopy )" );
         return -1;
       }
     } else {
-      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", (char *)"w", NULL};
+      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", (char *)"w", nullptr};
       if (! PyArg_ParseTupleAndKeywords(args, kwds, "dddd", kwlist, 
                                         &(self->x), &(self->y), 
                                         &(self->z), &(self->w)))
@@ -2149,22 +2248,22 @@ self, deepCopy )" );
   /// MATRIX3F
   /// 
   static PyMethodDef PyMatrix3f_methods[] = {
-    { "__repr__", PyMatrix3f::repr, METH_NOARGS, NULL },
-    { "__str__",  PyMatrix3f::repr, METH_NOARGS, NULL },
-    { "setToIdentity", PyMatrix3f::setToIdentity, METH_NOARGS, NULL },
-    { "inverse", PyMatrix3f::inverse, METH_NOARGS, NULL },
-    { "getRow", PyMatrix3f::getRow, METH_O, NULL },
-    { "getColumn", PyMatrix3f::getColumn, METH_O, NULL },
-    { "getElement", PyMatrix3f::getElement, METH_VARARGS, NULL },    
-    { "setElement", PyMatrix3f::setElement, METH_VARARGS, NULL },
-    { "getScalePart", PyMatrix3f::getScalePart, METH_NOARGS, NULL },
-    { "transpose", PyMatrix3f::transpose, METH_NOARGS, NULL },
-    { "toEulerAngles", PyMatrix3f::toEulerAngles, METH_NOARGS, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__", PyMatrix3f::repr, METH_NOARGS, nullptr },
+    { "__str__",  PyMatrix3f::repr, METH_NOARGS, nullptr },
+    { "setToIdentity", PyMatrix3f::setToIdentity, METH_NOARGS, nullptr },
+    { "inverse", PyMatrix3f::inverse, METH_NOARGS, nullptr },
+    { "getRow", PyMatrix3f::getRow, METH_O, nullptr },
+    { "getColumn", PyMatrix3f::getColumn, METH_O, nullptr },
+    { "getElement", PyMatrix3f::getElement, METH_VARARGS, nullptr },    
+    { "setElement", PyMatrix3f::setElement, METH_VARARGS, nullptr },
+    { "getScalePart", PyMatrix3f::getScalePart, METH_NOARGS, nullptr },
+    { "transpose", PyMatrix3f::transpose, METH_NOARGS, nullptr },
+    { "toEulerAngles", PyMatrix3f::toEulerAngles, METH_NOARGS, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
   static PyMemberDef PyMatrix3f_members[] = {
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
   
   
@@ -2175,116 +2274,131 @@ self, deepCopy )" );
 #if PY_MAJOR_VERSION < 3
     (binaryfunc)    PyMatrix3f::div,   /* nb_divide */
 #endif
-    (binaryfunc)    0,   /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
-    (unaryfunc)     0,          /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,   /* nb_remainder */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
+    nullptr,          /* nb_negative */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)   0,                  /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,                  /* nb_hex */
 #endif      
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
       
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
     (binaryfunc)    PyMatrix3f::div,  /* nb_floor_divide */
     (binaryfunc)    PyMatrix3f::div,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyMatrix3f_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Matrix3f",
-    sizeof(PyMatrix3f),
+    "H3D.Matrix3f",                  /* tp_name */
+    sizeof(PyMatrix3f),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyMatrix3f::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyMatrix3f::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyMatrix3f::repr,                         /*tp_repr*/
     &PyMatrix3f_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE |
     Py_TPFLAGS_CHECKTYPES,     /*tp_flags*/
     "Matrix3f Object",         /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyMatrix3f::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyMatrix3f_methods,        /* tp_methods */
     PyMatrix3f_members,        /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyMatrix3f::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
   
   // Returns an Matrix3f representation of the contents of o.
@@ -2298,9 +2412,9 @@ self, deepCopy )" );
   }  
 
   PyObject* PyMatrix3f::getElement( PyObject *myself, PyObject *args ) {
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+    if( PyTuple_Size( args ) != 2 ) {
         ostringstream err;
-        err << "Invalid number of arguments  PyMatrix.getElement( i, j )";
+        err << "Invalid number of arguments to PyMatrix.getElement( i, j )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
         return 0;
       }
@@ -2319,9 +2433,9 @@ self, deepCopy )" );
   }
 
   PyObject* PyMatrix3f::setElement( PyObject *myself, PyObject *args ) {
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 3  ) {
+    if( PyTuple_Size( args ) != 3 ) {
         ostringstream err;
-        err << "Invalid number of arguments  PyMatrix.setElement( i, j, v )";
+        err << "Invalid number of arguments to PyMatrix.setElement( i, j, v )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
         return 0;
       }
@@ -2361,7 +2475,7 @@ self, deepCopy )" );
     return o;
   }
   
-  int PyMatrix3f::init(PyMatrix3f *self, PyObject *args, PyObject *kwds)  {
+  int PyMatrix3f::init(PyMatrix3f *self, PyObject *args, PyObject * /*kwds*/)  {
     Py_ssize_t args_size =  PyTuple_Size( args );
     Matrix3f *self_m = (Matrix3f *)self;
     if( args_size == 0 ) {
@@ -2370,7 +2484,7 @@ self, deepCopy )" );
     } else if( args_size == 1 ) {
       // from Quaternion, Rotation and Matrix3f
       PyObject *o = PyTuple_GetItem( args, 0 );
-      Matrix3f *self_m = (Matrix3f *)self;
+      self_m = (Matrix3f *)self;
       if( PyRotation_Check( o ) ) {
         Rotation r = PyRotation_AsRotation( o );
         *self_m = Matrix3f(r);
@@ -2433,7 +2547,7 @@ self, deepCopy )" );
       PyMatrix3f_FromMatrix3f >::mul( a, b );
   }
 
-  PyObject* PyMatrix3f::setToIdentity( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix3f::setToIdentity( PyObject *myself, PyObject * /*args*/ ) {
     PyMatrix3f *v = (PyMatrix3f*)myself;
     Matrix3f *m = (Matrix3f*)v;
     m->setToIdentity();
@@ -2441,22 +2555,22 @@ self, deepCopy )" );
     return myself;
   }
   
-  PyObject* PyMatrix3f::inverse( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix3f::inverse( PyObject *myself, PyObject * /*args*/ ) {
     Matrix3f m = PyMatrix3f_AsMatrix3f( myself );
     return PyMatrix3f_FromMatrix3f( m.inverse() );
   }
 
-  PyObject* PyMatrix3f::transpose( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix3f::transpose( PyObject *myself, PyObject * /*args*/ ) {
     Matrix3f m = PyMatrix3f_AsMatrix3f( myself );
     return PyMatrix3f_FromMatrix3f( m.transpose() );
   }
 
-  PyObject* PyMatrix3f::toEulerAngles( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix3f::toEulerAngles( PyObject *myself, PyObject * /*args*/ ) {
     Matrix3f m = PyMatrix3f_AsMatrix3f( myself );
     return PyVec3f_FromVec3f( m.toEulerAngles() );
   }
 
-  PyObject* PyMatrix3f::getScalePart( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix3f::getScalePart( PyObject *myself, PyObject * /*args*/ ) {
     Matrix3f m = PyMatrix3f_AsMatrix3f( myself );
     return PyVec3f_FromVec3f( m.getScalePart() );
   }
@@ -2469,7 +2583,7 @@ self, deepCopy )" );
     } 
     PyErr_SetString(PyExc_TypeError, 
                     "int type required as argument to getRow" );
-    return NULL;
+    return nullptr;
   }
 
   PyObject* PyMatrix3f::getColumn( PyObject *myself, PyObject *args ) {
@@ -2480,32 +2594,32 @@ self, deepCopy )" );
     } 
     PyErr_SetString(PyExc_TypeError, 
                     "int type required as argument to getColumn" );
-    return NULL;
+    return nullptr;
   }
 
   ///////////////////////////////////////////////////////////////////
   /// MATRIX4F
   /// 
   static PyMethodDef PyMatrix4f_methods[] = {
-    { "__repr__", PyMatrix4f::repr, METH_NOARGS, NULL },
-    { "__str__", PyMatrix4f::repr, METH_NOARGS, NULL },
-    { "setToIdentity", PyMatrix4f::setToIdentity, METH_NOARGS, NULL },
-    { "transformInverse", PyMatrix4f::transformInverse, METH_NOARGS, NULL },
-    { "inverse", PyMatrix4f::inverse, METH_NOARGS, NULL },
-    { "transpose", PyMatrix4f::transpose, METH_NOARGS, NULL },
-    { "getRow", PyMatrix4f::getRow, METH_O, NULL },
-    { "getColumn", PyMatrix4f::getColumn, METH_O, NULL },
-    { "getScaleRotationPart", PyMatrix4f::getScaleRotationPart, METH_NOARGS, NULL },
-    { "getRotationPart", PyMatrix4f::getRotationPart, METH_NOARGS, NULL },
-    { "getScalePart", PyMatrix4f::getScalePart, METH_NOARGS, NULL },
-    { "getTranslationPart", PyMatrix4f::getTranslationPart, METH_NOARGS, NULL },
-    { "getElement", PyMatrix4f::getElement, METH_VARARGS, NULL },    
-    { "setElement", PyMatrix4f::setElement, METH_VARARGS, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__", PyMatrix4f::repr, METH_NOARGS, nullptr },
+    { "__str__", PyMatrix4f::repr, METH_NOARGS, nullptr },
+    { "setToIdentity", PyMatrix4f::setToIdentity, METH_NOARGS, nullptr },
+    { "transformInverse", PyMatrix4f::transformInverse, METH_NOARGS, nullptr },
+    { "inverse", PyMatrix4f::inverse, METH_NOARGS, nullptr },
+    { "transpose", PyMatrix4f::transpose, METH_NOARGS, nullptr },
+    { "getRow", PyMatrix4f::getRow, METH_O, nullptr },
+    { "getColumn", PyMatrix4f::getColumn, METH_O, nullptr },
+    { "getScaleRotationPart", PyMatrix4f::getScaleRotationPart, METH_NOARGS, nullptr },
+    { "getRotationPart", PyMatrix4f::getRotationPart, METH_NOARGS, nullptr },
+    { "getScalePart", PyMatrix4f::getScalePart, METH_NOARGS, nullptr },
+    { "getTranslationPart", PyMatrix4f::getTranslationPart, METH_NOARGS, nullptr },
+    { "getElement", PyMatrix4f::getElement, METH_VARARGS, nullptr },    
+    { "setElement", PyMatrix4f::setElement, METH_VARARGS, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
   static PyMemberDef PyMatrix4f_members[] = {
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
   
   
@@ -2516,116 +2630,131 @@ self, deepCopy )" );
 #if PY_MAJOR_VERSION < 3
     (binaryfunc)    PyMatrix4f::div,   /* nb_divide */
 #endif
-    (binaryfunc)    0,   /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
-    (unaryfunc)     0,          /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,   /* nb_remainder */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
+    nullptr,          /* nb_negative */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)   0,                  /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,                  /* nb_hex */
 #endif      
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
       
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
     (binaryfunc)    PyMatrix4f::div,  /* nb_floor_divide */
     (binaryfunc)    PyMatrix4f::div,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyMatrix4f_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Matrix4f",
-    sizeof(PyMatrix4f),
+    "H3D.Matrix4f",                  /* tp_name */
+    sizeof(PyMatrix4f),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyMatrix4f::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyMatrix4f::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyMatrix4f::repr,                         /*tp_repr*/
     &PyMatrix4f_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE |
     Py_TPFLAGS_CHECKTYPES,     /*tp_flags*/
     "Matrix4f Object",         /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyMatrix4f::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyMatrix4f_methods,        /* tp_methods */
     PyMatrix4f_members,        /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyMatrix4f::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
   
   // Returns an Matrix4f representation of the contents of o.
@@ -2646,7 +2775,7 @@ self, deepCopy )" );
     return o;
   }
   
-  int PyMatrix4f::init(PyMatrix4f *self, PyObject *args, PyObject *kwds)  {
+  int PyMatrix4f::init(PyMatrix4f *self, PyObject *args, PyObject * /*kwds*/)  {
     Matrix4f *self_m = (Matrix4f *)self;
     Py_ssize_t args_size =  PyTuple_Size( args );
     if( args_size == 0 ) {
@@ -2681,8 +2810,8 @@ self, deepCopy )" );
       }
     } else if ( args_size == 2 ) {
       // Create transform matrix from position and rotation
-      PyObject* pos= NULL;
-      PyObject* rot= NULL;
+      PyObject* pos= nullptr;
+      PyObject* rot= nullptr;
       if ( !PyArg_ParseTuple ( args, "OO", &pos, &rot ) ) {
         PyErr_SetString(PyExc_TypeError, 
                         "Could not parse tuple with two arguments given to Matrix4f constructor." );
@@ -2703,9 +2832,9 @@ self, deepCopy )" );
       }
     } else if ( args_size == 3 ) {
       // Create transform matrix from position, rotation and scale
-      PyObject* pos= NULL;
-      PyObject* rot= NULL;
-      PyObject* sca= NULL;
+      PyObject* pos= nullptr;
+      PyObject* rot= nullptr;
+      PyObject* sca= nullptr;
       if ( !PyArg_ParseTuple ( args, "OOO", &pos, &rot, &sca ) ) {
         PyErr_SetString(PyExc_TypeError, 
                         "Could not parse tuple with three arguments given to Matrix4f constructor." );
@@ -2790,9 +2919,9 @@ self, deepCopy )" );
 
 
   PyObject* PyMatrix4f::getElement( PyObject *myself, PyObject *args ) {
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+    if( PyTuple_Size( args ) != 2 ) {
         ostringstream err;
-        err << "Invalid number of arguments  PyMatrix.getElement( i, j )";
+        err << "Invalid number of arguments to PyMatrix.getElement( i, j )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
         return 0;
       }
@@ -2811,9 +2940,9 @@ self, deepCopy )" );
   }
 
   PyObject* PyMatrix4f::setElement( PyObject *myself, PyObject *args ) {
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 3  ) {
+    if( PyTuple_Size( args ) != 3 ) {
         ostringstream err;
-        err << "Invalid number of arguments  PyMatrix.setElement( i, j, v )";
+        err << "Invalid number of arguments to PyMatrix.setElement( i, j, v )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
         return 0;
       }
@@ -2845,7 +2974,7 @@ self, deepCopy )" );
     return Py_None;
   }
 
-  PyObject* PyMatrix4f::setToIdentity( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4f::setToIdentity( PyObject *myself, PyObject * /*args*/ ) {
     PyMatrix4f *v = (PyMatrix4f*)myself;
     Matrix4f *m = (Matrix4f*)v;
     m->setToIdentity();
@@ -2853,27 +2982,27 @@ self, deepCopy )" );
     return myself;
   }
   
-  PyObject* PyMatrix4f::transformInverse( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4f::transformInverse( PyObject *myself, PyObject * /*args*/ ) {
     Matrix4f m = PyMatrix4f_AsMatrix4f( myself );
     return PyMatrix4f_FromMatrix4f( m.transformInverse() );
   }
 
-  PyObject* PyMatrix4f::inverse( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4f::inverse( PyObject *myself, PyObject * /*args*/ ) {
     Matrix4f m = PyMatrix4f_AsMatrix4f( myself );
     return PyMatrix4f_FromMatrix4f( m.inverse() );
   }
 
-  PyObject* PyMatrix4f::transpose( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4f::transpose( PyObject *myself, PyObject * /*args*/ ) {
     Matrix4f m = PyMatrix4f_AsMatrix4f( myself );
     return PyMatrix4f_FromMatrix4f( m.transpose() );
   }
 
-  PyObject* PyMatrix4f::getScalePart( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4f::getScalePart( PyObject *myself, PyObject * /*args*/ ) {
     Matrix4f m = PyMatrix4f_AsMatrix4f( myself );
     return PyVec3f_FromVec3f( m.getScalePart() );
   }
 
-  PyObject* PyMatrix4f::getTranslationPart( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4f::getTranslationPart( PyObject *myself, PyObject * /*args*/ ) {
     Matrix4f m = PyMatrix4f_AsMatrix4f( myself );
     return PyVec3f_FromVec3f( m.getTranslationPart() );
   }
@@ -2886,7 +3015,7 @@ self, deepCopy )" );
     } 
     PyErr_SetString(PyExc_TypeError, 
                     "int type required as argument to getRow" );
-    return NULL;
+    return nullptr;
   }
 
   PyObject* PyMatrix4f::getColumn( PyObject *myself, PyObject *args ) {
@@ -2897,17 +3026,17 @@ self, deepCopy )" );
     } 
     PyErr_SetString(PyExc_TypeError, 
                     "int type required as argument to getColumn" );
-    return NULL;
+    return nullptr;
   }
 
    PyObject* PyMatrix4f::getScaleRotationPart( PyObject *myself, 
-                                               PyObject *args ) {
+                                               PyObject * /*args*/ ) {
      Matrix4f m = PyMatrix4f_AsMatrix4f( myself );
      return PyMatrix3f_FromMatrix3f( m.getScaleRotationPart() );
    }
 
    PyObject* PyMatrix4f::getRotationPart( PyObject *myself, 
-                                          PyObject *args ) {
+                                          PyObject * /*args*/ ) {
      Matrix4f m = PyMatrix4f_AsMatrix4f( myself );
      return PyMatrix3f_FromMatrix3f( m.getRotationPart() );
    }
@@ -2918,22 +3047,22 @@ self, deepCopy )" );
   /// 
 
   static PyMethodDef PyMatrix3d_methods[] = {
-    { "__repr__", PyMatrix3d::repr, METH_NOARGS, NULL },
-    { "__str__", PyMatrix3d::repr, METH_NOARGS, NULL },
-    { "setToIdentity", PyMatrix3d::setToIdentity, METH_NOARGS, NULL },
-    { "inverse", PyMatrix3d::inverse, METH_NOARGS, NULL },
-    { "getRow", PyMatrix3d::getRow, METH_O, NULL },
-    { "getColumn", PyMatrix3d::getColumn, METH_O, NULL },
-    { "getScalePart", PyMatrix3d::getScalePart, METH_NOARGS, NULL },
-    { "transpose", PyMatrix3d::transpose, METH_NOARGS, NULL },
-    { "toEulerAngles", PyMatrix3d::toEulerAngles, METH_NOARGS, NULL },
-    { "getElement", PyMatrix3d::getElement, METH_VARARGS, NULL },    
-    { "setElement", PyMatrix3d::setElement, METH_VARARGS, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__", PyMatrix3d::repr, METH_NOARGS, nullptr },
+    { "__str__", PyMatrix3d::repr, METH_NOARGS, nullptr },
+    { "setToIdentity", PyMatrix3d::setToIdentity, METH_NOARGS, nullptr },
+    { "inverse", PyMatrix3d::inverse, METH_NOARGS, nullptr },
+    { "getRow", PyMatrix3d::getRow, METH_O, nullptr },
+    { "getColumn", PyMatrix3d::getColumn, METH_O, nullptr },
+    { "getScalePart", PyMatrix3d::getScalePart, METH_NOARGS, nullptr },
+    { "transpose", PyMatrix3d::transpose, METH_NOARGS, nullptr },
+    { "toEulerAngles", PyMatrix3d::toEulerAngles, METH_NOARGS, nullptr },
+    { "getElement", PyMatrix3d::getElement, METH_VARARGS, nullptr },    
+    { "setElement", PyMatrix3d::setElement, METH_VARARGS, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
   static PyMemberDef PyMatrix3d_members[] = {
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
   
   
@@ -2944,116 +3073,131 @@ self, deepCopy )" );
 #if PY_MAJOR_VERSION < 3
     (binaryfunc)    PyMatrix3d::div,   /* nb_divide */
 #endif
-    (binaryfunc)    0,   /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
-    (unaryfunc)     0,          /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,   /* nb_remainder */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
+    nullptr,          /* nb_negative */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)   0,                  /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,                  /* nb_hex */
 #endif      
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
       
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
     (binaryfunc)    PyMatrix3d::div,  /* nb_floor_divide */
     (binaryfunc)    PyMatrix3d::div,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyMatrix3d_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Matrix3d",
-    sizeof(PyMatrix3d),
+    "H3D.Matrix3d",                  /* tp_name */
+    sizeof(PyMatrix3d),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyMatrix3d::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyMatrix3d::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyMatrix3d::repr,                         /*tp_repr*/
     &PyMatrix3d_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE |
     Py_TPFLAGS_CHECKTYPES,     /*tp_flags*/
     "Matrix3d Object",         /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyMatrix3d::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyMatrix3d_methods,        /* tp_methods */
     PyMatrix3d_members,        /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyMatrix3d::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
   
   // Returns an Matrix3d representation of the contents of o.
@@ -3074,7 +3218,7 @@ self, deepCopy )" );
     return o;
   }
   
-  int PyMatrix3d::init(PyMatrix3d *self, PyObject *args, PyObject *kwds)  {
+  int PyMatrix3d::init(PyMatrix3d *self, PyObject *args, PyObject * /*kwds*/)  {
     Py_ssize_t args_size =  PyTuple_Size( args );
     Matrix3d *self_m = (Matrix3d *)self;
     if( args_size == 0 ) {
@@ -3146,9 +3290,9 @@ self, deepCopy )" );
   }
 
   PyObject* PyMatrix3d::getElement( PyObject *myself, PyObject *args ) {
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+    if( PyTuple_Size( args ) != 2 ) {
         ostringstream err;
-        err << "Invalid number of arguments  PyMatrix.getElement( i, j )";
+        err << "Invalid number of arguments to PyMatrix.getElement( i, j )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
         return 0;
       }
@@ -3167,9 +3311,9 @@ self, deepCopy )" );
   }
 
   PyObject* PyMatrix3d::setElement( PyObject *myself, PyObject *args ) {
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 3  ) {
+    if( PyTuple_Size( args ) != 3 ) {
         ostringstream err;
-        err << "Invalid number of arguments  PyMatrix.setElement( i, j, v )";
+        err << "Invalid number of arguments to PyMatrix.setElement( i, j, v )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
         return 0;
       }
@@ -3201,7 +3345,7 @@ self, deepCopy )" );
     return Py_None;
   }
 
-  PyObject* PyMatrix3d::setToIdentity( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix3d::setToIdentity( PyObject *myself, PyObject * /*args*/ ) {
     PyMatrix3d *v = (PyMatrix3d*)myself;
     Matrix3d *m = (Matrix3d*)v;
     m->setToIdentity();
@@ -3209,22 +3353,22 @@ self, deepCopy )" );
     return myself;
   }
   
-  PyObject* PyMatrix3d::inverse( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix3d::inverse( PyObject *myself, PyObject * /*args*/ ) {
     Matrix3d m = PyMatrix3d_AsMatrix3d( myself );
     return PyMatrix3d_FromMatrix3d( m.inverse() );
   }
 
-  PyObject* PyMatrix3d::transpose( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix3d::transpose( PyObject *myself, PyObject * /*args*/ ) {
     Matrix3d m = PyMatrix3d_AsMatrix3d( myself );
     return PyMatrix3d_FromMatrix3d( m.transpose() );
   }
 
-  PyObject* PyMatrix3d::toEulerAngles( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix3d::toEulerAngles( PyObject *myself, PyObject * /*args*/ ) {
     Matrix3d m = PyMatrix3d_AsMatrix3d( myself );
     return PyVec3d_FromVec3d( m.toEulerAngles() );
   }
 
-  PyObject* PyMatrix3d::getScalePart( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix3d::getScalePart( PyObject *myself, PyObject * /*args*/ ) {
     Matrix3d m = PyMatrix3d_AsMatrix3d( myself );
     return PyVec3d_FromVec3d( m.getScalePart() );
   }
@@ -3237,7 +3381,7 @@ self, deepCopy )" );
     } 
     PyErr_SetString(PyExc_TypeError, 
                     "int type required as argument to getRow" );
-    return NULL;
+    return nullptr;
   }
 
   PyObject* PyMatrix3d::getColumn( PyObject *myself, PyObject *args ) {
@@ -3248,33 +3392,33 @@ self, deepCopy )" );
     } 
     PyErr_SetString(PyExc_TypeError, 
                     "int type required as argument to getColumn" );
-    return NULL;
+    return nullptr;
   }
 
   ///////////////////////////////////////////////////////////////////
   /// MATRIX4D
   /// 
   static PyMethodDef PyMatrix4d_methods[] = {
-    { "__repr__", PyMatrix4d::repr, METH_NOARGS, NULL },
-    { "__str__",  PyMatrix4d::repr, METH_NOARGS, NULL },
-    { "setToIdentity", PyMatrix4d::setToIdentity, METH_NOARGS, NULL },
-    { "transformInverse", PyMatrix4d::transformInverse, METH_NOARGS, NULL },
-    { "inverse", PyMatrix4d::inverse, METH_NOARGS, NULL },
-    { "transpose", PyMatrix4d::transpose, METH_NOARGS, NULL },
-    { "getRow", PyMatrix4d::getRow, METH_O, NULL },
-    { "getColumn", PyMatrix4d::getColumn, METH_O, NULL },
+    { "__repr__", PyMatrix4d::repr, METH_NOARGS, nullptr },
+    { "__str__",  PyMatrix4d::repr, METH_NOARGS, nullptr },
+    { "setToIdentity", PyMatrix4d::setToIdentity, METH_NOARGS, nullptr },
+    { "transformInverse", PyMatrix4d::transformInverse, METH_NOARGS, nullptr },
+    { "inverse", PyMatrix4d::inverse, METH_NOARGS, nullptr },
+    { "transpose", PyMatrix4d::transpose, METH_NOARGS, nullptr },
+    { "getRow", PyMatrix4d::getRow, METH_O, nullptr },
+    { "getColumn", PyMatrix4d::getColumn, METH_O, nullptr },
     { "getScaleRotationPart",
-      PyMatrix4d::getScaleRotationPart, METH_NOARGS, NULL },
-    { "getRotationPart", PyMatrix4d::getRotationPart, METH_NOARGS, NULL },
-    { "getScalePart", PyMatrix4d::getScalePart, METH_NOARGS, NULL },
-    { "getTranslationPart", PyMatrix4d::getTranslationPart, METH_NOARGS, NULL },
-    { "getElement", PyMatrix4d::getElement, METH_VARARGS, NULL },    
-    { "setElement", PyMatrix4d::setElement, METH_VARARGS, NULL },
-    {NULL, NULL, 0, NULL}
+      PyMatrix4d::getScaleRotationPart, METH_NOARGS, nullptr },
+    { "getRotationPart", PyMatrix4d::getRotationPart, METH_NOARGS, nullptr },
+    { "getScalePart", PyMatrix4d::getScalePart, METH_NOARGS, nullptr },
+    { "getTranslationPart", PyMatrix4d::getTranslationPart, METH_NOARGS, nullptr },
+    { "getElement", PyMatrix4d::getElement, METH_VARARGS, nullptr },    
+    { "setElement", PyMatrix4d::setElement, METH_VARARGS, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
   static PyMemberDef PyMatrix4d_members[] = {
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
   
   
@@ -3285,116 +3429,131 @@ self, deepCopy )" );
 #if PY_MAJOR_VERSION < 3
     (binaryfunc)    PyMatrix4d::div,   /* nb_divide */
 #endif
-    (binaryfunc)    0,   /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
-    (unaryfunc)     0,          /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,   /* nb_remainder */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
+    nullptr,          /* nb_negative */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)   0,                  /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,                  /* nb_hex */
 #endif      
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
       
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
     (binaryfunc)    PyMatrix4d::div,  /* nb_floor_divide */
     (binaryfunc)    PyMatrix4d::div,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyMatrix4d_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Matrix4d",
-    sizeof(PyMatrix4d),
+    "H3D.Matrix4d",                  /* tp_name */
+    sizeof(PyMatrix4d),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyMatrix4d::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyMatrix4d::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyMatrix4d::repr,                         /*tp_repr*/
     &PyMatrix4d_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE |
     Py_TPFLAGS_CHECKTYPES,     /*tp_flags*/
     "Matrix4d Object",         /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyMatrix4d::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyMatrix4d_methods,        /* tp_methods */
     PyMatrix4d_members,        /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyMatrix4d::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
   
   // Returns an Matrix4d representation of the contents of o.
@@ -3415,7 +3574,7 @@ self, deepCopy )" );
     return o;
   }
   
-  int PyMatrix4d::init(PyMatrix4d *self, PyObject *args, PyObject *kwds)  {
+  int PyMatrix4d::init(PyMatrix4d *self, PyObject *args, PyObject * /*kwds*/)  {
     Matrix4d *self_m = (Matrix4d *)self;
     Py_ssize_t args_size =  PyTuple_Size( args );
     if( args_size == 0 ) {
@@ -3450,8 +3609,8 @@ self, deepCopy )" );
       }
     } else if ( args_size == 2 ) {
       // Create transform matrix from position and rotation
-      PyObject* pos= NULL;
-      PyObject* rot= NULL;
+      PyObject* pos= nullptr;
+      PyObject* rot= nullptr;
       if ( !PyArg_ParseTuple ( args, "OO", &pos, &rot ) ) {
         return -1;
       }
@@ -3468,9 +3627,9 @@ self, deepCopy )" );
       }
     } else if ( args_size == 3 ) {
       // Create transform matrix from position, rotation and scale
-      PyObject* pos= NULL;
-      PyObject* rot= NULL;
-      PyObject* sca= NULL;
+      PyObject* pos= nullptr;
+      PyObject* rot= nullptr;
+      PyObject* sca= nullptr;
       if ( !PyArg_ParseTuple ( args, "OOO", &pos, &rot, &sca ) ) {
         return -1;
       }
@@ -3547,9 +3706,9 @@ self, deepCopy )" );
   }
 
   PyObject* PyMatrix4d::getElement( PyObject *myself, PyObject *args ) {
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+    if( PyTuple_Size( args ) != 2 ) {
         ostringstream err;
-        err << "Invalid number of arguments  PyMatrix.getElement( i, j )";
+        err << "Invalid number of arguments to PyMatrix.getElement( i, j )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
         return 0;
       }
@@ -3568,9 +3727,9 @@ self, deepCopy )" );
   }
 
   PyObject* PyMatrix4d::setElement( PyObject *myself, PyObject *args ) {
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 3  ) {
+    if( PyTuple_Size( args ) != 3 ) {
         ostringstream err;
-        err << "Invalid number of arguments  PyMatrix.setElement( i, j, v )";
+        err << "Invalid number of arguments to PyMatrix.setElement( i, j, v )";
         PyErr_SetString( PyExc_ValueError, err.str().c_str() );
         return 0;
       }
@@ -3602,7 +3761,7 @@ self, deepCopy )" );
     return Py_None;
   }
 
-  PyObject* PyMatrix4d::setToIdentity( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4d::setToIdentity( PyObject *myself, PyObject * /*args*/ ) {
     PyMatrix4d *v = (PyMatrix4d*)myself;
     Matrix4d *m = (Matrix4d*)v;
     m->setToIdentity();
@@ -3610,27 +3769,27 @@ self, deepCopy )" );
     return myself;
   }
   
-  PyObject* PyMatrix4d::transformInverse( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4d::transformInverse( PyObject *myself, PyObject * /*args*/ ) {
     Matrix4d m = PyMatrix4d_AsMatrix4d( myself );
     return PyMatrix4d_FromMatrix4d( m.transformInverse() );
   }
 
-  PyObject* PyMatrix4d::inverse( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4d::inverse( PyObject *myself, PyObject * /*args*/ ) {
     Matrix4d m = PyMatrix4d_AsMatrix4d( myself );
     return PyMatrix4d_FromMatrix4d( m.inverse() );
   }
 
-  PyObject* PyMatrix4d::transpose( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4d::transpose( PyObject *myself, PyObject * /*args*/ ) {
     Matrix4d m = PyMatrix4d_AsMatrix4d( myself );
     return PyMatrix4d_FromMatrix4d( m.transpose() );
   }
 
-  PyObject* PyMatrix4d::getScalePart( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4d::getScalePart( PyObject *myself, PyObject * /*args*/ ) {
     Matrix4d m = PyMatrix4d_AsMatrix4d( myself );
     return PyVec3d_FromVec3d( m.getScalePart() );
   }
 
-  PyObject* PyMatrix4d::getTranslationPart( PyObject *myself, PyObject *args ) {
+  PyObject* PyMatrix4d::getTranslationPart( PyObject *myself, PyObject * /*args*/ ) {
     Matrix4d m = PyMatrix4d_AsMatrix4d( myself );
     return PyVec3d_FromVec3d( m.getTranslationPart() );
   }
@@ -3643,7 +3802,7 @@ self, deepCopy )" );
     } 
     PyErr_SetString(PyExc_TypeError, 
                     "int type required as argument to getRow" );
-    return NULL;
+    return nullptr;
   }
 
   PyObject* PyMatrix4d::getColumn( PyObject *myself, PyObject *args ) {
@@ -3654,17 +3813,17 @@ self, deepCopy )" );
     } 
     PyErr_SetString(PyExc_TypeError, 
                     "int type required as argument to getColumn" );
-    return NULL;
+    return nullptr;
   }
 
    PyObject* PyMatrix4d::getScaleRotationPart( PyObject *myself, 
-                                               PyObject *args ) {
+                                               PyObject * /*args*/ ) {
      Matrix4d m = PyMatrix4d_AsMatrix4d( myself );
      return PyMatrix3d_FromMatrix3d( m.getScaleRotationPart() );
    }
 
    PyObject* PyMatrix4d::getRotationPart( PyObject *myself, 
-                                          PyObject *args ) {
+                                          PyObject * /*args*/ ) {
      Matrix4d m = PyMatrix4d_AsMatrix4d( myself );
      return PyMatrix3d_FromMatrix3d( m.getRotationPart() );
    }
@@ -3674,11 +3833,11 @@ self, deepCopy )" );
   /// ROTATION
   /// 
   static PyMethodDef PyRotation_methods[] = {
-    { "__repr__", PyRotation::repr, METH_NOARGS, NULL },
-    { "__str__",  PyRotation::repr, METH_NOARGS, NULL },
-    { "toEulerAngles", PyRotation::toEulerAngles, METH_NOARGS, NULL },
-    { "slerp", PyRotation::slerp, METH_VARARGS, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__", PyRotation::repr, METH_NOARGS, nullptr },
+    { "__str__",  PyRotation::repr, METH_NOARGS, nullptr },
+    { "toEulerAngles", PyRotation::toEulerAngles, METH_NOARGS, nullptr },
+    { "slerp", PyRotation::slerp, METH_VARARGS, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
 #ifdef __GNUC__
@@ -3692,7 +3851,7 @@ self, deepCopy )" );
     {(char *)"z", T_FLOAT, offsetof(PyRotation, axis.z), 0,(char *)"z"},
     {(char *)"a", T_FLOAT, offsetof(PyRotation, angle), 0,(char *)"a"},
     {(char *)"angle", T_FLOAT, offsetof(PyRotation, angle), 0,(char *)"angle"}, 
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
 
 #ifdef __GNUC__
@@ -3701,123 +3860,138 @@ self, deepCopy )" );
   
   
   static PyNumberMethods PyRotation_as_number = {
-    (binaryfunc)  0,          /* nb_add */
-    (binaryfunc)  0,          /* nb_subtract */
+    nullptr,          /* nb_add */
+    nullptr,          /* nb_subtract */
     (binaryfunc)  PyRotation::mul, /* nb_multiply */
 #if PY_MAJOR_VERSION < 3
     (binaryfunc)  PyRotation::div,  /* nb_divide */
 #endif
-    (binaryfunc)    0,          /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
+    nullptr,          /* nb_remainder */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
     (unaryfunc)     PyRotation::neg, /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)   0,                  /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,                  /* nb_hex */
 #endif
     
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
     
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
-    (binaryfunc)   0,  /* nb_floor_divide */
-    (binaryfunc)   0,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,  /* nb_floor_divide */
+    nullptr,  /* nb_true_divide */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyRotation_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Rotation",
-    sizeof(PyRotation),
+    "H3D.Rotation",                  /* tp_name */
+    sizeof(PyRotation),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyRotation::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyRotation::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyRotation::repr,                         /*tp_repr*/
     &PyRotation_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE |
     Py_TPFLAGS_CHECKTYPES,     /*tp_flags*/
     "Rotation Object",         /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyRotation::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyRotation_methods,           /* tp_methods */
     PyRotation_members,           /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyRotation::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
 
   // Returns an Rotation representation of the contents of o.
@@ -3839,9 +4013,9 @@ self, deepCopy )" );
   }
    
   PyObject* PyRotation::slerp( PyObject *myself, PyObject *args ) {
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+    if( PyTuple_Size( args ) != 2 ) {
       PyErr_SetString(PyExc_TypeError, 
-             "invalid number of arguments given Rotation::slerp( Rot, t )." );
+             "invalid number of arguments given to Rotation::slerp( Rot, t )." );
       return 0;
     }
 
@@ -3914,7 +4088,7 @@ self, deepCopy )" );
         return -1;
       }
     } else {
-      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", (char *)"a", NULL};
+      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", (char *)"a", nullptr};
       if (! PyArg_ParseTupleAndKeywords(args, kwds, "|ffff", kwlist, 
                                         &(self->axis.x), &(self->axis.y), 
                                         &(self->axis.z), &(self->angle)))
@@ -3944,7 +4118,7 @@ self, deepCopy )" );
       PyRotation_FromRotation >::mul( a, b );
   }
 
-  PyObject* PyRotation::toEulerAngles( PyObject *myself, PyObject *args ) {
+  PyObject* PyRotation::toEulerAngles( PyObject *myself, PyObject * /*args*/ ) {
     Rotation r = PyRotation_AsRotation( myself );
     return (PyObject *)PyVec3f_FromVec3f( r.toEulerAngles() );
   }
@@ -3954,16 +4128,16 @@ self, deepCopy )" );
   /// QUATERNION
   /// 
   static PyMethodDef PyQuaternion_methods[] = {
-    { "__repr__", PyQuaternion::repr, METH_NOARGS, NULL },
-    { "__str__", PyQuaternion::repr, METH_NOARGS, NULL },
-    { "toEulerAngles", PyQuaternion::toEulerAngles, METH_NOARGS, NULL },
-    { "norm", PyQuaternion::norm, METH_NOARGS, NULL },
-    { "normalize", PyQuaternion::normalize, METH_NOARGS, NULL },
-    { "conjugate", PyQuaternion::conjugate, METH_NOARGS, NULL },
-    { "inverse", PyQuaternion::inverse, METH_NOARGS, NULL },
-    { "slerp", PyQuaternion::slerp, METH_VARARGS, NULL },
-    { "dotProduct", PyQuaternion::dotProduct, METH_O, NULL },
-    {NULL, NULL, 0, NULL}
+    { "__repr__", PyQuaternion::repr, METH_NOARGS, nullptr },
+    { "__str__", PyQuaternion::repr, METH_NOARGS, nullptr },
+    { "toEulerAngles", PyQuaternion::toEulerAngles, METH_NOARGS, nullptr },
+    { "norm", PyQuaternion::norm, METH_NOARGS, nullptr },
+    { "normalize", PyQuaternion::normalize, METH_NOARGS, nullptr },
+    { "conjugate", PyQuaternion::conjugate, METH_NOARGS, nullptr },
+    { "inverse", PyQuaternion::inverse, METH_NOARGS, nullptr },
+    { "slerp", PyQuaternion::slerp, METH_VARARGS, nullptr },
+    { "dotProduct", PyQuaternion::dotProduct, METH_O, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
   
 #ifdef __GNUC__
@@ -3976,7 +4150,7 @@ self, deepCopy )" );
     {(char *)"y", T_FLOAT, offsetof(PyQuaternion, v.y), 0,(char *)"y"},
     {(char *)"z", T_FLOAT, offsetof(PyQuaternion, v.z), 0,(char *)"z"},
     {(char *)"w", T_FLOAT, offsetof(PyQuaternion, w), 0,(char *)"w"},
-    {NULL, 0, 0, 0, NULL}  /* Sentinel */
+    {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
 
 #ifdef __GNUC__
@@ -3991,116 +4165,131 @@ self, deepCopy )" );
 #if PY_MAJOR_VERSION < 3
     (binaryfunc)  PyQuaternion::div,    /* nb_divide */
 #endif
-    (binaryfunc)    0,          /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
+    nullptr,          /* nb_remainder */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
     (unaryfunc)   PyQuaternion::neg,  /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)   0,                  /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,                  /* nb_hex */
 #endif    
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
     
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
     (binaryfunc)    PyQuaternion::div,  /* nb_floor_divide */
     (binaryfunc)    PyQuaternion::div,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyQuaternion_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Quaternion",
-    sizeof(PyQuaternion),
+    "H3D.Quaternion",                  /* tp_name */
+    sizeof(PyQuaternion),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyQuaternion::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyQuaternion::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyQuaternion::repr,                         /*tp_repr*/
     &PyQuaternion_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | 
     Py_TPFLAGS_BASETYPE |
     Py_TPFLAGS_CHECKTYPES, /*tp_flags*/
     "Quaternion Object",            /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyQuaternion::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyQuaternion_methods,           /* tp_methods */
     PyQuaternion_members,           /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyQuaternion::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
   
   PyObject* PyQuaternion::mul( PyObject *a, PyObject *b ) {
@@ -4185,7 +4374,7 @@ self, deepCopy )" );
         return -1;
       }
     } else {
-      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", (char *)"w", NULL};
+      static char *kwlist[] = {(char *)"x", (char *)"y", (char *)"z", (char *)"w", nullptr};
       if (! PyArg_ParseTupleAndKeywords(args, kwds, "|ffff", kwlist, 
                                         &(self->v.x), &(self->v.y), 
                                         &(self->v.z), &(self->w)))
@@ -4195,7 +4384,7 @@ self, deepCopy )" );
     return 0;
   }
   
-  PyObject* PyQuaternion::normalize( PyObject *myself, PyObject *args ) {
+  PyObject* PyQuaternion::normalize( PyObject *myself, PyObject * /*args*/ ) {
     PyQuaternion *q = (PyQuaternion*)myself;
     Quaternion *quat = (Quaternion*)q;
     quat->normalize();
@@ -4203,8 +4392,8 @@ self, deepCopy )" );
     return myself;
   }
 
-  PyObject* PyQuaternion::dotProduct( PyObject *myself, PyObject *args ) {
-    if( !args || !PyQuaternion_Check( args ) ) {
+  PyObject* PyQuaternion::dotProduct( PyObject *myself, PyObject * args ) {
+    if( !PyQuaternion_Check( args ) ) {
       PyErr_SetString(PyExc_TypeError, 
                 "invalid type given as argument to Quaternion::dotProduct." );
       return 0;
@@ -4215,9 +4404,9 @@ self, deepCopy )" );
   }
 
   PyObject* PyQuaternion::slerp( PyObject *myself, PyObject *args ) {
-    if( !args || !PyTuple_Check( args ) || PyTuple_Size( args ) != 2  ) {
+    if( PyTuple_Size( args ) != 2 ) {
       PyErr_SetString(PyExc_TypeError, 
-          "invalid number of arguments given Quaternion::slerp( Quat, t )." );
+          "invalid number of arguments given to Quaternion::slerp( Quat, t )." );
       return 0;
     }
 
@@ -4236,22 +4425,22 @@ self, deepCopy )" );
     return PyQuaternion_FromQuaternion( quat1.slerp( quat2, arg ) );
   }
 
-  PyObject* PyQuaternion::norm( PyObject *myself, PyObject *args ) {
+  PyObject* PyQuaternion::norm( PyObject *myself, PyObject * /*args*/ ) {
     Quaternion quat = PyQuaternion_AsQuaternion( myself );
     return PyFloat_FromDouble( quat.norm() );
   }
 
-  PyObject* PyQuaternion::toEulerAngles( PyObject *myself, PyObject *args ) {
+  PyObject* PyQuaternion::toEulerAngles( PyObject *myself, PyObject * /*args*/ ) {
     Quaternion quat = PyQuaternion_AsQuaternion( myself );
     return PyVec3f_FromVec3f( quat.toEulerAngles() );
   }
 
-  PyObject* PyQuaternion::conjugate( PyObject *myself, PyObject *args ) {
+  PyObject* PyQuaternion::conjugate( PyObject *myself, PyObject * /*args*/ ) {
     Quaternion quat = PyQuaternion_AsQuaternion( myself );
     return PyQuaternion_FromQuaternion( quat.conjugate() );
   }
 
-  PyObject* PyQuaternion::inverse( PyObject *myself, PyObject *args ) {
+  PyObject* PyQuaternion::inverse( PyObject *myself, PyObject * /*args*/ ) {
     Quaternion quat = PyQuaternion_AsQuaternion( myself );
     return PyQuaternion_FromQuaternion( quat.inverse() );
   }
@@ -4261,9 +4450,9 @@ self, deepCopy )" );
   /// RGB
   /// 
   static PyMethodDef PyRGB_methods[] = {
-  { "__repr__", PyRGB::repr, METH_NOARGS, NULL },
-  { "__str__", PyRGB::repr, METH_NOARGS, NULL },
-  {NULL, NULL, 0, NULL}
+  { "__repr__", PyRGB::repr, METH_NOARGS, nullptr },
+  { "__str__", PyRGB::repr, METH_NOARGS, nullptr },
+  {nullptr, nullptr, 0, nullptr}
   };
   
 #ifdef __GNUC__
@@ -4275,7 +4464,7 @@ self, deepCopy )" );
   {(char *)"r", T_FLOAT, offsetof(PyRGB, r), 0,(char *)"r"},
   {(char *)"g", T_FLOAT, offsetof(PyRGB, g), 0,(char *)"g"},
   {(char *)"b", T_FLOAT, offsetof(PyRGB, b), 0,(char *)"b"},
-  {NULL, 0, 0, 0, NULL}  /* Sentinel */
+  {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
 
 #ifdef __GNUC__
@@ -4284,120 +4473,135 @@ self, deepCopy )" );
   
   
   static PyNumberMethods PyRGB_as_number = {
-    (binaryfunc)    0,   /* nb_add */
-    (binaryfunc)    0,   /* nb_subtract */
-    (binaryfunc)    0,       /* nb_multiply */
+    nullptr,   /* nb_add */
+    nullptr,   /* nb_subtract */
+    nullptr,       /* nb_multiply */
 #if PY_MAJOR_VERSION < 3
-    (binaryfunc)    0,   /* nb_divide */
+    nullptr,   /* nb_divide */
 #endif
-    (binaryfunc)    0,   /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
-    (unaryfunc)     0,          /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,   /* nb_remainder */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
+    nullptr,          /* nb_negative */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)   0,                  /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,                  /* nb_hex */
 #endif    
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
     
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
-    (binaryfunc)    0,  /* nb_floor_divide */
-    (binaryfunc)    0,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,  /* nb_floor_divide */
+    nullptr,  /* nb_true_divide */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyRGB_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.RGB",
-    sizeof(PyRGB),
+    "H3D.RGB",                  /* tp_name */
+    sizeof(PyRGB),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyRGB::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyRGB::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyRGB::repr,                         /*tp_repr*/
     &PyRGB_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
     "RGB Object",            /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyRGB::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyRGB_methods,           /* tp_methods */
     PyRGB_members,           /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyRGB::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
   
   // Returns an RGB representation of the contents of o.
@@ -4423,7 +4627,7 @@ self, deepCopy )" );
       RGB *self_v = (RGB *)self;
       *self_v = RGB();
     } else {
-      static char *kwlist[] = {(char *)"r", (char *)"g", (char *)"b", NULL};
+      static char *kwlist[] = {(char *)"r", (char *)"g", (char *)"b", nullptr};
       if (! PyArg_ParseTupleAndKeywords(args, kwds, "fff", kwlist, 
                                         &(self->r), &(self->g), &(self->b)))
         return -1; 
@@ -4435,9 +4639,9 @@ self, deepCopy )" );
   /// RGBA
   /// 
   static PyMethodDef PyRGBA_methods[] = {
-  { "__repr__", PyRGBA::repr, METH_NOARGS, NULL },
-  { "__str__", PyRGBA::repr, METH_NOARGS, NULL },
-  {NULL, NULL, 0, NULL}
+  { "__repr__", PyRGBA::repr, METH_NOARGS, nullptr },
+  { "__str__", PyRGBA::repr, METH_NOARGS, nullptr },
+  {nullptr, nullptr, 0, nullptr}
   };
   
 #ifdef __GNUC__
@@ -4450,7 +4654,7 @@ self, deepCopy )" );
   {(char *)"g", T_FLOAT, offsetof(PyRGBA, g), 0,(char *)"g"},
   {(char *)"b", T_FLOAT, offsetof(PyRGBA, b), 0,(char *)"b"},
   {(char *)"a", T_FLOAT, offsetof(PyRGBA, a), 0,(char *)"a"},
-  {NULL, 0, 0, 0, NULL}  /* Sentinel */
+  {nullptr, 0, 0, 0, nullptr}  /* Sentinel */
   };
 
 #ifdef __GNUC__
@@ -4459,120 +4663,135 @@ self, deepCopy )" );
   
   
   static PyNumberMethods PyRGBA_as_number = {
-    (binaryfunc)    0,   /* nb_add */
-    (binaryfunc)    0,   /* nb_subtract */
-    (binaryfunc)    0,       /* nb_multiply */
+    nullptr,   /* nb_add */
+    nullptr,   /* nb_subtract */
+    nullptr,       /* nb_multiply */
 #if PY_MAJOR_VERSION < 3
-    (binaryfunc)    0,   /* nb_divide */
+    nullptr,   /* nb_divide */
 #endif
-    (binaryfunc)    0,   /* nb_remainder */
-    (binaryfunc)    0,          /* nb_divmod */
-    (ternaryfunc)   0,          /* nb_power */
-    (unaryfunc)     0,          /* nb_negative */
-    (unaryfunc)     0,          /* tp_positive */
-    (unaryfunc)     0,          /* tp_absolute */
-    (inquiry)       0,          /* tp_nonzero */
-    (unaryfunc)     0,          /* nb_invert */
-    (binaryfunc)    0,          /* nb_lshift */
-    (binaryfunc)    0,          /* nb_rshift */
-    (binaryfunc)    0,          /* nb_and */
-    (binaryfunc)    0,          /* nb_xor */
-    (binaryfunc)    0,          /* nb_or */
+    nullptr,   /* nb_remainder */
+    nullptr,          /* nb_divmod */
+    nullptr,          /* nb_power */
+    nullptr,          /* nb_negative */
+    nullptr,          /* tp_positive */
+    nullptr,          /* tp_absolute */
+    nullptr,          /* tp_nonzero */
+    nullptr,          /* nb_invert */
+    nullptr,          /* nb_lshift */
+    nullptr,          /* nb_rshift */
+    nullptr,          /* nb_and */
+    nullptr,          /* nb_xor */
+    nullptr,          /* nb_or */
 #if PY_MAJOR_VERSION < 3
-    (coercion)      0,          /* nb_coerce */
+    nullptr,          /* nb_coerce */
 #endif
-    (unaryfunc)     0,          /* nb_int */
-    (unaryfunc)     0,          /* nb_long */
-    (unaryfunc)     0,          /* nb_float */
+    nullptr,          /* nb_int */
+#if PY_VERSION_HEX < ((3 << 24) | (0 << 16) | (1 <<  8))
+    nullptr,          /* nb_long */
+#else
+    nullptr,                          /* nb_reserved */
+#endif
+    nullptr,          /* nb_float */
 #if PY_MAJOR_VERSION < 3
-    (unaryfunc)     0,          /* nb_oct */
-    (unaryfunc)   0,                  /* nb_hex */
+    nullptr,          /* nb_oct */
+    nullptr,                  /* nb_hex */
 #endif
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-    0,                      /* nb_inplace_add */
-    0,                      /* nb_inplace_subtract */
-    0,                      /* nb_inplace_multiply */
+    nullptr,                      /* nb_inplace_add */
+    nullptr,                      /* nb_inplace_subtract */
+    nullptr,                      /* nb_inplace_multiply */
 #if PY_MAJOR_VERSION < 3
-    0,                      /* nb_inplace_divide */
+    nullptr,                      /* nb_inplace_divide */
 #endif
-    0,                      /* nb_inplace_remainder */
-    (ternaryfunc)0,         /* nb_inplace_power */
-    0,                      /* nb_inplace_lshift */
-    0,                      /* nb_inplace_rshift */
-    0,                      /* nb_inplace_and */
-    0,                      /* nb_inplace_xor */
-    0,                      /* nb_inplace_or */
+    nullptr,                      /* nb_inplace_remainder */
+    nullptr,         /* nb_inplace_power */
+    nullptr,                      /* nb_inplace_lshift */
+    nullptr,                      /* nb_inplace_rshift */
+    nullptr,                      /* nb_inplace_and */
+    nullptr,                      /* nb_inplace_xor */
+    nullptr,                      /* nb_inplace_or */
     
     /* Added in release 2.2 */
     /* These require the Py_TPFLAGS_HAVE_CLASS flag */
-    (binaryfunc)    0,  /* nb_floor_divide */
-    (binaryfunc)    0,  /* nb_true_divide */
-    0,                      /* nb_inplace_floor_divide */
-    0,                      /* nb_inplace_true_divide */
-    0                       /* nb_index */
+    nullptr,  /* nb_floor_divide */
+    nullptr,  /* nb_true_divide */
+    nullptr,                      /* nb_inplace_floor_divide */
+    nullptr,                      /* nb_inplace_true_divide */
+    nullptr                       /* nb_index */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 5
+    , nullptr,                    /* nb_matrix_multiply */
+    nullptr                       /* nb_inplace_matrix_multiply */
+#endif
   };    
   PyTypeObject PyRGBA_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.RGBA",
-    sizeof(PyRGBA),
+    "H3D.RGBA",                  /* tp_name */
+    sizeof(PyRGBA),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyRGBA::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
 #if PY_MAJOR_VERSION >= 3
-    0,
+    nullptr,                   /*tp_as_async or tp_reserved*/
 #else
     (cmpfunc) PyRGBA::compare,                         /*tp_compare*/
 #endif
     (reprfunc) PyRGBA::repr,                         /*tp_repr*/
     &PyRGBA_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
     "RGBA Object",            /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
 #if PY_MAJOR_VERSION >= 3
     (richcmpfunc)PyRGBA::richCompare,
 #else
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_richcompare */
 #endif
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyRGBA_methods,           /* tp_methods */
     PyRGBA_members,           /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyRGBA::init,   /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
   
   // Returns an RGBA representation of the contents of o.
@@ -4599,7 +4818,7 @@ self, deepCopy )" );
       RGBA *self_v = (RGBA *)self;
       *self_v = RGBA();
     } else {
-      static char *kwlist[] = {(char *)"r", (char *)"g", (char *)"b", (char *)"a", NULL};
+      static char *kwlist[] = {(char *)"r", (char *)"g", (char *)"b", (char *)"a", nullptr};
       if (! PyArg_ParseTupleAndKeywords(args, kwds, "ffff", kwlist, 
                                         &(self->r), 
                                         &(self->g), 
@@ -4618,7 +4837,7 @@ self, deepCopy )" );
 
   PyMemberDef PyConsole_members[] = {
     {(char *)"log_level", T_INT, offsetof(PyConsole, log_level), 0, (char *)"log_level"},
-    {NULL}  /* Sentinel */
+    {nullptr}  /* Sentinel */
   };
 
 #ifdef __GNUC__
@@ -4626,64 +4845,71 @@ self, deepCopy )" );
 #endif
 
   static PyMethodDef PyConsole_methods[] = {
-    { "write", PyConsole::write, METH_O, NULL },
-    { "writeAtLevel", PyConsole::writeAtLevel, METH_VARARGS, NULL },
-    {NULL, NULL, 0, NULL}
+    { "write", PyConsole::write, METH_O, nullptr },
+    { "writeAtLevel", PyConsole::writeAtLevel, METH_VARARGS, nullptr },
+    {nullptr, nullptr, 0, nullptr}
   };
 
   PyTypeObject PyConsole_Type = {
 #if PY_MAJOR_VERSION >= 3
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(nullptr, 0) /* VAR_HEAD */
 #else
-    PyObject_HEAD_INIT(NULL)
+    PyObject_HEAD_INIT(nullptr)   /* VAR_HEAD python 2*/
     0,
 #endif
-    "H3D.Console",
-    sizeof(PyConsole),
+    "H3D.Console",                  /* tp_name */
+    sizeof(PyConsole),              /* tp_basicsize */
     0,                         /*tp_itemsize*/
     (destructor)PyConsole::dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
-    0,                         /*tp_compare*/
-    0,                         /*tp_repr*/
-    0,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+#if PY_VERSION_HEX >= 0x03080000
+    0,                              /*tp_vectorcall_offset*/
+#else
+    nullptr,                         /*tp_print*/
+#endif
+    nullptr,                         /*tp_getattr*/
+    nullptr,                         /*tp_setattr*/
+    nullptr,                         /*tp_compare*/
+    nullptr,                         /*tp_repr*/
+    nullptr,                         /*tp_as_number*/
+    nullptr,                         /*tp_as_sequence*/
+    nullptr,                         /*tp_as_mapping*/
+    nullptr,                         /*tp_hash */
+    nullptr,                         /*tp_call*/
+    nullptr,                         /*tp_str*/
+    nullptr,                         /*tp_getattro*/
+    nullptr,                         /*tp_setattro*/
+    nullptr,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
     "Console Object",            /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
-    0,                         /* tp_richcompare */
+    nullptr,                         /* tp_traverse */
+    nullptr,                         /* tp_clear */
+    nullptr,                         /* tp_richcompare */
     0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
+    nullptr,                         /* tp_iter */
+    nullptr,                         /* tp_iternext */
     PyConsole_methods,           /* tp_methods */
     PyConsole_members,         /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
+    nullptr,                         /* tp_getset */
+    nullptr,                         /* tp_base */
+    nullptr,                         /* tp_dict */
+    nullptr,                         /* tp_descr_get */
+    nullptr,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
     (initproc)PyConsole::init, /* tp_init */
     PyType_GenericAlloc,       /* tp_alloc */
     (newfunc) PyType_GenericAlloc,            /* tp_new */
-    0, /* tp_free */
-    0, /* tp_is_gc */
-    0, /* tp_bases */
-    0, /* tp_mro */
-    0, /* tp_cache */
-    0, /* tp_subclasses */
-    0, /* tp_weaklist */
-    0, /* tp_del */
+    nullptr, /* tp_free */
+    nullptr, /* tp_is_gc */
+    nullptr, /* tp_bases */
+    nullptr, /* tp_mro */
+    nullptr, /* tp_cache */
+    nullptr, /* tp_subclasses */
+    nullptr, /* tp_weaklist */
+    nullptr, /* tp_del */
     0  /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 4
+    ,nullptr /* tp_finalize */
+#endif
   };
 
   void writeHelper ( int _level, const std::string& _msg ) {
@@ -4697,7 +4923,7 @@ self, deepCopy )" );
     }
   }
 
-  int PyConsole::init(PyConsole *self, PyObject *args, PyObject *kwds) {
+  int PyConsole::init(PyConsole *self, PyObject *args, PyObject * /*kwds*/) {
     self->log_level = LogLevel::Info;
     if( PyTuple_Size( args ) == 1 ) {
       PyObject *o = PyTuple_GetItem( args, 0 ); // new ref
@@ -4739,13 +4965,13 @@ self, deepCopy )" );
     }
   }
 
-  PyObject* PyConsole::writeAtLevel( PyObject *self, PyObject *args ) {
+  PyObject* PyConsole::writeAtLevel( PyObject * /*self*/, PyObject *args ) {
 
-    if( !PyTuple_Check( args ) || PyTuple_Size( args ) != 2 ) {
+    if( PyTuple_Size( args ) != 2 ) {
       PyErr_SetString( PyExc_ValueError, 
-                       "Invalid argument(s) to function PyConsole.writeAtLevel( \
+                       "Invalid number of arguments to function PyConsole.writeAtLevel( \
 self, level, message )" );
-      return NULL;
+      return nullptr;
     } 
     
     PyObject *levelObj = PyTuple_GetItem( args, 0 );

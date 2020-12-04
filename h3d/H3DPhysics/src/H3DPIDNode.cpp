@@ -47,7 +47,7 @@ H3DPIDNode::H3DPIDNode( Inst< SFNode      > _metadata ) :
 void H3DPIDNode::traverseSG( TraverseInfo &ti ) {
   X3DNode::traverseSG( ti );
 
-  PhysicsEngineThread *pt;
+  PhysicsEngineThread *pt = NULL;
   // obtain the physics thread
   ti.getUserData( "PhysicsEngine", (void * *)&pt );
 

@@ -41,7 +41,7 @@
 // undefine _DEBUG since we want to always link to the release version of
 // python and pyconfig.h automatically links debug version if _DEBUG is
 // defined.
-#ifdef _DEBUG
+#if defined _DEBUG && ! defined HAVE_PYTHON_DEBUG_LIBRARY 
 #define _DEBUG_UNDEFED
 #undef _DEBUG
 #endif
@@ -78,6 +78,8 @@
 
 #include <H3D/Python3Compatibility.h>
 
+#include <sstream>
+
 namespace H3D {
   struct PyNode; // Forward declare
   namespace PythonInternals {
@@ -88,6 +90,7 @@ namespace H3D {
 #endif  
 
     H3DAPI_API PyObject * initH3DInternal();
+    H3DAPI_API void finishH3DInternal();
 
     double pyObjectToDouble( PyObject *v );
 
@@ -258,8 +261,16 @@ namespace H3D {
       python_field( _python_field ),
       have_update( false ),
       have_type_info( false ),
-      have_opt_type_info( false ) {}
+      have_opt_type_info( false ) {
+      assert( H3DUtil::ThreadBase::inMainThread() );
+      python_fields.insert( this );
+    }
 
+    virtual ~PythonFieldBase() {
+      assert( H3DUtil::ThreadBase::inMainThread() );
+      python_fields.erase( this );
+    }
+    static H3DAPI_API std::set< PythonFieldBase * > python_fields;
     void *python_field;
     // Flags used to know if the "update", "__type_info_", "__opt_type_info__"
     // attributes of the python fields exists and should be used.
@@ -311,13 +322,27 @@ namespace H3D {
             Py_DECREF( r );
           } else if ( r ) {
             if( !PythonInternals::pythonSetFieldValueFromObject( this, r ) ) {
-              Console(LogLevel::Warning) << "Warning: invalid return value from update()-function"
+              std::stringstream ss;
+              ss << "Warning: invalid return value from update()-function"
                          << " for Python defined field of type " 
-                         << this->getFullName() << endl;
+                         << this->getFullName();
+              bool is_MField = (this->getX3DType() % 2 != 0);
+              if ( is_MField && !PyList_Check( r ) ) {
+                ss << ". The field is a MField which requires a list of values to be returned"
+                  << " while the current return value is not a list.";
+              }
+              Console( LogLevel::Warning ) << ss.str() << std::endl;
+              PyObject* err = PyErr_Occurred();
+              if (err != NULL) {
+                PyErr_Print();
+              }
             }
             Py_DECREF( r );
           } else {
-            PyErr_Print();
+            PyObject* err = PyErr_Occurred();
+            if (err != NULL) {
+              PyErr_Print();
+            }
           }
           Py_DECREF( python_update );
         } else {

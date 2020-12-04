@@ -29,7 +29,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <H3D/VrmlParser.h>
 #include <H3D/IStreamInputSource.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 #include <sstream>
 #include <H3D/PrototypeVector.h>
 #include <H3D/VrmlDriver.h>
@@ -84,15 +84,23 @@ Group* X3D::createVRMLFromString( const string &str,
                                   DEFNodes *exported_nodes,
                                   PrototypeVector *prototypes  ) {
   Group *g = new Group;
-  stringstream inp;
-  inp << str;
-  VrmlDriver driver;
-  if (driver.parse( &inp, "<string>", dn, exported_nodes, prototypes )) {
-    Group *c = driver.getRoot();
-    if ( c )
-      g->children->push_back( c );
-  } else {
-    Console(LogLevel::Warning) << "Warning: Could not parse VRML from string" << endl;
+  try{
+    stringstream inp;
+    inp << str;
+    VrmlDriver driver;
+    if (driver.parse(&inp, "<string>", dn, exported_nodes, prototypes)) {
+      Group *c = driver.getRoot();
+      if (c)
+        g->children->push_back(c);
+    }
+    else {
+      Console(LogLevel::Warning) << "Warning: Could not parse VRML from string" << endl;
+    }
+  }
+  catch (const std::exception&){
+    delete g;
+    g = NULL;
+    throw;
   }
   return g;
 }
@@ -110,38 +118,43 @@ Group* X3D::createVRMLFromURL( const string &url,
   }
 
   Group *g = new Group;
+  try{
+    URNResolver* urn_resolver = ResourceResolver::getURNResolver();
+    string urn = url;
+    if (urn_resolver) urn = urn_resolver->resolveURN(urn);
+    string::size_type pos = urn.find_last_of("/\\");
+    string path = urn.substr(0, pos + 1);
+    string old_base = ResourceResolver::getBaseURL();
 
-  URNResolver *urn_resolver = ResourceResolver::getURNResolver();
-  string urn = url;
-  if( urn_resolver ) urn = urn_resolver->resolveURN( urn );
-  string::size_type pos = urn.find_last_of( "/\\" );
-  string path = urn.substr( 0, pos + 1 );
-  string old_base = ResourceResolver::getBaseURL();
+    bool is_tmp_file;
+    string resolved_url = ResourceResolver::resolveURLAsFile(url,
+      &is_tmp_file);
+    if (change_base_path_during_parsing)
+      ResourceResolver::setBaseURL(path);
 
-  bool is_tmp_file;
-  string resolved_url = ResourceResolver::resolveURLAsFile( url, 
-                                                            &is_tmp_file );
-  if( change_base_path_during_parsing )
-    ResourceResolver::setBaseURL( path ); 
+    if (resolved_url == "") {
+      Console(LogLevel::Warning) << "Warning: Could not open file "
+        << url << " for parsing." << endl;
+      ResourceResolver::setBaseURL(old_base);
+      return g;
+    }
 
-  if( resolved_url == "" ) {
-    Console(LogLevel::Warning) << "Warning: Could not open file " 
-               << url << " for parsing." << endl;
-    ResourceResolver::setBaseURL( old_base );
-    return g;
+    VrmlDriver driver;
+    ifstream inp(resolved_url.c_str());
+
+    if (driver.parse(&inp, url.c_str(), dn, exported_nodes, prototypes)) {
+      Group *c = driver.getRoot();
+      if (c)
+        g->children->push_back(c);
+    }
+    inp.close();
+    ResourceResolver::setBaseURL(old_base);
+    if (is_tmp_file) ResourceResolver::releaseTmpFileName(resolved_url);
+  }catch (...){
+    delete g;
+    g = NULL;
+    throw;
   }
-
-  VrmlDriver driver;
-  ifstream inp(resolved_url.c_str() );
-  
-  if (driver.parse( &inp, url.c_str(), dn, exported_nodes, prototypes )) {
-    Group *c = driver.getRoot();
-    if ( c )
-      g->children->push_back( c );
-  } 
-  inp.close();
-  ResourceResolver::setBaseURL( old_base );
-  if( is_tmp_file ) ResourceResolver::releaseTmpFileName( resolved_url );
   return g;
 }
 
@@ -150,13 +163,21 @@ Group* X3D::createVRMLFromStream( istream &is,
                                    DEFNodes *exported_nodes,
                                    PrototypeVector *prototypes ) {
   Group *g = new Group;
-  VrmlDriver driver;
-  if (driver.parse( &is, "<stream>", dn, exported_nodes, prototypes )) {
-    Group *c = driver.getRoot();
-    if ( c )
-      g->children->push_back( c );
-  } else {
-    Console(LogLevel::Warning) << "Warning: Could not parse VRML from stream" << endl;
+  try{
+    VrmlDriver driver;
+    if (driver.parse(&is, "<stream>", dn, exported_nodes, prototypes)) {
+      Group *c = driver.getRoot();
+      if (c)
+        g->children->push_back(c);
+    }
+    else {
+      Console(LogLevel::Warning) << "Warning: Could not parse VRML from stream" << endl;
+    }
+  }
+  catch (...){
+    delete g;
+    g = NULL;
+    throw;
   }
   return g;
 }

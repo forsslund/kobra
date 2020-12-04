@@ -29,7 +29,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <H3D/X3DUrlObject.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 
 using namespace H3D;
 
@@ -83,13 +83,13 @@ void X3DUrlObject::addInlinePrefix( const string &s ) {
   supported_inline_prefixes.push_back( s + ":" );
 }
 
-int X3DUrlObject::getInlinedContentOffset( const std::string& url ) {
+int X3DUrlObject::getInlinedContentOffset( const std::string& _url ) {
   for( list< string >::const_iterator i = supported_inline_prefixes.begin();
        i != supported_inline_prefixes.end(); ++i ) {
     size_t start = 0;
-    size_t url_size = url.size();
-    while( start < url_size && isspace( url[start] ) ) ++start;
-    if( url.compare( start, (*i).size(), *i ) == 0 ) {
+    size_t url_size = _url.size();
+    while( start < url_size && isspace( _url[start] ) ) ++start;
+    if( _url.compare( start, (*i).size(), *i ) == 0 ) {
       assert( start + (*i).size() <= ( std::numeric_limits<unsigned int>::max() / 2 ) - 1 );
       return static_cast< int >(start + (*i).size());
     }

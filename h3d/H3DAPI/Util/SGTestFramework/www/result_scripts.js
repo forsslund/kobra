@@ -64,16 +64,27 @@ var display_options =  {
   },
   testruns: {
     selected: -1
-  }
+  },
+  filter: {
+    onlyShowFailed: false,
+    collapseAllCategories: true,
+    collapseVisibleSteps: true,
+    collapseVisibleCases: true,
+    collapseVisibleSteps: true,
+  },
 };
 
-        
+// Pre-selected test-run
 var hash_build = decodeURI(location.hash.substr(location.hash.indexOf('build=')).split('&')[0].split('=')[1]).replace(/--/g, ' ');
 var hash_hardware = decodeURI(location.hash.substr(location.hash.indexOf('hardware=')).split('&')[0].split('=')[1]).replace(/--/g, ' ');
 var hash_run = location.hash.substr(location.hash.indexOf('testrun=')).split('&')[0].split('=')[1];
-var hash_category = decodeURI(location.hash.substr(location.hash.indexOf('category=')).split('&')[0].split('=')[1]).replace(/--/g, ' ');
-var hash_case = decodeURI(location.hash.substr(location.hash.indexOf('case=')).split('&')[0].split('=')[1]);
 var open_cases = decodeURI(location.hash.substr(location.hash.indexOf('opencases=')).split('&')[0].split('=')[1]).split(',');
+
+// Display options
+if( location.hash.includes('osfc') ){
+  display_options.filter.onlyShowFailed = 'true' == decodeURI(location.hash.substr(location.hash.indexOf('osfc=')).split('&')[0].split('=')[1]);
+}
+
 if(open_cases[0] == "undefined") {
   open_cases = [];
 }
@@ -868,14 +879,26 @@ function ConstructTestCases(model, target, path) {
         var case_name = $('<div>');
         case_name.addClass("TestResult_name");
         
-        if ((hash_build == display_options.servers.current.build) && (hash_hardware == display_options.servers.current.hardware) && hash_category.startsWith(path) && hash_case == model.testcases[i].name) {
-          $("input", $(target).parent()).prop("checked", true);
-          if(open_cases.indexOf(model.testcases[i].id) < 0) {
-            open_cases.push(model.testcases[i].id);
+        if ((hash_build == display_options.servers.current.build) && (hash_hardware == display_options.servers.current.hardware) && open_cases.includes(model.testcases[i].id) ) {
+          var p = $(target).parent();
+          while( $("input", p).length ){
+            $("input", p).prop("checked", true);
+            p = $(p).parent();
+          }
+          // Scroll to the first one
+          if(model.testcases[i].id == open_cases[0]){
+            console.log("Scrolling..");
+            $([document.documentElement, document.body]).animate({
+              scrollTop: $(target).offset().top
+            }, 1000);
           }
         } else {
           if(open_cases.indexOf(model.testcases[i].id) > -1) {
-            $("input", $(target).parent()).prop("checked", true);
+            var p = $(target).parent();
+            while( $("input", p).length ){
+              $("input", p).prop("checked", true);
+              p = $(p).parent();
+            }
           } else {
             case_name.addClass("minimized");
           }
@@ -892,14 +915,22 @@ function ConstructTestCases(model, target, path) {
           } else if(open_cases.indexOf(testcase.id) < 0){
             open_cases.push(testcase.id);
           }
-          window.location.hash = window.location.hash.split('#')[0] + encodeURI("#build=" + display_options.servers.current.build.replace(/ /g, '--') + "&hardware=" + display_options.servers.current.hardware.replace(/ /g, '--') + "&testrun=" + display_options.testruns.selected + "&category=" + path.replace(/ /g, '--') + "&case=" + testcase.name)          
-          URLUpdateOpenCases();
+          UpdateURL();
         });
         
         var case_name_link = $("<a>");
         case_name_link.append("Case: " + model.testcases[i].name);
+
+        var history_link = $("<a>");
+        history_link.append("History");
+        var history_url = "step_history.html#server_id=" + display_options.servers.current.id + "&case_id=" + model.testcases[i].case_id;
+        history_link.attr('href', history_url);
+        history_link.attr('target', '_blank');
+        history_link.css('float', 'right');
+
         //case_name_link.attr('href', );
         case_name.append(case_name_link);
+        case_name.append(history_link);
         if(model.testcases[i].success == 'Y') {
           case_name.addClass("test_successful");
         } else {
@@ -908,7 +939,6 @@ function ConstructTestCases(model, target, path) {
             case_name.addClass('test_failed_new');
           }
         }
-        
         case_div.append(case_name);
 
         if (model.testcases[i].svn_url_x3d && model.testcases[i].svn_url_x3d != "") {
@@ -980,6 +1010,7 @@ function ConstructTestCases(model, target, path) {
         case_name.append(" - Missing performance data");
       }
     }
+    UpdateURL();
   }  
 }
 
@@ -1004,9 +1035,6 @@ function ConstructList(model, target, path) {
       label.append(glyph);
       var name = $('<a><h3>'+model[i].name+'</h3></a>');
       name.data('category_name', path + model[i].name + "/");
-      name.click(function(){
-        window.location.hash = encodeURI("#build=" + display_options.servers.current.build.replace(/ /g, '--') + "&hardware=" + display_options.servers.current.hardware.replace(/ /g, '--') + "&testrun=" + display_options.testruns.selected + "&category=" + $(this).data('category_name').replace(/ /g, '--'));
-      });
       label.append(name);
 
       label.attr('for', 'category'+CategoryCount);
@@ -1015,11 +1043,6 @@ function ConstructList(model, target, path) {
       input.attr('type', 'checkbox');
       input.attr('id', 'category'+CategoryCount);
       input.addClass('category_list_checkbox');
-      if(first || (hash_build == display_options.servers.current.build && hash_hardware == display_options.servers.current.hardware && hash_category.startsWith(path + model[i].name))) {
-        input.prop('checked', true);
-        first = false;
-      }
-      
       
       ul.append(input);
       ul.append(label);
@@ -1219,7 +1242,7 @@ function BuildSelected(build_name) {
             if ($(this).hasClass("Selected_Server")) {
               if (display_options.servers.current.id != server) {
                 SetServer(server);
-                window.location.hash = encodeURI("#build=" + display_options.servers.current.build.replace(/ /g, '--') + "&hardware=" + display_options.servers.current.hardware.replace(/ /g, '--'));
+                UpdateURL();
               } else {
                 SetServer(server);
               }
@@ -1274,7 +1297,7 @@ function HardwareSelected(hardware_name) {
             if ($(this).hasClass("Selected_Server")) {
               if (display_options.servers.current.id != server) {
                 SetServer(server);
-                window.location.hash = encodeURI("#build=" + display_options.servers.current.build.replace(/ /g, '--') + "&hardware=" + display_options.servers.current.hardware.replace(/ /g, '--'));
+                UpdateURL();
               } else {
                 SetServer(server);
               }
@@ -1331,7 +1354,7 @@ function SetServer(server_index) {
 function OnTestRunClick(){
   $(".TestRun").unbind("click");
   if(display_options.testruns.selected != $(this).data("test_run_id")) {
-    window.location.hash = encodeURI("#build=" + display_options.servers.current.build.replace(/ /g, '--') + "&hardware=" + display_options.servers.current.hardware.replace(/ /g, '--') + "&testrun=" + $(this).data("test_run_id"));
+    UpdateURL();
     hash_run = $(this).data("test_run_id");
   }
   open_cases = [];
@@ -1372,6 +1395,7 @@ function GetTestRunList(server_id) {
               $(".Selected_TestRun").removeClass('Selected_TestRun');
               $(div).addClass('Selected_TestRun');
               display_options.testruns.selected = $(div).data("test_run_id");
+              UpdateURL();
             }
           } else {
             div.addClass('TestRun_NoResults');
@@ -1570,67 +1594,86 @@ function SetTestRun(test_run_id, description) {
     });
     
     // Set up the toggle buttons.
-    $('#Options_Toggle_Only_Show_Failed').data('only_showing_failed', false);
-    $('#Options_Toggle_Only_Show_Failed').prop('value', 'Only Show Failed Cases');
+    $('#Options_Toggle_Only_Show_Failed').data('only_showing_failed', display_options.filter.onlyShowFailed);
+    $('#Options_Toggle_Only_Show_Failed').prop('value', display_options.filter.onlyShowFailed ? 'Show All Cases' : 'Only Show Failed Cases');
     $('#Options_Toggle_Only_Show_Failed').unbind().click(function(){
-      if($(this).data('only_showing_failed')) {
-        $(".TestCase:not(:has(.test_failed)):not(.description)").show(); // Showing the test cases
-        $('ul:not(:has(.test_failed))').show() // Showing the test categories
-        $(this).data('only_showing_failed', false);
-        $('#Options_Toggle_Only_Show_Failed').prop('value', 'Only Show Failed Cases');
-      } else {
-        $(".TestCase:not(:has(.test_failed)):not(.description)").hide(); // Hiding the test cases
-        $('ul:not(:has(.test_failed))').hide() // Hiding the test categories
-        $(this).data('only_showing_failed', true);
-        $('#Options_Toggle_Only_Show_Failed').prop('value', 'Show All Cases');
-      }
+      display_options.filter.onlyShowFailed = !display_options.filter.onlyShowFailed;
+      $('#Options_Toggle_Only_Show_Failed').prop('value', display_options.filter.onlyShowFailed ? 'Show All Cases' : 'Only Show Failed Cases');
+      ApplyFilterShowOnlyFailed();
+      UpdateURL();
     });
     
-    $('#Options_Toggle_Categories').data('collapsed', true);
-    $('#Options_Toggle_Categories').prop('value', 'Expand All Categories');
+    $('#Options_Toggle_Categories').data('collapsed', display_options.filter.collapseAllCategories);
+    $('#Options_Toggle_Categories').prop('value', display_options.filter.collapseAllCategories ? 'Expand All Categories' : 'Collapse All Categories');
     $('#Options_Toggle_Categories').unbind().click(function(){
-      if($(this).data('collapsed')) {
-        $('.category_list_checkbox').prop('checked', true);
-        $(this).data('collapsed', false);
-        $('#Options_Toggle_Categories').prop('value', 'Collapse All Categories');
-      } else {
-        $('.category_list_checkbox').prop('checked', false);
-        $(this).data('collapsed', true);
-        $('#Options_Toggle_Categories').prop('value', 'Expand All Categories');
-      }
+      display_options.filter.collapseAllCategories = !display_options.filter.collapseAllCategories;
+      $('#Options_Toggle_Categories').prop('value', display_options.filter.collapseAllCategories ? 'Expand All Categories' : 'Collapse All Categories');
+      ApplyFilterCollapseAllCategories();
+      UpdateURL();
     });
     
-    
-    $('#Options_Toggle_Cases').data('collapsed', true);
-    $('#Options_Toggle_Cases').prop('value', 'Expand Visible Cases');
+    $('#Options_Toggle_Cases').data('collapsed', display_options.filter.collapseVisibleCases);
+    $('#Options_Toggle_Cases').prop('value', display_options.filter.collapseVisibleCases ? 'Expand Visible Cases' : 'Collapse Visible Cases');
     $('#Options_Toggle_Cases').unbind().click(function(){
-      if($(this).data('collapsed')) {
-        $('.TestResult_name:visible').removeClass('minimized');
-        $(this).data('collapsed', false);
-        $('#Options_Toggle_Cases').prop('value', 'Collapse Visible Cases');
-      } else {
-        $('.TestResult_name:visible').addClass('minimized');
-        $(this).data('collapsed', true);
-        $('#Options_Toggle_Cases').prop('value', 'Expand Visible Cases');
-      }
+      display_options.filter.collapseVisibleCases = !display_options.filter.collapseVisibleCases;
+      $('#Options_Toggle_Cases').prop('value', display_options.filter.collapseVisibleCases ? 'Expand Visible Cases' : 'Collapse Visible Cases');
+      ApplyFilterCollapseVisibleCases();
+      UpdateURL();
     });
 
-    $('#Options_Collapse_Steps').prop('value', 'Collapse Visible Steps');
-    $('#Options_Collapse_Steps').click(function(){
-      $('.TestStep_name:visible').addClass('minimized');
-    });
-    $('#Options_Expand_Steps').prop('value', 'Expand Visible Steps');
-    $('#Options_Expand_Steps').click(function(){
-      $('.TestStep_name:visible').removeClass('minimized');
+    $('#Options_Collapse_Steps').data('collapsed', display_options.filter.collapseVisibleSteps);
+    $('#Options_Collapse_Steps').prop('value', display_options.filter.collapseVisibleSteps ? 'Expand Visible Steps' : 'Collapse Visible Steps');
+    $('#Options_Collapse_Steps').unbind().click(function(){
+      display_options.filter.collapseVisibleSteps = !display_options.filter.collapseVisibleSteps;
+      $('#Options_Collapse_Steps').prop('value', display_options.filter.collapseVisibleSteps ? 'Expand Visible Steps' : 'Collapse Visible Steps');
+      ApplyFilterCollapseVisibleSteps();
+      UpdateURL();
     });
 
     $(".TestRun").unbind("click");
     $(".TestRun:not(.TestRun_NoResults)").click(OnTestRunClick);
+    
+    ApplyFilterShowOnlyFailed();
   });
   
 }
 
 
+function ApplyFilterShowOnlyFailed(){
+  if( display_options.filter.onlyShowFailed ){
+    $(".TestCase:not(:has(.test_failed)):not(.description)").hide(); // Hiding the test cases
+    $('ul:not(:has(.test_failed))').hide(); // Hiding the test categories
+    
+  }else{
+    $(".TestCase:not(:has(.test_failed)):not(.description)").show(); // Showing the test cases
+    $('ul:not(:has(.test_failed))').show(); // Showing the test categories
+  }
+}
+
+function ApplyFilterCollapseAllCategories(){
+  if( display_options.filter.collapseAllCategories ) {
+    $('.category_list_checkbox').prop('checked', false);
+  }else{
+    $('.category_list_checkbox').prop('checked', true);
+  }
+}
+
+function ApplyFilterCollapseVisibleCases(){
+  if( display_options.filter.collapseVisibleCases ){
+    $('.TestResult_name:visible').addClass('minimized');
+    
+  }else{
+    $('.TestResult_name:visible').removeClass('minimized');
+  }
+}
+
+function ApplyFilterCollapseVisibleSteps(){
+  if( display_options.filter.collapseVisibleSteps ){
+    $('.TestStep_name:visible').addClass('minimized');
+  }else{
+    $('.TestStep_name:visible').removeClass('minimized');
+  }
+}
 
 var model = null;
 
@@ -1638,11 +1681,22 @@ $(document).ready(function(){
   GetServerList();
 });
 
-
-
-function URLUpdateOpenCases() {
-  window.location.hash = window.location.hash.replace(/[&]opencases[=][0-9,]+/g, "");
-  if(open_cases.length > 0) {
-    window.location.hash = window.location.hash + "&opencases=" + open_cases.join();
+function UpdateURL(){
+  var params = "";
+  if( display_options.servers.current.build != "" ){
+    params += "#build=" + display_options.servers.current.build.replace(/ /g, '--');
   }
+  if( display_options.servers.current.hardware != "" ){
+    params += "&hardware=" + display_options.servers.current.hardware.replace(/ /g, '--');
+  }
+  if( display_options.testruns.selected != null){
+    params += "&testrun=" + display_options.testruns.selected
+  }
+  if(open_cases.length > 0) {
+    params += "&opencases=" + open_cases.join();
+  }
+  
+  params +=  "&osfc=" + display_options.filter.onlyShowFailed;
+
+  window.location.hash = encodeURI(params);
 }

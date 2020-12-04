@@ -4,7 +4,7 @@
     <!-- Declare components required to run -->
     <component name="H3DPhysics"/>
     <meta name='title' content='PhysX3RigidBodyOptions.x3d'/>
-    <meta name='description' content='A demonstration of PhysX3RigidBodyOptions from the H3DPhysics component.'/>
+    <meta name='description' content='A demonstration of PhysXRigidBodyOptions from the H3DPhysics component.'/>
     <meta name='author' content='SenseGraphics AB, 2014-2019'/>
   </head>
   <Scene>
@@ -161,25 +161,25 @@
       <RigidBody DEF='Body0' position="-0.1 0.1 0">
         <CollidableShape USE='Body0_BoxC' containerField='geometry' />
         <Box USE='Body0_BoxG' containerField='massDensityModel' />
-        <PhysX3RigidBodyOptions DEF="PHYSX3Option" contactReportThreshold="0.1" solverPositionIterations="8" solverVelocityIterations="4" />
+        <PhysXRigidBodyOptions DEF="PHYSX3Option" contactReportThreshold="0.1" solverPositionIterations="8" solverVelocityIterations="4" />
       </RigidBody>
       
       <RigidBody DEF='Body1' position="0 0.1 0">
         <CollidableShape USE='Body1_SphereC' containerField='geometry' />
         <Sphere USE='Body1_SphereG' containerField='massDensityModel' />
-        <PhysX3RigidBodyOptions USE="PHYSX3Option" />
+        <PhysXRigidBodyOptions USE="PHYSX3Option" />
       </RigidBody>
       
       <RigidBody DEF='Body2' position="-0 0 0">
         <CollidableShape USE='Body2_BoxC' containerField='geometry' />
         <Box USE='Body2_BoxG' containerField='massDensityModel' />
-        <PhysX3RigidBodyOptions USE="PHYSX3Option" />
+        <PhysXRigidBodyOptions USE="PHYSX3Option" />
       </RigidBody>
       
       <RigidBody DEF='Body3' position="0.1 0.1 0">
         <CollidableShape USE='Body3_SphereC' containerField='geometry' />
         <Sphere USE='Body3_SphereG' containerField='massDensityModel' />
-        <PhysX3RigidBodyOptions USE="PHYSX3Option" />
+        <PhysXRigidBodyOptions USE="PHYSX3Option" />
       </RigidBody>
     </RigidBodyCollection>
     

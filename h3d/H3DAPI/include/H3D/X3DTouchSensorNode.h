@@ -98,8 +98,6 @@ namespace H3D {
     static H3DNodeDatabase database;
 
   protected:
-    // used to keep track on when the touching of the geometry started.
-    H3DTime start_time;
     /// instance of specialized field used to set the touchTime field.
     auto_ptr< SetTouchTime > setTouchTime;
   };

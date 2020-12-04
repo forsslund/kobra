@@ -48,16 +48,19 @@ namespace H3D {
   public:
     class H3DAPI_API FakeHapticsDevice: public HAPI::HAPIHapticsDevice {
     public:
+      /// Constructor
+      FakeHapticsDevice() : owner( NULL ) {}
+
       /// Implementation of updateDeviceValues using the set_... fields
       /// to specify values.
       virtual void updateDeviceValues( DeviceValues &dv, HAPI::HAPITime dt );
 
       /// Output is ignored on a fake haptics device.
-      virtual void sendOutput( DeviceOutput &dv,
-             HAPI::HAPITime dt ) {}
+      virtual void sendOutput( DeviceOutput &/*dv*/,
+             HAPI::HAPITime /*dt*/ ) {}
 
       /// Implementation of initHapticsDevice.
-      virtual bool initHapticsDevice( int _thread_frequency = 1000 ) {
+      virtual bool initHapticsDevice( int /*_thread_frequency*/ = 1000 ) {
         return true;
       }
 
@@ -79,6 +82,12 @@ namespace H3D {
     template< class BaseField >
     class GetValueSafeField: public PeriodicUpdate< BaseField > {
     public:
+      /// Constructor
+      GetValueSafeField() {
+        rt_value = PeriodicUpdate< BaseField >::value;
+        value_for_haptic = PeriodicUpdate< BaseField >::value;
+      }
+
       /// Get the value of the field.
       inline virtual const typename BaseField::value_type &getValue( int _id = 0 ) {
         if( H3DUtil::HapticThread::inHapticThread() ) {

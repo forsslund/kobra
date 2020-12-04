@@ -126,11 +126,6 @@ GridLayoutManager::GridLayoutManager( Inst< SFNode      > _metadata   ,
 
 void GridLayoutManager::pack( Frame *frame ) {
 
-  // the maximum column index used by the children in the frame 
-  int max_column = -1;
-  // the maximum row index used by the children in the frame 
-  int max_row = -1;
-
   GridLayoutManagerInternals::Grid grid;
   
   // add all widgets to a Grid structure

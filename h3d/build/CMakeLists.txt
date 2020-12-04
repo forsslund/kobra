@@ -169,12 +169,7 @@ if( GENERATE_H3D_PACKAGE_PROJECT AND TARGET H3DAPI )
 
   if( MSVC )
     # Additional, temporary command, to get 64 bit library for windows.
-    set( h3d_msvc_version 6 )
-    set( temp_msvc_version 1299 )
-    while( ${MSVC_VERSION} GREATER ${temp_msvc_version} )
-      math( EXPR h3d_msvc_version "${h3d_msvc_version} + 1" )
-      math( EXPR temp_msvc_version "${temp_msvc_version} + 100" )
-    endwhile()
+    getMSVCPostFix( h3d_msvc_postfix )
 
     set( 32_or_64 "64" )
     if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
@@ -186,14 +181,14 @@ if( GENERATE_H3D_PACKAGE_PROJECT AND TARGET H3DAPI )
       if( ${component_prefix} STREQUAL "OpenHapticsRenderer_cpack_" OR ${component_prefix} STREQUAL "Chai3DRenderer_cpack_" )
         set( component_prefix "HAPI_cpack_" )
       endif()
-      set( file_name_to_install ${H3DWithToolkitsWin_SOURCE_DIR}/../lib${32_or_64}/${NAME_TO_INSTALL}_vc${h3d_msvc_version}.lib )
+      set( file_name_to_install ${H3DWithToolkitsWin_SOURCE_DIR}/../lib${32_or_64}/${NAME_TO_INSTALL}${h3d_msvc_postfix}.lib )
       if( EXISTS ${file_name_to_install} )
         install( FILES ${file_name_to_install}
                  DESTINATION lib${32_or_64}
                  COMPONENT ${component_prefix}libraries )
       endif()
 
-      set( file_name_to_install ${H3DWithToolkitsWin_SOURCE_DIR}/../bin${32_or_64}/${NAME_TO_INSTALL}_vc${h3d_msvc_version}.dll )
+      set( file_name_to_install ${H3DWithToolkitsWin_SOURCE_DIR}/../bin${32_or_64}/${NAME_TO_INSTALL}${h3d_msvc_postfix}.dll )
       if( EXISTS ${file_name_to_install} )
         install( FILES ${file_name_to_install}
                  DESTINATION bin${32_or_64}

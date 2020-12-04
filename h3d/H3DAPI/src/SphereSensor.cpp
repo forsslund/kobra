@@ -58,9 +58,10 @@ SphereSensor::SphereSensor(
                      _metadata, _isActive, _isOver, _trackPoint_changed ),
   offset( _offset ),
   rotation_changed( _rotation_changed ),
+  radius( 0 ),
+  center( Vec3f( 0, 0, 0 ) ),
   new_radius( true ),
-  prev_new_radius( true ),
-  center( Vec3f( 0, 0, 0 ) ) {
+  prev_new_radius( true ) {
 
   type_name = "SphereSensor";
   database.initFields( this );

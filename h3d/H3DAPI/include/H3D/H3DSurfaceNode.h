@@ -53,7 +53,7 @@ namespace H3D {
 
     /// Get the surface to use for the haptics device with the
     /// specified index.
-    virtual HAPI::HAPISurfaceObject *getSurface( unsigned int device_index = 0 ) {
+    virtual HAPI::HAPISurfaceObject *getSurface( unsigned int /*device_index*/ = 0 ) {
       return hapi_surface.get();
     }
 

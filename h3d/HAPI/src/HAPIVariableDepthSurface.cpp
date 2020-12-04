@@ -49,6 +49,7 @@ HAPIVariableDepthSurface::HAPIVariableDepthSurface(
   func( _func ),
   minimization_epsilon( _minimization_epsilon ),
   max_iterations( _max_iterations ),
+  this_contact_info( NULL ),
   depth_invert( false ) {
 }
 

@@ -91,8 +91,8 @@ namespace H3D {
           spotDirection ( _spotDirection ),
             spotExponent( _spotExponent ),
           spotCutoff ( _spotCutoff ),
-          constantAttenuation ( _constantAttenuation ),
           linearAttenuation ( _linearAttenuation ), 
+          constantAttenuation( _constantAttenuation ),
           quadraticAttenuation ( _quadraticAttenuation ) {}
 
       RGBA ambient;   

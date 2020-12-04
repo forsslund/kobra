@@ -87,7 +87,7 @@ EntactHapticsDevice::~EntactHapticsDevice() {
 eapi_device_handle handles[MAX_NR_DEVICES]; // detecting up to 10 attached devices
 
 
-bool EntactHapticsDevice::initHapticsDevice( int _thread_frequency ) {
+bool EntactHapticsDevice::initHapticsDevice( int /*_thread_frequency*/ ) {
 #ifdef H3D_WINDOWS
   /// need to go check if the dll to support this haptic device can be correctly
   /// loaded
@@ -250,7 +250,7 @@ void EntactHapticsDevice::updateDeviceValues( DeviceValues &dv,
 }
 
 void EntactHapticsDevice::sendOutput( DeviceOutput &dv,
-                                   HAPITime dt ) {
+                                   HAPITime /*dt*/ ) {
   if( device_id != -1 ) {
     com_lock.lock();
     current_values.force = dv.force;

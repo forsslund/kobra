@@ -55,7 +55,8 @@ CollisionSpace::CollisionSpace( Inst< MFCollidable  > _collidables,
 X3DNBodyCollisionSpaceNode( _enabled, _metadata, _bound, 
                            _bboxCenter, _bboxSize ),
                            collidables( _collidables ),
-                           useGeometry( _useGeometry )
+                           useGeometry( _useGeometry ),
+  use_union_bound( false )
 {
 
   type_name = "CollisionSpace";

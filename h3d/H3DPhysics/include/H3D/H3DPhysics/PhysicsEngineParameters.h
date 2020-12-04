@@ -961,7 +961,8 @@ namespace H3D {
 
       /// Constructor.
       ArticulatedRigidBodyParameters() :RigidBodyParameters(),
-        max_projection_iterations( 4 ), separation_tolerance( 0.1f ) {
+        max_projection_iterations( 4 ), separation_tolerance( 0.1f ),
+        joint_internal_compliance( 0 ), joint_external_compliance( 0 ) {
       };
 
       /// Destructor
@@ -3355,6 +3356,57 @@ namespace H3D {
         max_force3 = f;
       }
 
+      /// Output
+      inline void setBody1AnchorPoint( const Vec3f &a ) {
+        generic6dof_output_bit_mask |= BODY1_ANCHOR_POINT;
+        body1_anchor_point = a;
+      }
+
+      inline void setBody2AnchorPoint( const Vec3f &a ) {
+        generic6dof_output_bit_mask |= BODY2_ANCHOR_POINT;
+        body2_anchor_point = a;
+      }
+
+      inline void setBody1Axis( const Vec3f &a ) {
+        generic6dof_output_bit_mask |= BODY1_AXIS;
+        body1_axis = a;
+      }
+
+      inline void setBody2Axis( const Vec3f &a ) {
+        generic6dof_output_bit_mask |= BODY2_AXIS;
+        body2_axis = a;
+      }
+
+      inline void setHinge1Angle( H3DFloat a ) {
+        generic6dof_output_bit_mask |= HINGE1_ANGLE;
+        hinge1_angle = a;
+      }
+
+      inline void setHinge2Angle( H3DFloat a ) {
+        generic6dof_output_bit_mask |= HINGE2_ANGLE;
+        hinge2_angle = a;
+      }
+
+      inline void setHinge3Angle( H3DFloat a ) {
+        generic6dof_output_bit_mask |= HINGE3_ANGLE;
+        hinge3_angle = a;
+      }
+
+      inline void setHinge1AngleRate( H3DFloat a ) {
+        generic6dof_output_bit_mask |= HINGE1_ANGLE_RATE;
+        hinge1_angle_rate = a;
+      }
+
+      inline void setHinge2AngleRate( H3DFloat a ) {
+        generic6dof_output_bit_mask |= HINGE2_ANGLE_RATE;
+        hinge2_angle_rate = a;
+      }
+
+      inline void setHinge3AngleRate( H3DFloat a ) {
+        generic6dof_output_bit_mask |= HINGE3_ANGLE_RATE;
+        hinge3_angle_rate = a;
+      }
+
       //////////////////////////////////////////
       /// Get functions
       /// Input
@@ -3468,6 +3520,51 @@ namespace H3D {
 
       inline H3DFloat getMaxForce3() {
         return max_force3;
+      }
+
+      /// Output
+      inline const Vec3f & getBody1AnchorPoint() {
+        return body1_anchor_point;
+      }
+
+      inline const Vec3f & getBody2AnchorPoint() {
+        return body2_anchor_point;
+      }
+
+      inline const Vec3f & getBody1Axis() {
+        return body1_axis;
+      }
+
+      inline const Vec3f & getBody2Axis() {
+        return body2_axis;
+      }
+
+      inline H3DFloat getHinge1Angle() {
+        return hinge1_angle;
+      }
+
+      inline H3DFloat getHinge2Angle() {
+        return hinge2_angle;
+      }
+
+      inline H3DFloat getHinge3Angle() {
+        return hinge3_angle;
+      }
+
+      inline H3DFloat getHinge1AngleRate() {
+        return hinge1_angle_rate;
+      }
+
+      inline H3DFloat getHinge2AngleRate() {
+        return hinge2_angle_rate;
+      }
+
+      inline H3DFloat getHinge3AngleRate() {
+        return hinge3_angle_rate;
+      }
+
+      inline unsigned int getGeneric6DOFOutputBitMask() {
+        return generic6dof_output_bit_mask;
       }
 
       ////////////////////////////////////////
@@ -3585,6 +3682,99 @@ namespace H3D {
         return (update_bit_mask & MAX_FORCE3) != 0;
       }
 
+      /// Output
+      inline bool haveBody1AnchorPoint() {
+        return (generic6dof_output_bit_mask & BODY1_ANCHOR_POINT) != 0;
+      }
+
+      inline bool haveBody2AnchorPoint() {
+        return (generic6dof_output_bit_mask & BODY2_ANCHOR_POINT) != 0;
+      }
+
+      inline bool haveBody1Axis() {
+        return (generic6dof_output_bit_mask & BODY1_AXIS) != 0;
+      }
+
+      inline bool haveBody2Axis() {
+        return (generic6dof_output_bit_mask & BODY2_AXIS) != 0;
+      }
+
+      inline bool haveHinge1Angle() {
+        return (generic6dof_output_bit_mask & HINGE1_ANGLE) != 0;
+      }
+
+      inline bool haveHinge2Angle() {
+        return (generic6dof_output_bit_mask & HINGE2_ANGLE) != 0;
+      }
+
+      inline bool haveHinge3Angle() {
+        return (generic6dof_output_bit_mask & HINGE3_ANGLE) != 0;
+      }
+
+      inline bool haveHinge1AngleRate() {
+        return (generic6dof_output_bit_mask & HINGE1_ANGLE_RATE) != 0;
+      }
+
+      inline bool haveHinge2AngleRate() {
+        return (generic6dof_output_bit_mask & HINGE2_ANGLE_RATE) != 0;
+      }
+      
+      inline bool haveHinge3AngleRate() {
+        return (generic6dof_output_bit_mask & HINGE3_ANGLE_RATE) != 0;
+      }
+
+      /// enable functions
+      inline void enableBody1AnchorPoint() {
+        generic6dof_output_bit_mask |= BODY1_ANCHOR_POINT;
+      }
+
+      inline void enableBody2AnchorPoint() {
+        generic6dof_output_bit_mask |= BODY2_ANCHOR_POINT;
+      }
+
+      inline void enableBody1Axis() {
+        generic6dof_output_bit_mask |= BODY1_AXIS;
+      }
+
+      inline void enableBody2Axis() {
+        generic6dof_output_bit_mask |= BODY2_AXIS;
+      }
+
+      inline void enableHinge1Angle() {
+        generic6dof_output_bit_mask |= HINGE1_ANGLE;
+      }
+
+      inline void enableHinge2Angle() {
+        generic6dof_output_bit_mask |= HINGE2_ANGLE;
+      }
+
+      inline void enableHinge3Angle() {
+        generic6dof_output_bit_mask |= HINGE3_ANGLE;
+      }
+
+      inline void enableHinge1AngleRate() {
+        generic6dof_output_bit_mask |= HINGE1_ANGLE_RATE;
+      }
+
+      inline void enableHinge2AngleRate() {
+        generic6dof_output_bit_mask |= HINGE2_ANGLE_RATE;
+      }
+
+      inline void enableHinge3AngleRate() {
+        generic6dof_output_bit_mask |= HINGE3_ANGLE_RATE;
+      }
+
+      /// Copy the part of the bit mask containing which output parameters are set (defined by all_output)
+      /// Needed because copyOutputFlag is not virtual and this particular joint
+      /// has too many parameters to fix in update_bit_mask.
+      /// It seems unlikely that copyOutputFlag needs to be made virtual for any other joints.
+      inline void copyGeneric6DOFOutputBitMask( unsigned int src_update_bit_mask ) {
+        generic6dof_output_bit_mask = (generic6dof_output_bit_mask & ~all_output) | (src_update_bit_mask & all_output);
+      }
+
+      /// Copy the output parameters from the src parameters to this.
+      virtual void copyOutputParameters( ConstraintParameters& src );
+
       /// Copy the input parameters from the src parameters to this.
       virtual void copyInputParameters( ConstraintParameters& src );
 
@@ -3618,6 +3808,18 @@ namespace H3D {
       static const unsigned int MAX_FORCE1                = 1<<25;
       static const unsigned int MAX_FORCE2                = 1<<26;
       static const unsigned int MAX_FORCE3                = 1<<27;
+
+      /// Output
+      static const unsigned int BODY1_ANCHOR_POINT = 1<<0;
+      static const unsigned int BODY2_ANCHOR_POINT = 1<<1;
+      static const unsigned int BODY1_AXIS = 1<<2;
+      static const unsigned int BODY2_AXIS = 1<<3;
+      static const unsigned int HINGE1_ANGLE = 2<<4;
+      static const unsigned int HINGE2_ANGLE = 2<<5;
+      static const unsigned int HINGE3_ANGLE = 2<<6;
+      static const unsigned int HINGE1_ANGLE_RATE = 2<<7;
+      static const unsigned int HINGE2_ANGLE_RATE = 2<<8;
+      static const unsigned int HINGE3_ANGLE_RATE = 2<<9;
 
       /// Input
       Vec3f    anchor_point;
@@ -3658,6 +3860,20 @@ namespace H3D {
       H3DFloat max_force2;
       H3DFloat max_force3;
 
+      /// Output
+      Vec3f    body1_anchor_point;
+      Vec3f    body1_axis;
+      Vec3f    body2_anchor_point;
+      Vec3f    body2_axis;
+      H3DFloat hinge1_angle;
+      H3DFloat hinge1_angle_rate;
+      H3DFloat hinge2_angle;
+      H3DFloat hinge2_angle_rate;
+      H3DFloat hinge3_angle;
+      H3DFloat hinge3_angle_rate;
+      /// Bitmask for which output parameters that are set.
+      /// Needed because there are more parameters than bits in update_bit_mask.
+      unsigned int generic6dof_output_bit_mask;
 
     };
 

@@ -83,6 +83,7 @@ namespace H3D {
                        bool _called_from_proto_declaration = false ): 
         proto_instance( NULL ),
         proto_declaration( NULL ),
+        called_from_proto_declaration( _called_from_proto_declaration ),
         proto_body_count( 0 ),
         defining_proto_body( 0 ),
         defining_proto_interface( false ),
@@ -94,7 +95,6 @@ namespace H3D {
         DEF_map( dn ),
         exported_nodes( _exported_nodes ),
         proto_declarations( _proto_declarations ),
-        called_from_proto_declaration( _called_from_proto_declaration ),
         locator( NULL ),
         profile_set( false ),
         meta_set( false ),

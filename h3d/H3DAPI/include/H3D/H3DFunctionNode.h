@@ -61,13 +61,13 @@ namespace H3D {
     virtual H3DDouble evaluate( H3DDouble *input ) = 0;
 
     /// Shortcut for functions just taking one input 
-    inline H3DDouble evaluate( H3DDouble input ) {
-      return evaluate( &input ); 
+    inline H3DDouble evaluate( H3DDouble _input ) {
+      return evaluate( &_input );
     }
 
     /// Same as evaluate(). For backwards compatability.
-    inline H3DDouble get( H3DDouble input ) {
-      return evaluate( &input ); 
+    inline H3DDouble get( H3DDouble _input ) {
+      return evaluate( &_input );
     }
 
     /// Returns the number of input values the function takes.

@@ -50,7 +50,7 @@ namespace H3D {
       
       // constructor
       VolumeGradientImage(int _W, int _H, int _D, void *_data) :
-        W(_W), H(_H), D(_D), data((NTuple*) _data) {}
+        data( (NTuple*)_data ), W(_W), H(_H), D(_D) {}
       
       // access operator
       Type& operator()(int x, int y, int z, int k=0) {

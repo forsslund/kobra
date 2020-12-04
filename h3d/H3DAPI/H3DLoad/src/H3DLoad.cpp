@@ -51,27 +51,16 @@
 #include <H3D/Viewpoint.h>
 #include <H3D/DeviceInfo.h>
 #include <H3D/INIFile.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 #include <H3D/PythonScript.h>
 #include <H3D/NavigationInfo.h>
 #include <H3D/H3DNavigation.h>
 #include <H3D/PeriodicUpdate.h>
+#include <H3D/PythonMethods.h>
+#include <H3D/PythonTypes.h>
+
 using namespace std;
 using namespace H3D;
-
-#ifdef LINUX
-// To quit gracefully in Linux
-#include <signal.h>
-Scene::CallbackCode exitLater ( void* data ) {
-  throw Exception::QuitAPI();
-  return Scene::CALLBACK_DONE;
-}
-void term(int signum)
-{
-  std::cout << "SIGTERM Called. Quitting.\n";
-  Scene::addCallback ( exitLater, NULL );
-}
-#endif
 
 class ChangeViewport : public PeriodicUpdate< SFInt32> { 
   public:
@@ -314,18 +303,6 @@ string GET_ENV_INI_DEFAULT_FILE( INIFile &ini_file,
 
 
 int main(int argc, char* argv[]) {
-
-#ifdef LINUX
-  // To quit gracefully in Linux on SIGTERM (by normal kill or QT Process Terminate)
-  // https://airtower.wordpress.com/2010/06/16/catch-sigterm-exit-gracefully/
-  // Added by Jonas Forsslund 2019-04-24
-  struct sigaction action;
-  memset(&action, 0, sizeof(struct sigaction));
-  action.sa_handler = term;
-  sigaction(SIGTERM, &action, NULL);
-#endif
-
-
 #ifdef H3DAPI_LIB
   initializeH3D();
 #endif
@@ -671,6 +648,7 @@ int main(int argc, char* argv[]) {
   AutoRef< Scene > scene( new Scene );
   try {
     AutoRef< KeySensor > ks( new KeySensor );
+
     X3D::DEFNodes dn;
     auto_ptr< ChangeViewport > change_viewpoint( new ChangeViewport );
     auto_ptr< ChangeNavType > change_nav_type( new ChangeNavType );
@@ -773,6 +751,7 @@ int main(int argc, char* argv[]) {
     }
 
     dn.clear();
+
     Scene::mainLoop();
   }
   catch (const Exception::QuitAPI &) {
@@ -794,9 +773,9 @@ int main(int argc, char* argv[]) {
   // This is required to ensure the scene is deleted
   // in all cases probably due to circular references
   scene->setSceneRoot ( NULL );
-
-  std::cout << "H3D has quit gracefully\n";
-
+#ifdef HAVE_PYTHON
+  PythonInternals::finishH3DInternal();
+#endif
 #ifdef H3DAPI_LIB
   deinitializeH3D();
 #endif

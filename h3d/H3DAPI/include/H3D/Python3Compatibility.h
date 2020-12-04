@@ -35,7 +35,7 @@
 // undefine _DEBUG since we want to always link to the release version of
 // python and pyconfig.h automatically links debug version if _DEBUG is
 // defined.
-#ifdef _DEBUG
+#if defined _DEBUG && ! defined HAVE_PYTHON_DEBUG_LIBRARY 
 #define _DEBUG_UNDEFED
 #undef _DEBUG
 #endif

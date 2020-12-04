@@ -183,6 +183,7 @@ namespace H3D {
     H3DTime start_log_time;
     string write_to_log;
     MutexLock pid_lock;
+    std::ofstream *log_file;
 
   };
 }

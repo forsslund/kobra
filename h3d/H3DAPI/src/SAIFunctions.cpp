@@ -33,7 +33,7 @@
 //#include <H3D/Console.h>
 #include <H3D/Scene.h>
 #include <H3D/X3DGroupingNode.h>
-#include <H3D/ResourceResolver.h>
+#include <H3DUtil/ResourceResolver.h>
 
 using namespace H3D;
 using namespace SAI;
@@ -67,7 +67,7 @@ const vector< ProfileInfo > &Browser::getSupportedProfiles() {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
 }
 
-const ProfileInfo &Browser::getProfile( const string &profile ) {
+const ProfileInfo &Browser::getProfile( const string &/*profile*/ ) {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
 }
 
@@ -75,8 +75,8 @@ const vector< ComponentInfo > &Browser::getSupportedComponents() {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
 }
 
-const ComponentInfo &Browser::getComponent( const string &component,
-                                            H3DUInt32 level ) {
+const ComponentInfo &Browser::getComponent( const string &/*component*/,
+                                            H3DUInt32 /*level*/ ) {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
 }
 
@@ -95,8 +95,8 @@ ExecutionContext *Browser::getExecutionContext() {
 
 }
 
-SAIScene *Browser::createScene( ProfileInfo *pi,
-                             const vector< ComponentInfo > &cis ) {
+SAIScene *Browser::createScene( ProfileInfo * /*pi*/,
+                             const vector< ComponentInfo > &/*cis*/ ) {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
   return NULL;
 }
@@ -112,19 +112,19 @@ void Browser::replaceWorld( SAIScene *new_scene ) {
   }
 }
 
-SAIScene *Browser::importDocument( DOMNode *node ) {
+SAIScene *Browser::importDocument( DOMNode * /*node*/ ) {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
   return NULL;
 }
 
 
-void Browser::loadURL( const string &url,
-                       const vector< string > &property_list  ) {
+void Browser::loadURL( const string &/*url*/,
+                       const vector< string > &/*property_list*/  ) {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
 }
 
 
-void Browser::setDescription( const string &description ) {
+void Browser::setDescription( const string &/*description*/ ) {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
 }
 
@@ -143,7 +143,7 @@ SAIScene *Browser::createX3DFromString( const string &s ) {
   return NULL;
 }
 
-SAIScene *Browser::createX3DFromStream( const istream &s ) {
+SAIScene *Browser::createX3DFromStream( const istream & ) {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
   return NULL;
 }
@@ -195,19 +195,19 @@ const vector< string > &Browser::getBrowserProperties() {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
 }
 
-void Browser::nextViewpoint( H3DInt32 layer  ) {
+void Browser::nextViewpoint( H3DInt32 /*layer*/  ) {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
 }
 
-void Browser::previousViewpoint( H3DInt32 layer  ) {
+void Browser::previousViewpoint( H3DInt32 /*layer*/  ) {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
 }
 
-void Browser::firstViewpoint( H3DInt32 layer  ) {
+void Browser::firstViewpoint( H3DInt32 /*layer*/  ) {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
 }
 
-void Browser::lastViewpoint( H3DInt32 layer ) {
+void Browser::lastViewpoint( H3DInt32 /*layer*/ ) {
   throw SAIError( SAIError::SAI_NOT_SUPPORTED );
 }
 

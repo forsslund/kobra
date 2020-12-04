@@ -57,9 +57,12 @@ namespace HAPI {
       motor_temperatures( 6, 0 ),
       encoder_values( 6, 0 ),
       device_firmware_version( 0.0 ),
-      device_handle( -1 ),
+      device_handle( HD_INVALID_HANDLE ),
       input_dof( -1 ),
-      output_dof( -1 ) {
+      output_dof( -1 ),
+      max_force( -1 ),
+      max_cont_force( -1 ),
+      tabletop_offset( 0 ) {
       hdapi_version = "NOT INITIALIZED YET";
       setup_haptic_rendering_callback = false;
     }

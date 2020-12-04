@@ -45,7 +45,7 @@ namespace HAPI {
 
     
     /// The force of the EffectOutput will be the force of the force field. 
-    EffectOutput virtual calculateForces( const EffectInput &input ) {
+    EffectOutput virtual calculateForces( const EffectInput &/*input*/ ) {
       return EffectOutput( force, torque );
     }
     

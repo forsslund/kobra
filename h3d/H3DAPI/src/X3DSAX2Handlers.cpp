@@ -784,9 +784,9 @@ void X3DSAX2Handlers::handleConnectElement( const Attributes &attrs,
   }
 }
 
-void X3DSAX2Handlers::protoStartElement( const XMLCh* const uri,
+void X3DSAX2Handlers::protoStartElement( const XMLCh* const /*uri*/,
                                          const XMLCh* const localname, 
-                                         const XMLCh* const qname,
+                                         const XMLCh* const /*qname*/,
                                          const Attributes& attrs ) {
   Node *parent = NULL;
   if( node_stack.size() > 0 ) parent = node_stack.top().getNode();  
@@ -902,9 +902,9 @@ void X3DSAX2Handlers::protoStartElement( const XMLCh* const uri,
   }
 }
 
-void X3DSAX2Handlers::protoEndElement( const XMLCh* const uri,
+void X3DSAX2Handlers::protoEndElement( const XMLCh* const /*uri*/,
                                        const XMLCh* const localname, 
-                                       const XMLCh* const qname ) {
+                                       const XMLCh* const /*qname*/ ) {
   AutoRef< Node > top( node_stack.top().getNode() );  
   if( !top.get() ) {
     node_stack.pop();

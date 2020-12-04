@@ -108,7 +108,9 @@ ComposedShader::ComposedShader( Inst< DisplayList  > _displayList,
   setupDynamicRoutes( new SetupDynamicRoutes ),
   updateUniforms ( new UpdateUniforms ),
   debug_options_previous( NULL ),
-  updateCache( new UpdateCache ){
+  updateCache( new UpdateCache ),
+  max_texture_in_shader( 0 ),
+  max_image_in_shader( 0 ) {
   type_name = "ComposedShader";
   database.initFields( this );
 
@@ -820,10 +822,10 @@ void ComposedShader::UpdateUniforms::update() {
 
 void ComposedShader::MFShaderPart::onAdd(Node *n) {
   ComposedShader::MFShaderPartBase::onAdd(n);
-  ComposedShader* owner = static_cast<ComposedShader*>(getOwner());
+  ComposedShader* _owner = static_cast<ComposedShader*>(getOwner());
   ShaderPart* part = dynamic_cast<ShaderPart*>(n);
   if(part) {
-    part->setParentComposedShader(owner);
+    part->setParentComposedShader( _owner );
   }
 }
 

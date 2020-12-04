@@ -568,8 +568,8 @@ namespace H3D {
     /// Set the cursor to the given cursor type. See cursorType field
     /// for valid values. Returns 0 on success. -1 if the cursor_type is 
     /// not supported.
-    virtual int setCursorType( const std::string & cursor_type ) { 
-      return -1; 
+    virtual int setCursorType( const std::string & /*cursor_type*/ ) {
+      return -1;
     }
 
     /// Return the cursor type to use for given modes. This should

@@ -88,16 +88,15 @@ X3DGeometryNode::X3DGeometryNode(
   contactPoint( _contactPoint ),
   contactTexCoord( _contactTexCoord ),
   contactNormal( _contactNormal ),
-  boundTree( _boundTree ),
-  centerOfMass ( _centerOfMass ),
+  centerOfMass( _centerOfMass ),
+  boundTree(_boundTree),
   options( new MFOptionsNode ),
   shadow_volume( NULL ),
   use_culling( false ),
   allow_culling( true ),
-  draw_debug_options( true ),
   cull_face( GL_BACK ),
+  draw_debug_options( true ),
   print_negative_scaling_warning( true ) {
-
   type_name = "X3DGeometryNode";
   
   displayList->setOwner( this );
@@ -531,11 +530,18 @@ void X3DGeometryNode::traverseSG( TraverseInfo &ti ) {
   }
 }
 
+#ifndef HAVE_OPENHAPTICS
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void X3DGeometryNode::createAndAddHapticShapes(
                                   TraverseInfo &ti,
                                   H3DHapticsDevice *hd,
                                   H3DInt32 hd_index,
                                   OpenHapticsOptions *openhaptics_options) {
+#ifndef HAVE_OPENHAPTICS
+H3D_POP_WARNINGS()
+#endif
 
   vector< HAPI::Collision::Triangle > tris;
   tris.reserve( 200 );

@@ -17,7 +17,7 @@ handleCommonCacheVar( CMAKE_INSTALL_PREFIX ${H3DLoad_SOURCE_DIR}/../../.. )
 setupRPathForLib()
 
 set( H3DLoad_MAJOR_VERSION "2" )
-set( H3DLoad_MINOR_VERSION "3" )
+set( H3DLoad_MINOR_VERSION "4" )
 set( H3DLoad_BUILD_VERSION "1" )
 
 # Where to find Source files.
@@ -28,6 +28,11 @@ set( optional_libs )
 
 # Include directories.
 include_directories( ../src )
+
+# Add the H3DLoad.rc resource file if Visual Studio
+if( MSVC )
+  set( H3DLoad_SRCS ${H3DLoad_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/H3DLoad.rc )
+endif()
 
 # Add required libs to this variable.
 set( required_libs )
@@ -65,30 +70,24 @@ endif()
 add_executable( H3DLoad  ${H3DLoad_SRCS} )
 target_link_libraries( H3DLoad ${required_libs} ${optional_libs} )
 
+# make sure that the H3DLoad.rc contains the correct svn-version
+setupResourceFile( H3DLoad
+                   VERSION_PREFIX H3DLoad
+                   SVN_DIR_CANDIDATE ${H3DLoad_SOURCE_DIR}/../
+                   RESOURCE_FILE_CMAKE_TEMPLATE ${H3DLoad_SOURCE_DIR}/H3DLoad.rc.cmake
+                   RESOURCE_FILE_OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/H3DLoad.rc
+                   UPDATERESOURCEFILE_EXE ${H3DLoad_SOURCE_DIR}/../../build/UpdateResourceFile
+                   UPDATERESOURCEFILE_EXE_EXTRA_ARGS "H3DLoad_SOURCE_DIR" ${H3DLoad_SOURCE_DIR} "H3DLoad_Output_Name" "$(TargetFileName)" )
+
 # Debug version should have _d postfix.
 set_target_properties( H3DLoad PROPERTIES DEBUG_POSTFIX "_d" )
 
+addCommonH3DCompileFlags( H3DLoad_COMPILE_FLAGS TRUE )
+
 # set the install directory to the H3D directory on Windows
 if( MSVC ) 
-  # Treat wchar_t as built in type for all visual studio versions.
-  # This is default for every version above 7 (so far) but we still set it for all.
-  set( H3DLoad_COMPILE_FLAGS "${H3DLoad_COMPILE_FLAGS} /Zc:wchar_t" )
-  
-  if( ${MSVC_VERSION} GREATER 1399 )
-    # Remove compiler warnings about deprecation for visual studio versions 8 and above.
-    set( H3DLoad_COMPILE_FLAGS "${H3DLoad_COMPILE_FLAGS} -D_CRT_SECURE_NO_DEPRECATE" )
-  endif()
-  
-  if( ${MSVC_VERSION} GREATER 1499 )
-    # Build using several threads for visual studio versions 9 and above.
-    set( H3DLoad_COMPILE_FLAGS "${H3DLoad_COMPILE_FLAGS} /MP" )
-  endif()
-  
   set_target_properties( H3DLoad PROPERTIES LINK_FLAGS_DEBUG "/INCREMENTAL:NO /NODEFAULTLIB:msvcrt" )
   set_target_properties( H3DLoad PROPERTIES FOLDER "H3D" )
-  
-elseif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-  addCommonH3DGNUCompileFlags( H3DLoad_COMPILE_FLAGS )
 endif()
 
 set_target_properties( H3DLoad PROPERTIES COMPILE_FLAGS "${H3DLoad_COMPILE_FLAGS}" )

@@ -90,7 +90,7 @@ void MedX3DDemoComposedVolumeStyleOptions::removeStyleOption( wxPanel *p ) {
 // Add the style to the composable node adding a gui as well. The 
 // position is the position to put it in. If -1 it is added to the end.
 void MedX3DDemoComposedVolumeStyleOptions::insertStyle( H3D::X3DComposableVolumeRenderStyleNode *s, 
-                                                        unsigned int pos ) {
+                                                        int pos ) {
   // if we have only the empty panel when no styles, remove it
   if( !style_options.empty() && composed_style->renderStyle->empty() ) {
     style_options.clear();
@@ -98,7 +98,7 @@ void MedX3DDemoComposedVolumeStyleOptions::insertStyle( H3D::X3DComposableVolume
   }
 
   // at to end of list
-  if( pos == -1 || pos >= composed_style->renderStyle->size() ) {
+  if( pos == -1 || pos >= static_cast<int>(composed_style->renderStyle->size()) ) {
 
     wxPanel *panel = new MedX3DDemoComposedVolumeStyleOptionsPart( this, s );
     style_options.push_back( panel );

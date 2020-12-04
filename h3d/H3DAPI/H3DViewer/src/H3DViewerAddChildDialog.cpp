@@ -69,17 +69,17 @@ void H3DViewerAddChildDialog::cbNewNodeNameOnText(wxCommandEvent& event)
   }
 }
 
-void H3DViewerAddChildDialog::cbNewNodeNameOnTextEnter(wxCommandEvent& event)
+void H3DViewerAddChildDialog::cbNewNodeNameOnTextEnter(wxCommandEvent& /*event*/)
 {
   EndModal(wxID_OK);
 }
 
-void H3DViewerAddChildDialog::btSizerAddNodeOnCancelButtonClick(wxCommandEvent& event)
+void H3DViewerAddChildDialog::btSizerAddNodeOnCancelButtonClick(wxCommandEvent& /*event*/)
 {
   EndModal(wxID_CANCEL);
 }
 
-void H3DViewerAddChildDialog::btSizerAddNodeOnOKButtonClick(wxCommandEvent& event)
+void H3DViewerAddChildDialog::btSizerAddNodeOnOKButtonClick(wxCommandEvent& /*event*/)
 {
   EndModal(wxID_OK);
 }

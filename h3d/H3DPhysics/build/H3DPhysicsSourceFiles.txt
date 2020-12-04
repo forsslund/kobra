@@ -75,9 +75,13 @@ set( H3DPhysics_HEADERS_NO_COOKING
      "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysicsMaterial.h"
      "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysXCallbacks.h"
      "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysX3Callbacks.h"
-     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysX3CollidableOptions.h"
      "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysX3Joints.h"
-     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysX3RigidBodyOptions.h"
+     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysX4Callbacks.h"
+     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysX4Joints.h"
+     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysXCollidableOptions.h"
+     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysXRigidBodyOptions.h"
+     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysXJointOptions.h"
+     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysXJointParameters.h"
      "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PythonMethods.h"
      "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/RigidBody.h"
      "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/RigidBodyCollection.h"
@@ -115,9 +119,7 @@ set( H3DPhysics_HEADERS_NO_COOKING
      "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/JointPID.h"
      "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/BodyPID.h"
      "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/DistanceJoint.h"
-     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/ArticulatedRigidBody.h"
-     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysX3JointOptions.h"
-     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysX3JointParameters.h" )
+     "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/ArticulatedRigidBody.h" )
 
 set( H3DPhysics_HEADERS_COOKING
      "${H3DPhysics_SOURCE_DIR}/../include/H3D/H3DPhysics/PhysX/cooking.h"
@@ -208,9 +210,12 @@ set( H3DPhysics_SRCS_NO_COOKING
      "${H3DPhysics_SOURCE_DIR}/../src/PhysicsMaterial.cpp"
      "${H3DPhysics_SOURCE_DIR}/../src/PhysXCallbacks.cpp"
      "${H3DPhysics_SOURCE_DIR}/../src/PhysX3Callbacks.cpp"
-     "${H3DPhysics_SOURCE_DIR}/../src/PhysX3CollidableOptions.cpp"
      "${H3DPhysics_SOURCE_DIR}/../src/PhysX3Joints.cpp"
-     "${H3DPhysics_SOURCE_DIR}/../src/PhysX3RigidBodyOptions.cpp"
+     "${H3DPhysics_SOURCE_DIR}/../src/PhysX4Callbacks.cpp"
+     "${H3DPhysics_SOURCE_DIR}/../src/PhysX4Joints.cpp"
+     "${H3DPhysics_SOURCE_DIR}/../src/PhysXCollidableOptions.cpp"
+     "${H3DPhysics_SOURCE_DIR}/../src/PhysXRigidBodyOptions.cpp"
+     "${H3DPhysics_SOURCE_DIR}/../src/PhysXJointOptions.cpp"
      "${H3DPhysics_SOURCE_DIR}/../src/PythonMethods.cpp"
      "${H3DPhysics_SOURCE_DIR}/../src/RigidBody.cpp"
      "${H3DPhysics_SOURCE_DIR}/../src/RigidBodyCollection.cpp"
@@ -247,8 +252,7 @@ set( H3DPhysics_SRCS_NO_COOKING
      "${H3DPhysics_SOURCE_DIR}/../src/JointPID.cpp"
      "${H3DPhysics_SOURCE_DIR}/../src/BodyPID.cpp"
      "${H3DPhysics_SOURCE_DIR}/../src/DistanceJoint.cpp"
-     "${H3DPhysics_SOURCE_DIR}/../src/ArticulatedRigidBody.cpp"
-     "${H3DPhysics_SOURCE_DIR}/../src/PhysX3JointOptions.cpp" )
+     "${H3DPhysics_SOURCE_DIR}/../src/ArticulatedRigidBody.cpp" )
 
 set( H3DPhysics_SRCS_COOKING
      "${H3DPhysics_SOURCE_DIR}/../src/PhysX/cooking.cpp"

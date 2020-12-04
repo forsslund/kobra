@@ -173,6 +173,10 @@ void HaptikDevice::SelectDevice::update() {
 #endif
 }
 
+#ifndef HAVE_HAPTIK_LIBRARY
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void HaptikDevice::changeHaptikDevice( unsigned int device_id ) {
 #ifdef HAVE_HAPTIK_LIBRARY
   if( hapi_device.get() ) {
@@ -185,3 +189,6 @@ void HaptikDevice::changeHaptikDevice( unsigned int device_id ) {
   }
 #endif
 }
+#ifndef HAVE_HAPTIK_LIBRARY
+H3D_POP_WARNINGS()
+#endif

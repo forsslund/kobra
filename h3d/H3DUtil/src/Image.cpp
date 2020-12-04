@@ -34,7 +34,13 @@
 #endif
 #include <limits>
 #ifdef HAVE_OPENEXR
+#if _MSC_VER >= 1500
+#pragma warning( disable : 4244 )
+#endif
 #include <OpenEXR/half.h>
+#if _MSC_VER >= 1500
+#pragma warning( default : 4244 )
+#endif
 #endif
 
 using namespace H3DUtil;
@@ -320,7 +326,7 @@ H3DUtil::RGBA Image::imageValueToRGBA( void *_pixel_data ) {
   }
 
   switch( pixelType() ) {
-  case Image::LUMINANCE: 
+  case Image::LUMINANCE: {
     switch( pixelComponentType() ) { 
     case Image::UNSIGNED: {
       H3DFloat fv = getUnsignedValueAsFloat( pixel_data, 
@@ -338,7 +344,9 @@ H3DUtil::RGBA Image::imageValueToRGBA( void *_pixel_data ) {
                                              bytes_per_pixel );
       return H3DUtil::RGBA( fv, fv, fv, 1 );
     }
-    };
+    }
+    break;
+  }
   case Image::R:
     {
       H3DFloat fv = getValueAsFloat( pixel_data, bytes_per_pixel, pixelComponentType() );
@@ -370,7 +378,8 @@ H3DUtil::RGBA Image::imageValueToRGBA( void *_pixel_data ) {
                                             bytes_per_component );
       return H3DUtil::RGBA( fv, fv, fv, a );
     }
-    };
+    }
+    break;
   }
   case Image::RGB:
   case Image::VEC3: {
@@ -407,7 +416,8 @@ H3DUtil::RGBA Image::imageValueToRGBA( void *_pixel_data ) {
                                             bytes_per_component );
       return H3DUtil::RGBA( r, g, b, 1 );
     }
-    };
+    }
+    break;
   }
   case Image::BGR:  {
     unsigned int bytes_per_component = bytes_per_pixel / 3;
@@ -443,7 +453,8 @@ H3DUtil::RGBA Image::imageValueToRGBA( void *_pixel_data ) {
                                             bytes_per_component );
       return H3DUtil::RGBA( r, g, b, 1 );
     }
-    };
+    }
+    break;
   }
   case Image::RGBA:  {
     unsigned int bytes_per_component = bytes_per_pixel / 4;
@@ -488,7 +499,8 @@ H3DUtil::RGBA Image::imageValueToRGBA( void *_pixel_data ) {
                                             bytes_per_component );
       return H3DUtil::RGBA( r, g, b, a );
     }
-    };
+    }
+    break;
   }
   case Image::BGRA: {
     unsigned int bytes_per_component = bytes_per_pixel / 4;
@@ -533,7 +545,8 @@ H3DUtil::RGBA Image::imageValueToRGBA( void *_pixel_data ) {
                                             bytes_per_component );
       return H3DUtil::RGBA( r, g, b, a );
     }
-    };
+    }
+    break;
   }
   case Image::RG: {
     unsigned int bytes_per_component = bytes_per_pixel / 2;
@@ -561,8 +574,10 @@ H3DUtil::RGBA Image::imageValueToRGBA( void *_pixel_data ) {
       return H3DUtil::RGBA( r, g, 0, 1 );
     }
     }
+    break;
   }
-  };
+  default: {}
+  }
   return H3DUtil::RGBA();
 }
 
@@ -600,7 +615,8 @@ void Image::RGBAToImageValue( const H3DUtil::RGBA &rgba, void *_pixel_data ) {
                                  bytes_per_pixel );
       return;
     }
-    };
+    }
+    break;
   case Image::R:{
     writeFloatAsValue(rgba.r, pixel_data, bytes_per_pixel, pixelComponentType() );
     return;
@@ -636,7 +652,8 @@ void Image::RGBAToImageValue( const H3DUtil::RGBA &rgba, void *_pixel_data ) {
                                  bytes_per_component );
       return;
     }
-    };
+    }
+    break;
   }
   case Image::RGB:
   case Image::VEC3: {
@@ -679,7 +696,8 @@ void Image::RGBAToImageValue( const H3DUtil::RGBA &rgba, void *_pixel_data ) {
                                bytes_per_component );
       return;
     }
-    };
+    }
+    break;
   }
   case Image::BGR:  {
     unsigned int bytes_per_component = bytes_per_pixel / 3;
@@ -721,7 +739,8 @@ void Image::RGBAToImageValue( const H3DUtil::RGBA &rgba, void *_pixel_data ) {
                                  bytes_per_component );
       return;
     }
-    };
+    }
+    break;
   }
   case Image::RGBA:  {
     unsigned int bytes_per_component = bytes_per_pixel / 4;
@@ -773,7 +792,8 @@ void Image::RGBAToImageValue( const H3DUtil::RGBA &rgba, void *_pixel_data ) {
       return;
     }
 
-    };
+    }
+    break;
   }
   case Image::BGRA: {
    unsigned int bytes_per_component = bytes_per_pixel / 4;
@@ -825,7 +845,8 @@ void Image::RGBAToImageValue( const H3DUtil::RGBA &rgba, void *_pixel_data ) {
       return;
     }
 
-    };
+    }
+    break;
   }
   case Image::RG: {
     unsigned int bytes_per_component = bytes_per_pixel / 2;
@@ -859,8 +880,10 @@ void Image::RGBAToImageValue( const H3DUtil::RGBA &rgba, void *_pixel_data ) {
       return;
     }
     }
+    break;
   }
-  };
+  default: {}
+  }
 }
 
 unsigned int Image::nrPixelComponents() {

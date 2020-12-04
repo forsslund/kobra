@@ -91,9 +91,9 @@ string ProfileSAX2Handlers::getLocationString() {
 }
 
 // ProfileSAX2Handlers: Implementation of the SAX DocumentHandler interface
-void ProfileSAX2Handlers::startElement(const XMLCh* const uri,
+void ProfileSAX2Handlers::startElement(const XMLCh* const /*uri*/,
                                    const XMLCh* const localname, 
-                                   const XMLCh* const qname,
+                                   const XMLCh* const /*qname*/,
                                    const Attributes& attrs) {
   
   string localname_string = toString( localname );
@@ -186,9 +186,9 @@ void ProfileSAX2Handlers::startElement(const XMLCh* const uri,
 
 
 
-void ProfileSAX2Handlers::endElement (const XMLCh *const uri,
+void ProfileSAX2Handlers::endElement (const XMLCh *const /*uri*/,
                                   const XMLCh *const localname, 
-                                  const XMLCh *const qname) {
+                                  const XMLCh *const /*qname*/) {
   string localname_string = toString( localname );
   if( localname_string == "Component" ) {
     if( !in_profile ) {

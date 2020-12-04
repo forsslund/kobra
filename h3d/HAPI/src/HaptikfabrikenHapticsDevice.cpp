@@ -136,6 +136,15 @@ void HaptikfabrikenHapticsDevice::updateDeviceValues( DeviceValues &dv,
 
   Matrix3 h3dRot = ChaiToH3d * chaiRot * rotx90 * roty90;
 
+  // In Kobra the orientationCalibration is "1 0 0 1.0472" = 60 degrees abt x
+  // theta = -1.0472; cos(t)=0.5, sin(t)=-0.8.., -cos(t)=-0.5, -sin(t)=0.8
+  /*
+  Matrix3 rotx_minus_60(1,0,0,
+                        0,0.5,0.866026628,
+                        0,-0.866026628,0.5);                  
+  h3dRot = rotx_minus_60*h3dRot;
+  */
+
 
   dv.orientation = Rotation(h3dRot);
 

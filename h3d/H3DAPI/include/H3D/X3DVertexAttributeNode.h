@@ -56,7 +56,7 @@ namespace H3D {
     /// value in the value field that is to be used. The vertex
     /// attribute will be rendered as the attribute index specified
     /// by the setAttribFunction.
-    virtual void render( int value_index ){}
+    virtual void render( int /*value_index*/ ){}
 
     /// Perform the OpenGL commands to set the vertex attributes
     /// as a an vertex attribute array on the attribute with the 

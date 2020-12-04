@@ -51,9 +51,12 @@ ShadowGeometry::ShadowGeometry( Inst< SFNode>  _metadata,
                                 Inst< SFGeometryNode > _geometry,
                                 Inst< SFBool > _enabled ) :
 H3DShadowObjectNode( _metadata, _transform, _enabled ),
-  geometry( _geometry ),
   triangles_changed( new Field ),
-  use_geometry_shader_last_loop( false ) {
+  geometry( _geometry ),
+  use_geometry_shader_last_loop( false ),
+  rebuild_triangles_ts( false ) {
+
+  is_enabled_ts = enabled->getValue();
 
   type_name = "ShadowGeometry";
   database.initFields( this );

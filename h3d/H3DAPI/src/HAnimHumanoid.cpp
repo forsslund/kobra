@@ -96,6 +96,7 @@ HAnimHumanoid::HAnimHumanoid(  Inst< SFNode         > _metadata    ,
                                Inst< SFString       > _renderMode ) :
   X3DChildNode( _metadata ),
   X3DBoundedObject( _bound, _bboxCenter, _bboxSize ),
+  use_union_bound( false ),
   info( _info ),
   name( _name ),
   version( _version ),
@@ -113,7 +114,6 @@ HAnimHumanoid::HAnimHumanoid(  Inst< SFNode         > _metadata    ,
   scaleOrientation( _scaleOrientation ),
   translation( _translation ),
   renderMode( _renderMode ),
-  use_union_bound( false ),
   root_transform( NULL ),
   jointMatrixChanged( new Field ) {
 
@@ -448,9 +448,9 @@ void HAnimHumanoid::traverseSG( TraverseInfo &ti ) {
       if( Coordinate *c = dynamic_cast< Coordinate * >( coord ) ) {
         points_double.clear();
         points_single = c->point->getValue();
-      } else if( CoordinateDouble *c = dynamic_cast< CoordinateDouble * >( coord ) ) {
+      } else if( CoordinateDouble *cd = dynamic_cast< CoordinateDouble * >( coord ) ) {
         points_single.clear();
-        points_double = c->point->getValue();
+        points_double = cd->point->getValue();
       } else {
         Console(LogLevel::Error) << "Unsupported X3DCoordinateNode: \""
                    << coord->getTypeName() << "\" in HAnimHumanoid." << endl;
@@ -500,8 +500,8 @@ void HAnimHumanoid::traverseSG( TraverseInfo &ti ) {
       vector< Vec3f > modified_normals = normals_single;
       updateCoordinates( points_single, normals_single,
                          modified_points, modified_normals );
-      if( Coordinate *c = dynamic_cast< Coordinate * >( coord )) {
-        c->point->swap( modified_points );
+      if( Coordinate *cd = dynamic_cast< Coordinate * >( coord )) {
+        cd->point->swap( modified_points );
       }
       if( normal ) normal->vector->swap( modified_normals );
     }

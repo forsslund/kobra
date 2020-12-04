@@ -64,7 +64,7 @@ protected:
   }
 };
 
-int main(int argc, char* argv[]) {
+int main(int /*argc*/, char* /*argv*/[]) {
   // Creating and instance of the AddSphere class needed for routes.
   auto_ptr< AddSphere > addSphere( new AddSphere() );
   // Setting up routes

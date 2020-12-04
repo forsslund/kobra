@@ -275,21 +275,21 @@ def setStiffnessImplicitVolume ( softBody, implicitVolume, stiffness ):
     edgesPerElement= 1
     getEdge= getEdgeRope
   else:
-    raise ValueError, "Unsupported soft body type: " + str(typename)
+    raise ValueError("Unsupported soft body type: " + str(typename))
   
   g= softBody.geometry.getValue()
   c= g.coord.getValue()
   try:
     p= c.point.getValue()
   except:
-    raise ValueError, "Soft body geometry must contain a Coordinate node."
+    raise ValueError("Soft body geometry must contain a Coordinate node.")
   try:
     index= g.index.getValue()
   except AttributeError:
     index= g.coordIndex.getValue()
     
   l= len(index)
-  nrEdges= (l/coordPerElement)*edgesPerElement
+  nrEdges= int( (l/coordPerElement)*edgesPerElement )
   
   globalStiffness= 1.0
   stiffnessNode= None
@@ -307,7 +307,7 @@ def setStiffnessImplicitVolume ( softBody, implicitVolume, stiffness ):
         physicsMaterial.stiffness.setValue ( stiffnessNode )
         
   if not stiffnessNode:
-    raise ValueError, "Unsupported or missing physicsMaterial or stiffness node."
+    raise ValueError("Unsupported or missing physicsMaterial or stiffness node.")
   
   edgeStiffnesses= stiffnessNode.stiffnessPerUnit.getValue()
   
@@ -321,7 +321,7 @@ def setStiffnessImplicitVolume ( softBody, implicitVolume, stiffness ):
   
   updateCount= 0
   globalEdgeIndex= 0
-  for elementIndex in range(len(index)/coordPerElement):
+  for elementIndex in range(int(len(index)/coordPerElement)):
     for edgeIndex in range(edgesPerElement):
       a, b= getEdge ( elementIndex, edgeIndex )
 

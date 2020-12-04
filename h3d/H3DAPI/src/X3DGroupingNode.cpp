@@ -67,7 +67,8 @@ X3DGroupingNode::X3DGroupingNode( Inst< AddChildren    > _addChildren,
   use_union_bound( false ),
   addChildren   ( _addChildren    ),
   removeChildren( _removeChildren ),
-  children      ( _children       )
+  children      ( _children       ),
+  children_multi_pass_transparency( false )
 #ifdef HAVE_PROFILER
   ,time_in_last_render( 0 ),
   time_in_last_traverseSG( 0 ),

@@ -118,6 +118,8 @@ namespace H3D {
         return ret;
       }
       
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
       /// Function that reads characters from a char * and converts them
       /// to a given type. It will use as many characters from the char * as
       /// possible to build the value. Used by H3D::X3D::X3DStringToVector and
@@ -133,6 +135,7 @@ namespace H3D {
         throw UnimplementedConversionType( typeid( Type ).name(),
                                            "" );
       }
+H3D_POP_WARNINGS()
       
       
       /// Template specialization to handle the type 'string'.

@@ -284,7 +284,10 @@ void H3DPhysicsPythonInterface::initModule () {
 #ifdef HAVE_PYTHON
   // Py_Initialize really should be done in the DLL loader function:
   if ( !Py_IsInitialized() ) {
-    Py_Initialize();  
+#if PY_MAJOR_VERSION >= 3
+    PyImport_AppendInittab( "H3D", PythonInternals::PyInit_H3D );
+#endif
+    Py_Initialize();
     PythonScript::disallowMainThreadPython();
   }
 
@@ -347,9 +350,9 @@ void H3DPhysicsPythonInterface::initModule () {
 #ifdef HAVE_PYTHON
 
 PyObject* TrackedMField_insertTracked( PyObject *self, PyObject *args ) {
-  if( !args || ! PyTuple_Check( args ) || PyTuple_Size( args ) != 3  ) {
+  if( PyTuple_Size( args ) != 3 ) {
     PyErr_SetString( PyExc_ValueError, 
-"Invalid argument(s) to function H3DPhysics.TrackedMField_insertTracked( self, index, value )" );  
+"Invalid number of arguments to function H3DPhysics.TrackedMField_insertTracked( self, index, value )" );  
     return 0;
   }
 
@@ -418,9 +421,9 @@ call the base class __init__ function." );
 }
 
 PyObject* TrackedMField_updateTracked( PyObject *self, PyObject *args ) {
-  if( !args || ! PyTuple_Check( args ) || PyTuple_Size( args ) != 3  ) {
+  if( PyTuple_Size( args ) != 3 ) {
     PyErr_SetString( PyExc_ValueError, 
-"Invalid argument(s) to function H3DPhysics.TrackedMField_updateTracked( self, index, value )" );  
+"Invalid number of arguments to function H3DPhysics.TrackedMField_updateTracked( self, index, value )" );  
     return 0;
   }
 
@@ -490,9 +493,9 @@ call the base class __init__ function." );
 }
 
 PyObject* TrackedMField_eraseTracked( PyObject *self, PyObject *args ) {
-  if( !args || ! PyTuple_Check( args ) || ( PyTuple_Size( args ) != 2 && PyTuple_Size( args ) != 3 )  ) {
+  if( ( PyTuple_Size( args ) != 2 && PyTuple_Size( args ) != 3 ) ) {
     PyErr_SetString( PyExc_ValueError, 
-"Invalid argument(s) to function H3DPhysics.TrackedMField_eraseTracked( self, index, count= 1 )" );  
+"Invalid number of arguments to function H3DPhysics.TrackedMField_eraseTracked( self, index, count= 1 )" );  
     return 0;
   }
 

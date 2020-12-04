@@ -61,6 +61,8 @@ namespace H3D{
     class H3DPHYS_API ValueUpdater : 
       public EventCollectingField < Field > {
     public:
+      ValueUpdater() : allParams( false ) {}
+
       virtual PhysicsEngineParameters::DeformationStrategyParameters* getDeformationStrategyParameters( bool all_params = false );
     protected:
       virtual void update();

@@ -38,9 +38,9 @@ HapticSpring::HapticSpring( const Vec3 &_position,
   position( _position ),
   spring_constant( _spring_constant ),
   damping( 0 ),
-  first_time( true ),
   step_length( 0 ),
-  position_interpolation( 1 ) {}
+  position_interpolation( 1 ),
+  first_time( true ) {}
 
 HapticSpring::HapticSpring( const Vec3 &_position,
                             HAPIFloat _spring_constant,
@@ -51,9 +51,9 @@ HapticSpring::HapticSpring( const Vec3 &_position,
   position( _position ),
   spring_constant( _spring_constant ),
   damping( _damping ),
-  first_time( true ),
   step_length( 0 ),
-  position_interpolation( _position_interpolation ) {
+  position_interpolation( _position_interpolation ),
+  first_time( true ) {
   
   if( position_interpolation < 0 )
     position_interpolation = 0;

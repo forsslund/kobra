@@ -56,7 +56,7 @@ ComposedVolumeStyleOptionsPart( parent )
   this->Layout();
 }
 
-void MedX3DDemoComposedVolumeStyleOptionsPart::OnAddStyleButton( wxCommandEvent& event )
+void MedX3DDemoComposedVolumeStyleOptionsPart::OnAddStyleButton( wxCommandEvent& /*event*/ )
 {
   wxString choices[] = { wxT("OpacityMapVolumeStyle" ),
                        wxT("BlendedVolumeStyle" ),
@@ -81,7 +81,7 @@ void MedX3DDemoComposedVolumeStyleOptionsPart::OnAddStyleButton( wxCommandEvent&
   }                                                             
 }
 
-void MedX3DDemoComposedVolumeStyleOptionsPart::OnRemoveStyleButton( wxCommandEvent& event )
+void MedX3DDemoComposedVolumeStyleOptionsPart::OnRemoveStyleButton( wxCommandEvent& /*event*/ )
 {
    MedX3DDemoComposedVolumeStyleOptions *parent = 
       static_cast< MedX3DDemoComposedVolumeStyleOptions * >( GetParent() );

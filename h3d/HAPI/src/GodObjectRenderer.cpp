@@ -464,7 +464,7 @@ void GodObjectRenderer::onThreeOrMorePlaneContact(
 HAPIForceEffect::EffectOutput 
 GodObjectRenderer::renderHapticsOneStep( HAPIHapticsDevice *hd,
                                          const HapticShapeVector &shapes,
-                                         HAPITime dt ) {
+                                         HAPITime /*dt*/ ) {
   // get the current device values
   HAPIHapticsDevice::DeviceValues input = hd->getDeviceValues();
 
@@ -725,8 +725,8 @@ bool GodObjectRenderer::tryProxyMovement( Vec3 from, Vec3 to,
           for (HapticShapeVector::const_iterator i = shapes.begin();
             i != shapes.end();
             ++i) {
-            Collision::IntersectionInfo intersection;
-            if ((*i)->lineIntersect(old_from_point, from_point, intersection,
+            Collision::IntersectionInfo intersection2;
+            if ((*i)->lineIntersect(old_from_point, from_point, intersection2,
               (*i)->getTouchableFace())) {
               from_point = old_from_point;
               break;

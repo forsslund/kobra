@@ -87,7 +87,7 @@ PlanarReflector::PlanarReflector(
 
 
 void PlanarReflector::renderPostViewpoint ( X3DChildNode *n,
-                                            X3DViewpointNode *vp ) {
+                                            X3DViewpointNode * /*vp*/ ) {
   glMatrixMode( GL_MODELVIEW );
 
   GLfloat mv[16];

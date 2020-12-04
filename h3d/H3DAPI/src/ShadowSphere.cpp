@@ -59,14 +59,18 @@ ShadowSphere::ShadowSphere( Inst< SFNode>  _metadata,
   H3DShadowObjectNode( _metadata ),
   radius( _radius ),
   position( _position ),
-  detailLevel( _detailLevel ) {
+  detailLevel( _detailLevel ),
+  radius_ts( 1 ),
+  detail_level_ts( 120 ) {
 
   type_name = "ShadowSphere";
   database.initFields( this );
 
-  radius->setValue( 1 );
+  radius->setValue( radius_ts );
   position->setValue( Vec3f( 0, 0, 0 ) );
-  detailLevel->setValue( 120 );
+  detailLevel->setValue( detail_level_ts );
+
+  is_enabled_ts = enabled->getValue();
 }
 
 void H3D::ShadowSphere::update() {
@@ -84,11 +88,11 @@ void H3D::ShadowSphere::update() {
   position_ts = position->getValue();
 }
 
-void ShadowSphere::buildGeometryData( bool is_dir_light, int detail_level, H3DFloat radius, bool render_caps,
-  Vec3f light_dir, Vec3f light_pos, std::vector<Vec4d>& coord, Matrix4f local_to_global, bool coords_in_global ) {
+void ShadowSphere::buildGeometryData( bool is_dir_light, int detail_level, H3DFloat _radius, bool render_caps,
+  Vec3f /*light_dir*/, Vec3f light_pos, std::vector<Vec4d>& coord, Matrix4f local_to_global, bool coords_in_global ) {
 
   int nr_faces = detail_level;
-  H3DFloat r = radius;
+  H3DFloat r = _radius;
 
   // render side
   std::vector<Vec4d> side_tris;
@@ -167,7 +171,7 @@ void ShadowSphere::buildGeometryData( bool is_dir_light, int detail_level, H3DFl
 
       addConvexPolygon( temp_polygon_indices, 0, temp_polygon_indices.size() - 1, cap_indices );
 
-      size_t coord_idx = coord.size();
+      coord_idx = coord.size();
       // Add all of the bottom vertices.
       coord.resize( coord.size() + cap_indices.size() );
       for( size_t i = 0; i < cap_indices.size(); ++i ) {
@@ -203,7 +207,7 @@ void ShadowSphere::buildGeometryData( bool is_dir_light, int detail_level, H3DFl
 
     // Add all of the bottom vertices.
     // Different winding order because different facing.
-    size_t coord_idx = coord.size();
+    coord_idx = coord.size();
     coord.resize( coord.size() + cap_indices.size() );
     for( size_t i = 0; i < cap_indices.size(); i += 3 ) {
       coord[coord_idx] = cap_tris[cap_indices[i + 2]]; ++coord_idx;

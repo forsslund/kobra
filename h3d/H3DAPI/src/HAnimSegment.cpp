@@ -113,9 +113,9 @@ void HAnimSegment::traverseSG( TraverseInfo &ti ) {
       if( Coordinate *c = dynamic_cast< Coordinate * >( coord_node ) ) {
         points_double.clear();
         points_single = c->point->getValue();
-      } else if( CoordinateDouble *c = dynamic_cast< CoordinateDouble * >( coord_node ) ) {
+      } else if( CoordinateDouble *cd = dynamic_cast< CoordinateDouble * >( coord_node ) ) {
         points_single.clear();
-        points_double = c->point->getValue();
+        points_double = cd->point->getValue();
       } else {
         Console(LogLevel::Error) << "Unsupported X3DCoordinateNode: \"" 
                    << coord_node->getTypeName() << "\" in HAnimHumanoid." << endl;
@@ -125,10 +125,10 @@ void HAnimSegment::traverseSG( TraverseInfo &ti ) {
     }
   }
 
-  if( CoordinateDouble *c = dynamic_cast< CoordinateDouble * >( coord_node ) ) {
+  if( CoordinateDouble *cd = dynamic_cast< CoordinateDouble * >( coord_node ) ) {
     vector< Vec3d > modified_points = points_double;
     updateCoordinates( modified_points );
-    c->point->swap( modified_points );
+    cd->point->swap( modified_points );
   } else {
     vector< Vec3f > modified_points = points_single;
     updateCoordinates( modified_points );

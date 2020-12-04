@@ -35,6 +35,7 @@
 #include "WxConsoleDialog.h"
 #include <H3DUtil/Console.h>
 #include <H3DUtil/H3DMath.h>
+#include <wx/clipbrd.h>
 
 using namespace std;
 
@@ -118,7 +119,7 @@ WxConsoleDialog::WxConsoleDialog ( wxWindow *parent,
   const wxPoint& pos,
   const wxSize& size,
   long style
-  ): wxDialog (parent, id, title, pos, size, style)
+  ) : wxDialog (parent, id, title, pos, size, style), filelog_enabled( false )
 {
   wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
 
@@ -157,8 +158,6 @@ WxConsoleDialog::WxConsoleDialog ( wxWindow *parent,
                 wxEXPAND |    // make horizontally stretchable
                 wxALL,        //   and make border all around
                 10);         // set border width to 10 */
-
-  clip_board = new wxClipboard();
 
   // Clear button
   wxButton *clearBtn = new wxButton(this, wxID_CLEAR, wxT("Cle&ar"));
@@ -297,8 +296,6 @@ WxConsoleDialog::~WxConsoleDialog() {
   cout.rdbuf(orig_cout_buf);
   cerr.rdbuf(orig_cerr_buf);
 
-  delete clip_board;
-
   // Clean up "default(????)" console buffer.
   streambuf * tmp_buf = console_stream->rdbuf(NULL);
   console_stream.reset( NULL );
@@ -327,11 +324,11 @@ BEGIN_EVENT_TABLE(WxConsoleDialog, wxDialog)
   END_EVENT_TABLE()
 
   /*******************Member Functions*********************/
-  void WxConsoleDialog::OnConsoleClose(wxCommandEvent &event) {
+  void WxConsoleDialog::OnConsoleClose(wxCommandEvent &/*event*/) {
     Close(TRUE);
 }
 
-void WxConsoleDialog::OnConsoleClear(wxCommandEvent &event) {
+void WxConsoleDialog::OnConsoleClear(wxCommandEvent &/*event*/) {
   switch( tabs->GetSelection() ) {
   case 0:
     logText->Clear();
@@ -351,7 +348,7 @@ void WxConsoleDialog::OnConsoleClear(wxCommandEvent &event) {
   updateNotebook();
 }
 
-void WxConsoleDialog::OnCopyToClipboard(wxCommandEvent &event){
+void WxConsoleDialog::OnCopyToClipboard(wxCommandEvent &/*event*/){
   wxTextCtrl* ctrl= logText;
   switch( tabs->GetSelection() ) {
   case 0:
@@ -365,19 +362,17 @@ void WxConsoleDialog::OnCopyToClipboard(wxCommandEvent &event){
     break;
   }
 
-  if(!ctrl->IsEmpty()){
-    if(clip_board->Open()){
-      clip_board->Clear();
-      wxTextDataObject* tmp=new wxTextDataObject();
-      tmp->SetText( ctrl->GetValue());
-      clip_board->SetData(tmp);
-      clip_board->Flush();
-      clip_board->Close();
+  if( !ctrl->IsEmpty() ) {
+    if( wxTheClipboard->Open() ) {
+      wxTheClipboard->Clear();
+      wxTheClipboard->SetData( new wxTextDataObject( ctrl->GetValue() ) );
+      wxTheClipboard->Flush();
+      wxTheClipboard->Close();
     }
   }
 }
 
-void WxConsoleDialog::OnIdle(wxIdleEvent &event) {
+void WxConsoleDialog::OnIdle(wxIdleEvent &/*event*/) {
   console_stream_buf->onIdle();
   console_stream_buf_w->onIdle();
   console_stream_buf_e->onIdle();

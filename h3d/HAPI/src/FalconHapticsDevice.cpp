@@ -51,7 +51,7 @@ FalconHapticsDevice::device_registration(
 bool FalconHapticsDevice::hdl_started = false;
 int FalconHapticsDevice::nr_of_initalized = 0;
 
-bool FalconHapticsDevice::initHapticsDevice( int _thread_frequency ) {
+bool FalconHapticsDevice::initHapticsDevice( int /*_thread_frequency*/ ) {
 #ifdef H3D_WINDOWS
   /// need to go check if the dll to support this haptic device can be correctly
   /// loaded
@@ -155,7 +155,7 @@ void FalconHapticsDevice::updateDeviceValues( DeviceValues &dv,
 }
 
 void FalconHapticsDevice::sendOutput( DeviceOutput &dv,
-                                       HAPITime dt ) {
+                                       HAPITime /*dt*/ ) {
   hdlMakeCurrent( device_handle );
 
   double v[3];

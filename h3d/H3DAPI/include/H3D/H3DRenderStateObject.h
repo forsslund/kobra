@@ -57,11 +57,11 @@ namespace H3D {
 
     /// Enable the states that you want to before all other nodes of a 
     /// X3DGroupingNode's children field are traversed with traverseSG.
-    virtual void enableHapticsState( TraverseInfo &ti ) {}
+    virtual void enableHapticsState( TraverseInfo &/*ti*/ ) {}
 
     /// Reset the states that were changed in the enableHapticsState() 
     /// function
-    virtual void disableHapticsState( TraverseInfo &ti ) {}
+    virtual void disableHapticsState( TraverseInfo &/*ti*/ ) {}
   };
 }
 

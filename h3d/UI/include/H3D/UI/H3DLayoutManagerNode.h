@@ -56,7 +56,7 @@ namespace H3D {
                           Inst< DisplayList > _displayList = 0 );
 
     /// Pack
-    virtual void pack( Frame *frame ) {}
+    virtual void pack( Frame * ) {}
 
     
     /// Returns the default xml containerField attribute value.

@@ -144,7 +144,7 @@ H3DViewerFieldValuesDialogPropGrid::~H3DViewerFieldValuesDialogPropGrid()
   this->Disconnect( wxEVT_IDLE, wxIdleEventHandler( H3DViewerFieldValuesPanelPropGrid::OnIdle ), NULL, prop_grid_panel );
 }
 
-void H3DViewerFieldValuesDialogPropGrid::OnClose( wxCloseEvent& event ) {
+void H3DViewerFieldValuesDialogPropGrid::OnClose( wxCloseEvent& /*event*/ ) {
   if( destroy_on_close ) {
     Destroy();
   } else {
@@ -254,7 +254,7 @@ void H3DViewerFieldValuesPanelPropGrid::displayFieldsFromNode( Node *n ) {
 }
 
 
-void H3DViewerFieldValuesPanelPropGrid::OnIdle( wxIdleEvent& event ) {
+void H3DViewerFieldValuesPanelPropGrid::OnIdle( wxIdleEvent& /*event*/ ) {
   TimeStamp now;
   if( now - last_fields_update > 0.25 ) {
     
@@ -876,8 +876,8 @@ void H3DViewerFieldValuesPanelPropGrid::populateGridFromProgramSettings( wxPrope
   }
 }
 
-void H3DViewerFieldValuesPanelPropGrid::settingsCallback( Scene::ProgramSettingsEvent event,
-                                                          const Scene::ProgramSetting &setting,
+void H3DViewerFieldValuesPanelPropGrid::settingsCallback( Scene::ProgramSettingsEvent /*event*/,
+                                                          const Scene::ProgramSetting &/*setting*/,
                                                           void *data ) {
   H3DViewerFieldValuesPanelPropGrid *panel = 
     static_cast< H3DViewerFieldValuesPanelPropGrid * >( data );

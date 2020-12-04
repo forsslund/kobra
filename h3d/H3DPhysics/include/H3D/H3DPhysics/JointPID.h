@@ -43,6 +43,8 @@ namespace H3D {
   ///
   /// Assumptions: 
   /// <ul>
+  ///   <li> The type of joint to control is either a SliderJoint, a SingleAxisHingeJoint, a DoubleAxisHingeJoint 
+  ///        or a Generic6DOFJoint(only angular control supported) </li>
   ///   <li> For a joint fixed to space, the single body must be in the body1 field </li>
   ///   <li> Forces are applied to the body in the joint's body1 field. Joint chains should
   ///        be arranged such that multiple PID controllers do not apply forces to the same body </li>
@@ -69,7 +71,8 @@ namespace H3D {
       Inst< SFFloat         >  _errorSleepThreshold = 0,
       Inst< SFBool          >  _useJointMotor = 0,
       Inst< SFBool          >  _switchForcesToBody2 = 0,
-      Inst< SFBool          >  _applyTorqueAsForce = 0 );
+      Inst< SFBool          >  _applyTorqueAsForce = 0,
+      Inst< SFPIDController >  _angularControl3 = 0 );
 
     /// Traverse the scene graph.
     virtual void traverseSG( TraverseInfo &ti );
@@ -97,6 +100,13 @@ namespace H3D {
     /// 
     /// \dotfile JointPID_angularControl2.dot
     auto_ptr< SFPIDController >  angularControl2;
+
+    /// PID controller for angular axis 3
+    ///
+    /// <b>Access type:</b> inputOutput
+    /// 
+    /// \dotfile JointPID_angularControl3.dot
+    auto_ptr< SFPIDController >  angularControl3;
 
     /// The joint to control
     ///
@@ -158,7 +168,7 @@ namespace H3D {
     bool rt_use_joint_motor;
 
     struct JointType {
-      enum e { SingleAxisHinge, DoubleAxisHinge, Slider, Unsupported };
+      enum e { SingleAxisHinge, DoubleAxisHinge, Slider, Generic6DOF, Unsupported };
     };
 
     struct ControlType {
@@ -166,7 +176,7 @@ namespace H3D {
     };
 
     struct AxisType {
-      enum e { Axis1, Axis2 };
+      enum e { Axis1, Axis2, Axis3 };
     };
 
     /// Initializes for the given PhysicsEngineThread.
@@ -207,6 +217,7 @@ namespace H3D {
 
     PIDController* angular_PID1;
     PIDController* angular_PID2;
+    PIDController* angular_PID3;
 
     /// Is the joint fixed to space?
     /// I.e. Contains only 1 body

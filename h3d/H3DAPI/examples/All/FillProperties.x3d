@@ -9,13 +9,25 @@
   
   <Scene>
     <Viewpoint position='0 0 0.6' />
-    <Shape>
-      <Sphere radius='0.04' />
-      <Appearance>
-        <FillProperties
-            filled='true' hatched='true'
-            hatchColor='1 1 1' hatchStyle='6' />
-      </Appearance>
-    </Shape>
+    <Transform translation="-0.05 0 0">
+      <Shape>
+        <Sphere radius='0.04' />
+        <Appearance>
+          <FillProperties
+              filled='true' hatched='true'
+              hatchColor='1 1 1' hatchStyle='6' />
+        </Appearance>
+      </Shape>
+    </Transform>
+    
+    <Transform translation="0.05 0 0">
+      <Shape>
+        <Sphere radius='0.04' />
+        <Appearance>
+          <FillProperties
+              filled='false' hatched='false'/>
+        </Appearance>
+      </Shape>
+    </Transform>
   </Scene>
 </X3D>

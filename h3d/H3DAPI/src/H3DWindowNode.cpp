@@ -1,4 +1,4 @@
-﻿//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //    Copyright 2004-2019, SenseGraphics AB
 //
 //    This file is part of H3D API.
@@ -126,6 +126,7 @@ H3DWindowNode::H3DWindowNode(
                    Inst< SFInt32 > _numSamples ) :
 #ifdef H3D_WINDOWS
   rendering_context( NULL ),
+  hWnd( NULL ),
 #endif
   posX      ( _posX        ),
   posY      ( _posY        ),
@@ -138,31 +139,36 @@ H3DWindowNode::H3DWindowNode(
   manualCursorControl( _manualCursorControl ),
   cursorType( _cursorType ),
   navigationInfo( _navigationInfo ),
-  useFullscreenAntiAliasing( _useFullscreenAntiAliasing ),
   clipDistances( _clipDistances ),
-  singlePassStereo( _singlePassStereo ),
+  useFullscreenAntiAliasing( _useFullscreenAntiAliasing ),
   viewportWidth( new SFInt32 ),
   viewportHeight( new SFInt32 ),
   projectionWidth( new SFInt32 ),
   projectionHeight( new SFInt32 ),
-  fbo_current_x(0),
-  fbo_current_y(0),
+  singlePassStereo( _singlePassStereo ),
   pointingDeviceRefreshMode( _pointingDeviceRefreshMode ),
   resetViewPoint(_resetViewPoint),
   numSamples(_numSamples),
+  fbo_current_width( 0 ),
+  fbo_current_height( 0 ),
+  fbo_current_x(0),
+  fbo_current_y(0),
+  rebuild_stencil_mask( false ),
   last_render_child( NULL ),
   window_id( 0 ),
-  rebuild_stencil_mask( false ),
   stencil_mask( NULL ),
   stencil_mask_height( 0 ),
   stencil_mask_width( 0 ),
   last_loop_mirrored( false ),
   last_render_mode( RenderMode::MONO ),
+  eye_mode( X3DViewpointNode::MONO ),
   current_cursor( "DEFAULT" ),
+  previous_left_mouse_button( false ),
   h3d_navigation( new H3DNavigation ),
   window_is_made_active( false ),
   check_if_stereo_obtained( false ),
-  windowSizeChanged( new WindowSizeChanged )
+  windowSizeChanged( new WindowSizeChanged ),
+  nr_viewports( 0 )
 #ifdef HAVE_LIBOVR
   ,oculus( NULL ) 
 #endif
@@ -171,11 +177,7 @@ H3DWindowNode::H3DWindowNode(
   type_name = "H3DWindowNode";
   database.initFields( this );
 
-  FrameBufferTextureGenerator *gen = new FrameBufferTextureGenerator;
-  gen->generateColorTextures->push_back( "RGBA" );
-  gen->samples->setValue( 4 );
-  gen->setAlwaysUseExistingViewport( true );
-  generator.reset( gen );
+
 
 #ifdef H3D_WINDOWS
   windowInstance = GetModuleHandle( NULL );
@@ -271,6 +273,10 @@ H3DWindowNode::~H3DWindowNode() {
   windows.erase( this );
 }
 
+#ifdef __GNUC__
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void H3DWindowNode::shareRenderingContext( H3DWindowNode *w ) {
 #ifdef H3D_WINDOWS
   BOOL res = wglShareLists( rendering_context, w->getRenderingContext() );
@@ -292,6 +298,9 @@ void H3DWindowNode::shareRenderingContext( H3DWindowNode *w ) {
                          H3D_FULL_LOCATION );
 #endif // H3D_WINDOWS
 }
+#ifdef __GNUC__
+H3D_POP_WARNINGS()
+#endif
 
 void H3DWindowNode::initialize() {
   initWindowHandler();

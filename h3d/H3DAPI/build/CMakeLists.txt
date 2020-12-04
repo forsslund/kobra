@@ -9,6 +9,7 @@ set( CMAKE_MODULE_PATH "${H3DAPI_SOURCE_DIR}/localModules" "${H3DAPI_SOURCE_DIR}
 include( H3DCommonFunctions )
 setCommonH3DCMakePolicies()
 setupRPathForLib()
+enableCpp11( FAIL_MESSAGE "Enabling C++11 support. This compiler lacks such support." )
 handleCommonCacheVar( CMAKE_INSTALL_PREFIX ${H3DAPI_SOURCE_DIR}/.. GENERATE_H3D_PACKAGE_PROJECT H3D_PREFER_STATIC_LIBRARIES GENERATE_NodeRoutesToDotFile_BUILD )
 
 # Make include files in paths like /usr/local/include have preference before
@@ -262,115 +263,14 @@ if( ZLIB_FOUND )
 endif()
 
 # Optional extra library. Add python bindings to H3D API, allow for extended prototyping without using C++.
-if( APPLE )
-  set( CMAKE_FIND_FRAMEWORK FIRST )
-endif()
-
-# Whether or not a local python environment is available and should be used (virtual env or full distribution).
-if( PYTHON_USE_LOCAL_ENV )
-  add_definitions( -DPYTHON_USE_LOCAL_ENV=1 )
-endif()
-
-set( USE_Python3 "OFF" CACHE BOOL "Check if you want to use Python 3 instead of 2" )
-set( PYTHON_VER "UNDEFINED" CACHE STRING "Located python version" )
-
-# Check if the wrong version of python is located.
-# If so, clear the cache variables FindPythonLibs-module uses otherwise it will complain and not find the right one
-if( NOT (PYTHON_VER STREQUAL "UNDEFINED") )
-  if( USE_Python3 AND PYTHON_VER VERSION_LESS "3.0.0" )
-    unset(PYTHON_LIBRARY CACHE)
-    unset(PYTHON_INCLUDE_DIR CACHE)
-    unset(PYTHON_DEBUG_LIBRARY CACHE)
-  elseif( (NOT USE_Python3 ) AND ( PYTHON_VER VERSION_GREATER "3.0.0" OR PYTHON_VER VERSION_EQUAL "3.0.0") )
-    unset(PYTHON_LIBRARY CACHE)
-    unset(PYTHON_INCLUDE_DIR CACHE)
-    unset(PYTHON_DEBUG_LIBRARY CACHE)
-  endif()
-endif()
-
-if( USE_Python3 )
-  find_package( PythonLibs 3 )
-  if( PYTHONLIBS_FOUND )
-    set( PYTHON_VER ${PYTHONLIBS_VERSION_STRING} CACHE STRING "Located python version" FORCE )
-  else ()
-    if( WIN32 )
-      # For all windows distributions: define which architectures can be used
-      if (CMAKE_SIZEOF_VOID_P)
-        # In this case, search only for 64bit or 32bit
-        math (EXPR _${_PYTHON_PREFIX}_ARCH "${CMAKE_SIZEOF_VOID_P} * 8")
-        set (_${_PYTHON_PREFIX}_ARCH2 ${_${_PYTHON_PREFIX}_ARCH})
-      else()
-        # architecture unknown, search for both 64bit and 32bit
-        set (_${_PYTHON_PREFIX}_ARCH 64)
-        set (_${_PYTHON_PREFIX}_ARCH2 32)
-      endif()
-
-      foreach(_CURRENT_VERSION ${_Python_VERSIONS})
-        string(REPLACE "." "" _CURRENT_VERSION_NO_DOTS ${_CURRENT_VERSION})
-        find_library(PYTHON_LIBRARY
-          NAMES
-            python${_CURRENT_VERSION_NO_DOTS}
-            python${_CURRENT_VERSION}mu
-            python${_CURRENT_VERSION}m
-            python${_CURRENT_VERSION}u
-            python${_CURRENT_VERSION}
-          NAMES_PER_DIR
-          PATHS
-            [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]/libs
-            [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]/libs
-            [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]/libs
-            [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]/libs
-        )
-      endforeach()
-      find_package( PythonLibs 3 )
-    endif()
-    if( PYTHONLIBS_FOUND )
-      set( PYTHON_VER ${PYTHONLIBS_VERSION_STRING} CACHE STRING "Located python version" FORCE )
-    else()
-      set( PYTHON_VER "UNDEFINED" CACHE STRING "Located python version" FORCE )
-      message( WARNING "COULD NOT FIND PYTHON 3 - GENERATED PROJECT WILL HAVE ZERO PYTHON SUPPORT. UNCHECK USE_Python3 IF YOU WISH TO LOOK FOR PYTHON 2.")
-    endif()
-  endif()
-else()
-  find_package( PythonLibs 2 )
-  if( PYTHONLIBS_FOUND )
-    set( PYTHON_VER ${PYTHONLIBS_VERSION_STRING} CACHE STRING "Located python version" FORCE )
-  else ()
-    set( PYTHON_VER "UNDEFINED" CACHE STRING "Located python version" FORCE )
-    message( WARNING "COULD NOT FIND PYTHON 2 - GENERATED PROJECT WILL HAVE ZERO PYTHON SUPPORT.")
-  endif()
-endif()
-
-if( PYTHONLIBS_FOUND )
+findPython2Or3( python_include_dirs python_libs have_python_debug_library have_python_os_framework python_definitions )
+add_definitions( ${python_definitions} )
+if( python_include_dirs AND python_libs )
   set( HAVE_PYTHON 1 )
-  set( HAVE_PYTHON_OSX_FRAMEWORK )
-  include_directories( ${PYTHON_INCLUDE_DIRS} )
-  if( APPLE )
-    foreach( dir ${PYTHON_INCLUDE_DIRS} )
-      if( dir MATCHES "/System/Library/Frameworks/Python[.]framework" )
-        set( HAVE_PYTHON_OSX_FRAMEWORK 1 )
-        break()
-      endif()
-    endforeach()
-  endif()
-  if( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
-    # pyconfig.h is put in different directory from Ubuntu 13.04 (raring)
-    # and CMake FindPythonLibs module is not updated for this yet.
-    # Adding it explicitly here in the mean time.
-    include_directories( /usr/include/${CMAKE_LIBRARY_ARCHITECTURE}/python2.7 )
-  endif()
-  set( optional_libs ${optional_libs} ${PYTHON_LIBRARIES} )
-
-  if( PYTHONLIBS_VERSION_STRING VERSION_LESS "3.0.0" AND (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") )
-    # Python 2.7 does not follow strict aliasing rules (pointers to objects
-    # of different types will never refer to the same memory location). So we
-    # must disable optimizations based on this assumption. Failing to do so
-    # gives warnings (with -Wall) and could give undefined results.
-    # This issue is fixed in Python 3. As far as I can see VS does not make
-    # such optimizations, so no action is required there.
-    # Also see: http://legacy.python.org/dev/peps/pep-3123/
-    add_definitions(-fno-strict-aliasing)
-  endif()
+  set( HAVE_PYTHON_OSX_FRAMEWORK ${have_python_os_framework} )
+  set( HAVE_PYTHON_DEBUG_LIBRARY ${have_python_debug_library} )
+  include_directories( ${python_include_dirs} )
+  set( optional_libs ${optional_libs} ${python_libs} )
 endif()
 
 # Optional extra library. Used for sound in H3D API.
@@ -618,7 +518,7 @@ if( WIN32 )
 endif()
 
 if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
-  addCommonH3DGNUCompileFlags( H3DAPI_COMPILE_FLAGS )
+  addCommonH3DGNUCompileFlags( H3DAPI_COMPILE_FLAGS TRUE )
 endif()
 addCommonAppleClangCompileFlags( H3DAPI_COMPILE_FLAGS )
 

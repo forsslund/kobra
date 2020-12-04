@@ -119,19 +119,19 @@ void ImageObjectInfo::updateFieldsFromImage( Image * image ) {
       pixelSize->setValue( pixel_size, id );
     }
 
-    if( width->getValue() != image->width() ) {
+    if( width->getValue() != static_cast<H3DInt32>(image->width()) ) {
       width->setValue( image->width(), id );
     }
 
-    if( height->getValue() != image->height() ) {
+    if( height->getValue() != static_cast<H3DInt32>(image->height()) ) {
       height->setValue( image->height(), id );
     }
 
-    if( depth->getValue() != image->depth() ) {
+    if( depth->getValue() != static_cast<H3DInt32>(image->depth()) ) {
       depth->setValue( image->depth(), id );
     }
 
-    if( bitsPerPixel->getValue() != image->bitsPerPixel() ) {
+    if( bitsPerPixel->getValue() != static_cast<H3DInt32>(image->bitsPerPixel()) ) {
       bitsPerPixel->setValue( image->bitsPerPixel(), id );
     }
 

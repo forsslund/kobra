@@ -88,7 +88,7 @@ protected:
 
     /// This function needs to be here in order for xsputn to be called.
     /// Not sure why..
-    int overflow( int c ) {
+    int overflow( int ) {
       // return something different from EOF
       return 0;
     }

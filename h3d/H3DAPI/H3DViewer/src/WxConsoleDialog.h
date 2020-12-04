@@ -35,7 +35,6 @@
 //  Console Dialog Class
 // ---------------------------------------------------------------------------
 #include <wx/wx.h>
-#include <wx/clipbrd.h>
 #include <wx/notebook.h>
 #include <sstream>
 #include <fstream>
@@ -67,9 +66,6 @@ public:
   wxTextCtrl *logText;         ///< Console for all output levels
   wxTextCtrl *logTextErrors;   ///< Console for errors
   wxTextCtrl *logTextWarnings; ///< Console for warnings
-
-  /// 
-  wxClipboard *clip_board;
 
   /// Used to make sure that output is done in the main wx thread.
   friend void wxLockGUI( void * );

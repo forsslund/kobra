@@ -76,7 +76,9 @@ namespace HAPI {
                        /// use getLastErrorMsg() to get info about the error.
     } ErrorCode;
 
+#ifdef HAVE_PROFILER
     std::string profiled_result_haptic[2];
+#endif
 
     /// \struct DeviceValues
     /// \brief Struct for holding a snapshot of current values of different
@@ -119,25 +121,25 @@ namespace HAPI {
     /// Constructor.
     HAPIHapticsDevice() :
       thread( NULL ),
-      tmp_switching_effects( false ),
       switching_effects( false ),
-      tmp_switch_effects_duration( 0 ),
+      tmp_switching_effects( false ),
       switch_effects_duration( 0 ),
+      tmp_switch_effects_duration( 0 ),
+      last_force_effect_change( 0 ),
+      error_handler( new DefaultErrorHandler ),
       time_in_last_loop( -1 ),
       device_state( UNINITIALIZED ),
       delete_thread( false ),
+      ts_force_scale( 1.0 ),
       setup_haptic_rendering_callback( true ),
       haptic_rendering_cb_handle( -1 ),
-      haptics_rate( 0 ),
       nr_haptics_loops( 0 ),
-      last_force_effect_change( 0 ),
-      error_handler( new DefaultErrorHandler ),
+      haptics_rate( 0 ),
       force_limit( -1 ),
-      torque_limit ( -1 ),
-      force_scale ( 1 ),
-      transfer_objects_active ( false ),
-      always_transfer_objects ( true ),
-      ts_force_scale( 1.0 ) {
+      torque_limit( -1 ),
+      force_scale( 1 ),
+      transfer_objects_active( false ),
+      always_transfer_objects( true ) {
       setHapticsRenderer( NULL );
       haptic_rendering_callback_data = this;
       // This value is choosen ad hoc as fairly "standard".
@@ -893,7 +895,7 @@ namespace HAPI {
     class HAPI_API DefaultErrorHandler: public ErrorHandler {
     public:
       /// Outputs a Console error message.
-      virtual void handleError( HAPIHapticsDevice *hd, 
+      virtual void handleError( HAPIHapticsDevice * /*hd*/, 
                                 long internal_error_code,
                                 std::string error_string ) {
         H3DUtil::Console(H3DUtil::LogLevel::Error) << "Haptics device error: " << error_string
@@ -1207,6 +1209,8 @@ namespace HAPI {
       last_error_message = err;
     }
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// This function should be overriden by all subclasses of 
     /// HAPIHapticsDevice in order to fill in the given DeviceValues
     /// structure with current values of the devie.
@@ -1218,6 +1222,7 @@ namespace HAPI {
       dv.torque = output.torque;
       dv.dof7_force = output.dof7_force;
     }
+H3D_POP_WARNINGS()
 
     /// This function should be overridden by all subclasses of 
     /// HAPIHapticsDevice in order to send the values in the
@@ -1301,7 +1306,13 @@ namespace HAPI {
     struct HAPI_API PhaseInOut {
     public:
       // Default Constructor
-      PhaseInOut(){};
+      PhaseInOut() : 
+        duration( 0 ),
+        start_time( 0 ),
+        phase_in( false ),
+        max_fraction( false ),
+        set_max_fraction( 0 )
+      {}
 
       // Constructor.
       PhaseInOut( HAPITime _duration,

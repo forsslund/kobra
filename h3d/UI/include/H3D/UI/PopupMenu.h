@@ -59,7 +59,6 @@ namespace H3D {
 
     class UI_API SFButtonNode: public TypedSFNode< H3DButtonNode > {
       virtual void onAdd( Node * );
-      virtual void onRemove( Node * );
     };
 
     class UI_API PopupTransformWidgets:

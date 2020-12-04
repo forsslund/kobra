@@ -77,14 +77,17 @@ namespace HAPI {
     /// \param dt Time since last call to this function.
     virtual void updateDeviceValues( DeviceValues &dv, HAPI::HAPITime dt );
 
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
     /// Output is ignored on a fake haptics device.
-    virtual void sendOutput( DeviceOutput &dv,
-            HAPI::HAPITime dt ) {}
+    virtual void sendOutput( DeviceOutput &/*dv*/,
+            HAPI::HAPITime /*dt*/ ) {}
 
     /// Dummy implementation of initHapticsDevice.
-    virtual bool initHapticsDevice( int _thread_frequency = 1000 ) {
+    virtual bool initHapticsDevice( int /*_thread_frequency*/ = 1000 ) {
       return true;
     }
+H3D_POP_WARNINGS()
 
     /// Releases all resources allocated in initHapticsDevice. 
     virtual bool releaseHapticsDevice() { return true; }

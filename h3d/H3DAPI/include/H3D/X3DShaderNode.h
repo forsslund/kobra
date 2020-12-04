@@ -91,7 +91,7 @@ namespace H3D {
     /// that is < 1, i.e. it is semi-transparent, or not. This
     /// is used to determine render order of transparent vs opaque
     /// objects.
-    virtual bool isTransparent( X3DMaterialNode *material ) {
+    virtual bool isTransparent( X3DMaterialNode * ) {
       return false;
     }
 

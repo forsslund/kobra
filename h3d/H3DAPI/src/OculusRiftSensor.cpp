@@ -217,6 +217,10 @@ void OculusRiftSensor::updateValues(){
 #endif
 }
 
+#ifndef HAVE_LIBOVR
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void OculusRiftSensor::PerformanceStatsField::onNewValue(const string &new_value) {
 #ifdef HAVE_LIBOVR
   if (OculusRiftSensor::oculus) {
@@ -246,3 +250,6 @@ void OculusRiftSensor::MSAAEnabledField::onNewValue(const bool &new_value) {
   if (OculusRiftSensor::oculus) oculus->setMSAA( new_value );
 #endif
 }
+#ifndef HAVE_LIBOVR
+H3D_POP_WARNINGS()
+#endif

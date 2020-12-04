@@ -62,7 +62,7 @@ getDefaultH3DOutputDirectoryName( default_bin_install default_lib_install )
 # Set compile and link properties for projects.
 set( ManualExamples_COMPILE_FLAGS )
 
-addCommonH3DCompileFlags( ManualExamples_COMPILE_FLAGS )
+addCommonH3DCompileFlags( ManualExamples_COMPILE_FLAGS TRUE )
 
 set_target_properties( Sphere_X3D PROPERTIES COMPILE_FLAGS "${ManualExamples_COMPILE_FLAGS}" )
 set_target_properties( Spheres_X3D PROPERTIES COMPILE_FLAGS "${ManualExamples_COMPILE_FLAGS}" )

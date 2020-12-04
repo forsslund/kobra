@@ -64,7 +64,8 @@ using namespace std;
 vector<ThreadBase *> ThreadBase::current_threads;
 
 MutexLock ThreadSpecificContainerBase::ThreadInfo::mutex;
-std::size_t ThreadSpecificContainerBase::ThreadInfo::next_thread_index = 0;
+
+std::set<std::size_t> ThreadSpecificContainerBase::ThreadInfo::used_thread_indexes;
 
 // Constructor.
 MutexLock::MutexLock() {
@@ -289,6 +290,25 @@ void *PeriodicThread::thread_func( void * _data ) {
     info.period_start_time = TimeStamp();
 #endif
 
+    // when thread is not negative, it is possible that the synced_callbacks can be
+    // used so we handle the synced callback first
+    // for synced callbacks, directly execute and clear afterward
+    // no need to handle continuing 
+    if( thread->frequency >= 0 ) {
+      thread->synced_callback_lock.lock();
+      for ( PeriodicThread::SyncedCallbacklist::iterator i = thread->synced_callbacks.begin();
+        i != thread->synced_callbacks.end(); ++i ) {
+        (*i).first( (*i).second );
+      }
+      thread->synced_callbacks.clear();
+      // All synced callbacks are handled, broadcast this so all threads blocked waiting 
+      // for the synchronous callback can continue.
+      thread->synced_callback_lock.broadcast();
+      thread->synced_callback_lock.unlock();
+    }
+
+
+
     vector< PeriodicThread::CallbackList::iterator > to_remove;
     thread->callback_lock.lock();
 
@@ -463,7 +483,11 @@ PeriodicThread::~PeriodicThread() {
     callbacks_added.clear();
     callbacks.clear();
     callbacks_added_lock.unlock();
+    synced_callback_lock.lock();
+    synced_callbacks.clear();
     exitThread();
+    synced_callback_lock.signal();
+    synced_callback_lock.unlock();
     callback_lock.signal();
     callback_lock.unlock();
     pthread_join( thread_id, NULL );
@@ -544,6 +568,27 @@ void PeriodicThread::synchronousCallback( CallbackFunc func, void *data ) {
   // wait for the callback to be done.
   callback_lock.wait();
   callback_lock.unlock();
+}
+
+void PeriodicThread::synchronousCallbackDedicatedQueue( CallbackFunc func, void *data ) {
+  if( frequency >= 0 ) {
+    // only use dedicated queue if frequency is not negative. 
+    // this is because A thread with negative frequency will be blocked when callbacks is empty. 
+    // And dedicated callback queue for synced callbacks does not have the 
+    // signaling on empty call back queue functionality (for performance and simplicity reason), hence
+    // the stalling can happen. 
+    synced_callback_lock.lock();
+    synced_callbacks.push_back( make_pair( func, data ) );
+    while ( !synced_callbacks.empty() )
+    {
+      // blocking until all synced_callbacks get handled
+      // keep checking this to avoid problems due to spurious wakeup
+      synced_callback_lock.wait();
+    }
+    synced_callback_lock.unlock();
+  } else {
+    synchronousCallback( func, data );
+  }
 }
 
 int PeriodicThread::asynchronousCallback( CallbackFunc func, void *data ) {
@@ -759,6 +804,10 @@ typedef struct tagTHREADNAME_INFO {
 #pragma pack(pop)
 #endif
 
+#ifndef _MSC_VER
+H3D_PUSH_WARNINGS()
+H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#endif
 void ThreadBase::setThreadName( ThreadId thread_id, const string &name ) {
 #if ( (PTW32_VERSION_MAJOR >= 3)  || ( ( PTW32_VERSION_MAJOR == 2 ) && ( PTW32_VERSION_MINOR >= 11 ) ) )
   pthread_setname_np( thread_id,  name.c_str() );
@@ -784,6 +833,9 @@ void ThreadBase::setThreadName( ThreadId thread_id, const string &name ) {
 #endif
 
 }
+#ifndef _MSC_VER
+H3D_POP_WARNINGS()
+#endif
 
 void ThreadBase::setThreadName( const string &_name ) {
   name = _name;
@@ -800,10 +852,32 @@ bool ThreadBase::inMainThread() {
 
 ThreadSpecificContainerBase::ThreadInfo::ThreadInfo() {
   ScopedLock< MutexLock > lock( mutex );
-  index = next_thread_index++;
+  index = acquireThreadIndex();
+  used_thread_indexes.insert( index );
 }
 
 ThreadSpecificContainerBase::ThreadInfo& ThreadSpecificContainerBase::ThreadInfo::getInstance() {
   static ThreadSpecificStorage< ThreadInfo > thread_info;
   return thread_info;
+}
+
+std::size_t ThreadSpecificContainerBase::ThreadInfo::acquireThreadIndex()
+{
+  
+  for ( auto x = 0; x < THREADSPECIFICCONTAINERMAXTHREAD; ++x ) {
+    if( !used_thread_indexes.count(x) ) {
+      used_thread_indexes.insert( x );
+      return x;
+    }
+  }
+  // print out error message as well as throw exception, as the exception
+  // is not likely to be captured due to this piece of code normally 
+  // get executed in another thread other than the main thread.
+  Console( LogLevel::Error ) << "All available thread indexes are assigned, something went wrong!" << std::endl;
+  throw std::runtime_error( "All available thread indexes are assigned, something went wrong!" );
+}
+
+H3DUtil::ThreadSpecificContainerBase::ThreadInfo::~ThreadInfo()
+{
+  used_thread_indexes.erase( index );
 }

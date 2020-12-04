@@ -205,7 +205,6 @@ namespace H3DUtil {
       return Quaterniond( q1.v + q2.v,
                          q1.w + q2.w );
     }
-    /// \}
 
     /// Unary minus.
     inline Quaterniond operator-( const Quaterniond &q ) { return q * -1; }

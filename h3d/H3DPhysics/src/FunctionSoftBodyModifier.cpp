@@ -68,14 +68,16 @@ H3DAdjacencySoftBodyDeformer ( _metadata, _valueUpdater, _body1,
     updatePoseNow ( true ),
     gaussian_center ( 0.0f ),
     gaussian_width ( 0.0f ),
-    gaussian_amplitude( 0.0f )
+    gaussian_amplitude( 0.0f ),
+    max_displacement( -1 ),
+    fade_distance( 0.001f )
 {
   // init fields
   type_name = "FunctionSoftBodyModifier";
   database.initFields( this );  
 
-  maxDisplacement->setValue ( -1 );
-  fadeDistance->setValue ( 0.001f );
+  maxDisplacement->setValue ( max_displacement );
+  fadeDistance->setValue( fade_distance );
   savePose->setValue ( false );
 }
 

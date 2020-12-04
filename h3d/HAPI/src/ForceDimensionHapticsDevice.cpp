@@ -40,6 +40,8 @@
 #include <dhdc.h>
 #endif
 
+#include <vector>
+
 using namespace HAPI;
 
 namespace ForceDimensionHapticsDeviceInternal {
@@ -98,10 +100,12 @@ namespace ForceDimensionHapticsDeviceInternal {
                                Rotation (*rotation_func)( double &rx, double &ry, double &rz ),
                                Vec3 (*angular_velocity_func)( double &rx, double &ry, double &rz ) ) {
     double x, y, z, rx, ry, rz, vx, vy, vz, avx = 0, avy = 0, avz = 0;
-    dhdGetPositionAndOrientationRad( &z, &x, &y, &rz, &rx, &ry, device_id );
-    dhdGetLinearVelocity( &vz, &vx, &vy, device_id );
+    dhdGetPositionAndOrientationRad( &z, &x, &y, &rz, &rx, &ry, static_cast< char >(device_id) );
+    dhdGetLinearVelocity( &vz, &vx, &vy, static_cast<char>(device_id) );
     if( gripper_support ) {
-      dhdGetGripperAngleRad( &dof7_angle, device_id );
+      dhdGetGripperAngleRad( &dof7_angle, static_cast<char>(device_id) );
+    } else {
+      dof7_angle = 0;
     }
 #ifdef DHD_DEVICE_SIGMA331 // This ifdef is used as a replacement for the lack of version define for the dhd headers.
     dhdGetAngularVelocityRad( &avz, &avx, &avy, device_id );
@@ -113,7 +117,7 @@ namespace ForceDimensionHapticsDeviceInternal {
 #else
     button = 0;
     for( int i = 0; i < H3DMin( DHD_MAX_BUTTONS, 8 ); ++i ) {
-      if( dhdGetButton( i, device_id ) == DHD_ON ) {
+      if( dhdGetButton( i, static_cast<char>(device_id) ) == DHD_ON ) {
         button |= 1 << i;
       }
     }
@@ -121,6 +125,8 @@ namespace ForceDimensionHapticsDeviceInternal {
 #endif
 #ifdef HAVE_DRDAPI
     _is_autocalibrated = drdIsInitialized( device_id );
+#else
+    _is_autocalibrated = true;
 #endif
     
 
@@ -141,7 +147,7 @@ ForceDimensionHapticsDevice::device_registration(
                             ForceDimensionHapticsDeviceInternal::force_dimension_libs
                             );
 
-ForceDimensionHapticsDevice::ForceDimensionHapticsDevice():
+ForceDimensionHapticsDevice::ForceDimensionHapticsDevice( int _device_type, bool _flip_7dof_values ):
   device_id( -1 ),
   com_thread( NULL ),
   com_func_cb_handle( -1 ),
@@ -149,7 +155,10 @@ ForceDimensionHapticsDevice::ForceDimensionHapticsDevice():
   is_autocalibrated_com_thread( true ),
   com_thread_frequency( 1000 ),
   auto_calibration_mode( false ),
-  has_gripper_support( 0 ) {
+  has_gripper_support( 0 ),
+  flip_7dof_values( _flip_7dof_values ),
+  device_type( _device_type ),
+  release_position_set( false ) {
   // This might have to be changed if they redo it so that their
   // different devices have different maximum stiffness values.
   max_stiffness = 1450;
@@ -159,7 +168,7 @@ ForceDimensionHapticsDevice::ForceDimensionHapticsDevice():
 
 std::vector< int > ForceDimensionHapticsDevice::free_dhd_ids;
 int ForceDimensionHapticsDevice::nr_of_connected_dhd_devices = -1;
-bool ForceDimensionHapticsDevice::initHapticsDevice( int _thread_frequency ) {
+bool ForceDimensionHapticsDevice::initHapticsDevice( int /*_thread_frequency*/ ) {
 #ifdef WIN32
   /// need to go check if the dll to support this haptic device can be correctly
   /// loaded
@@ -190,19 +199,58 @@ bool ForceDimensionHapticsDevice::initHapticsDevice( int _thread_frequency ) {
     return false;
   }
 
+
+  std::vector< int > device_ids_to_close;
+  std::vector< int >::reverse_iterator used_device_id_iterator = free_dhd_ids.rbegin(); // Reverse iterator so the behaviour is backwards compatible when no deviceType is given.
+  for( ; used_device_id_iterator != free_dhd_ids.rend(); ++used_device_id_iterator ) {
 #ifdef HAVE_DRDAPI
-  device_id = drdOpenID( free_dhd_ids.back() );
+    device_id = drdOpenID( *used_device_id_iterator );
 #else
-  device_id = dhdOpenID( free_dhd_ids.back() );
+    device_id = dhdOpenID( static_cast<char>(*used_device_id_iterator) );
 #endif
-  if( device_id == -1 ) {
-    std::stringstream s;
-    s << "Warning: Failed to open ForceDimension device. Error: "
-      << dhdErrorGetLastStr();
-    setErrorMsg( s.str() );
-    return false;
+    if( device_id == -1 ) {
+      std::stringstream s;
+      s << "Warning: Failed to open ForceDimension device. Error: "
+        << dhdErrorGetLastStr();
+      setErrorMsg( s.str() );
+      return false;
+    }
+    int obtained_device_type = dhdGetSystemType( static_cast< char >(device_id) );
+    if( device_type < 0 || obtained_device_type == device_type ) {
+      device_type = obtained_device_type;
+      break;
+    } else {
+      device_ids_to_close.push_back( static_cast<char>(device_id) );
+      device_id = -1;
+    }
   }
-  free_dhd_ids.pop_back();
+  
+  for( std::vector< int >::iterator i = device_ids_to_close.begin(); i != device_ids_to_close.end(); ++i ) {
+#ifdef HAVE_DRDAPI
+    drdClose( *i );
+#else
+    dhdClose( static_cast<char>(*i) );
+#endif
+  }
+
+  if( device_id == -1 ) {
+    if( device_type < 0 ) {
+      // This should not ever happen if the logic above is sound.
+      // However, I do not trust myself.
+      std::stringstream s;
+      s << "Warning: Failed to open ForceDimension device. Logic error in code, a bug is detected.";
+      setErrorMsg( s.str() );
+      return false;
+    } else {
+      std::stringstream s;
+      s << "Warning: Failed to open ForceDimension device. No connected device of type " << device_type;
+      setErrorMsg( s.str() );
+      return false;
+    }
+  }
+
+  std::vector< int >::iterator found_id = find( free_dhd_ids.begin(), free_dhd_ids.end(), *used_device_id_iterator ); // Because erase can not take reverse iterators.
+  free_dhd_ids.erase(found_id);
 
 #ifdef DHD_DEVICE_SIGMA331 // This ifdef is used as a replacement for the lack of version define for the dhd headers.
   has_gripper_support = dhdHasGripper( device_id );
@@ -213,15 +261,7 @@ bool ForceDimensionHapticsDevice::initHapticsDevice( int _thread_frequency ) {
   has_gripper_support = true;
 #endif
 
-  if( com_thread_frequency > 0 ) {
-    com_thread = 
-      new H3DUtil::PeriodicThread( H3DUtil::ThreadBase::HIGH_PRIORITY, com_thread_frequency );
-    com_thread->setThreadName( "DHD com thread" );
-    com_func_cb_handle = com_thread->asynchronousCallback( com_func, this );
-  }
-
 #ifdef DHD_DEVICE_SIGMA331 // This ifdef is used as a replacement for the lack of version define for the dhd headers.
-  int device_type = getDeviceType();
   if( device_type >= DHD_DEVICE_SIGMA331 && device_type <= DHD_DEVICE_SIGMA331 + 5 ) {
     rotation_func = &ForceDimensionHapticsDeviceInternal::calculateRotationSigma;
     angular_velocity_func = &ForceDimensionHapticsDeviceInternal::calculateAngularVelocitySigma;
@@ -236,6 +276,14 @@ bool ForceDimensionHapticsDevice::initHapticsDevice( int _thread_frequency ) {
 #ifdef DHD_DEVICE_SIGMA331 // This ifdef is used as a replacement for the lack of version define for the dhd headers.
   }
 #endif
+
+
+  if( com_thread_frequency > 0 ) {
+    com_thread = 
+      new H3DUtil::PeriodicThread( H3DUtil::ThreadBase::HIGH_PRIORITY, com_thread_frequency );
+    com_thread->setThreadName( "DHD com thread" );
+    com_func_cb_handle = com_thread->asynchronousCallback( com_func, this );
+  }
 
   return true;
 }
@@ -255,9 +303,17 @@ bool ForceDimensionHapticsDevice::releaseHapticsDevice() {
     int id = device_id;
     device_id = -1;
 #ifdef HAVE_DRDAPI
+    if( release_position_set ) {
+      dhdEnableForce( DHD_ON, id );
+      drdStart( id );
+      drdRegulatePos( true, id );
+      drdMoveToPos( release_position.x, release_position.y, release_position.z, true, id );
+      drdStop( true, id );
+      dhdEnableForce( DHD_OFF, id );
+    }
     drdClose( id );
 #else
-    dhdClose( id );
+    dhdClose( static_cast<char>(id) );
 #endif
     free_dhd_ids.push_back( id );
 
@@ -293,6 +349,9 @@ void ForceDimensionHapticsDevice::updateDeviceValues( DeviceValues &dv,
       ForceDimensionHapticsDeviceInternal::getDeviceValuesFromDHD( device_id, _button, _is_autocalibrated, _position,
                                                                    _velocity, _orientation, _angular_velocity, _dof7_angle,
                                                                    has_gripper_support, rotation_func, angular_velocity_func );
+      if( flip_7dof_values ) {
+        _dof7_angle = -_dof7_angle;
+      }
       dv.position = _position;
       dv.velocity = _velocity;
       dv.orientation = _orientation;
@@ -309,22 +368,30 @@ void ForceDimensionHapticsDevice::updateDeviceValues( DeviceValues &dv,
 }
 
 void ForceDimensionHapticsDevice::sendOutput( DeviceOutput &dv,
-                                              HAPITime dt ) {
+                                              HAPITime /*dt*/ ) {
   if( device_id != -1 ) {
     if( com_thread ) {
       com_lock.lock();
       current_values.force = dv.force;
       current_values.torque = dv.torque;
-      current_values.dof7_force = dv.dof7_force;
+      if( flip_7dof_values ) {
+        current_values.dof7_force = -dv.dof7_force;
+      } else {
+        current_values.dof7_force = dv.dof7_force;
+      }
       com_lock.unlock();
     } else {
 #ifdef HAVE_DRDAPI
       com_lock.lock();
       if( !auto_calibration_mode ) {
 #endif
+      HAPIFloat dof7_force = dv.dof7_force;
+      if( flip_7dof_values ) {
+        dof7_force = -dof7_force;
+      }
       dhdSetForceAndTorqueAndGripperForce( dv.force.z, dv.force.x, dv.force.y, 
-                            dv.torque.z, dv.torque.x, dv.torque.y, dv.dof7_force,
-                            device_id );
+                            dv.torque.z, dv.torque.x, dv.torque.y, dof7_force,
+                            static_cast< char >(device_id) );
 #ifdef HAVE_DRDAPI
       }
       com_lock.unlock();
@@ -335,10 +402,7 @@ void ForceDimensionHapticsDevice::sendOutput( DeviceOutput &dv,
 
 
 int ForceDimensionHapticsDevice::getDeviceType() {
-  if( device_id != -1 ) {
-    return dhdGetSystemType( device_id );
-  }
-  return -1;
+  return device_type;
 }
 
 // Puts the device in RESET mode. In this mode, the user is expected
@@ -346,7 +410,7 @@ int ForceDimensionHapticsDevice::getDeviceType() {
 // the device performs its calibration. 
 void ForceDimensionHapticsDevice::reset() {
   if( device_id != -1 ) {
-    dhdReset( device_id );
+    dhdReset( static_cast<char>(device_id) );
   }
 }
 
@@ -355,7 +419,7 @@ void ForceDimensionHapticsDevice::reset() {
 // call returns even if calibration has not occured.
 void ForceDimensionHapticsDevice::waitForReset( int timeout ) {
   if( device_id != -1 ) {
-    dhdWaitForReset( timeout, device_id );
+    dhdWaitForReset( timeout, static_cast<char>(device_id) );
   }
 }
 
@@ -363,7 +427,7 @@ void ForceDimensionHapticsDevice::waitForReset( int timeout ) {
 void ForceDimensionHapticsDevice::useGravityCompensation( bool b ) {
   if( device_id != -1 ) {
     dhdSetGravityCompensation( b ? DHD_ON : DHD_OFF,
-                               device_id );
+                               static_cast<char>(device_id) );
   }
 }
 
@@ -372,7 +436,7 @@ void ForceDimensionHapticsDevice::useGravityCompensation( bool b ) {
 // modified end-effectors are used.
 void ForceDimensionHapticsDevice::setEffectorMass( double mass ) {
   if( device_id != -1 ) {
-    dhdSetEffectorMass( mass, device_id );
+    dhdSetEffectorMass( mass, static_cast<char>(device_id) );
   }
 }
 
@@ -384,7 +448,7 @@ void ForceDimensionHapticsDevice::setEffectorMass( double mass ) {
 void ForceDimensionHapticsDevice::useBrakes( bool enable ) {
   if( device_id != -1 ) {
     dhdSetBrakes(  enable ? DHD_ON : DHD_OFF,
-                   device_id );
+                  static_cast<char>(device_id) );
   }
 }
 
@@ -403,6 +467,9 @@ ForceDimensionHapticsDevice::com_func( void *data ) {
     ForceDimensionHapticsDeviceInternal::getDeviceValuesFromDHD( hd->device_id, button, _is_autocalibrated, position,
                                                                  velocity, orientation, angular_velocity, dof7_angle,
                                                                  hd->has_gripper_support, hd->rotation_func, hd->angular_velocity_func );
+    if( hd->flip_7dof_values ) {
+      dof7_angle = -dof7_angle;
+    }
     hd->com_lock.lock();
 
     hd->current_values.position = position;
@@ -423,7 +490,7 @@ ForceDimensionHapticsDevice::com_func( void *data ) {
     dhdSetForceAndTorqueAndGripperForce( force.z, force.x, force.y, 
                                          torque.z, torque.x, torque.y,
                                          dof7_force,
-                                         hd->device_id );
+                                         static_cast<char>(hd->device_id) );
   }
   return H3DUtil::PeriodicThread::CALLBACK_CONTINUE;
 }
@@ -431,10 +498,13 @@ ForceDimensionHapticsDevice::com_func( void *data ) {
 void ForceDimensionHapticsDevice::enableForce( bool enable ) {
   if( device_id != -1 ) {
     dhdEnableForce( enable ? DHD_ON : DHD_OFF,
-                    device_id );
+                    static_cast<char>(device_id) );
   }
 }
 
+#ifdef _MSC_VER
+#pragma warning( disable : 4100 )
+#endif
 void ForceDimensionHapticsDevice::setVibration( const HAPIFloat &frequency, const HAPIFloat &amplitude ) {
 #ifdef DHD_UNDEFINED // This define does not exist unless vibration support is added, I hope.
   if( device_id != -1 ) {
@@ -442,6 +512,9 @@ void ForceDimensionHapticsDevice::setVibration( const HAPIFloat &frequency, cons
   }
 #endif
 }
+#ifdef _MSC_VER
+#pragma warning( default : 4100 )
+#endif
 
 bool ForceDimensionHapticsDevice::autoCalibrate() {
 #ifdef HAVE_DRDAPI
@@ -481,4 +554,10 @@ bool ForceDimensionHapticsDevice::autoCalibrate() {
 #endif
   return true;
 }
+
+void ForceDimensionHapticsDevice::setReleasePosition( const Vec3 &_release_position ) {
+  release_position = _release_position;
+  release_position_set = true;
+}
+
 #endif

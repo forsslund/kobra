@@ -226,7 +226,19 @@ namespace H3DUtil {
 #endif
 #endif
 
+#ifdef __GNUC__
+#define H3D_DISABLE_UNUSED_PARAMETER_WARNING() _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
+#define H3D_PUSH_WARNINGS() _Pragma("GCC diagnostic push")
+#define H3D_POP_WARNINGS() _Pragma("GCC diagnostic pop")
+#elif defined(_MSC_VER)
+#define H3D_DISABLE_UNUSED_PARAMETER_WARNING() __pragma(warning(disable:4100))
+#define H3D_PUSH_WARNINGS() __pragma(warning(push))
+#define H3D_POP_WARNINGS() __pragma(warning(pop))
+#else
+#define H3D_DISABLE_UNUSED_PARAMETER_WARNING()
+#define H3D_PUSH_WARNINGS()
+#define H3D_POP_WARNINGS()
 #endif
 
-
+#endif
 

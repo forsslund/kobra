@@ -267,15 +267,11 @@ namespace H3D {
 
   void ShadedVolumeStyle::SFMaterialNode::onAdd( Node *n) {
     SFMaterialNodeBase::onAdd( n );
-    X3DMaterialNode *cs = 
-      dynamic_cast< X3DMaterialNode * >( n );
     ShadedVolumeStyle *vd = static_cast< ShadedVolumeStyle * >( getOwner() );
     vd->rebuildShader->touch();    
   }
   
   void ShadedVolumeStyle::SFMaterialNode::onRemove( Node *n) {
-    X3DMaterialNode *cs = 
-      dynamic_cast< X3DMaterialNode * >( n );
     ShadedVolumeStyle *vd = static_cast< ShadedVolumeStyle * >( getOwner() );
     vd->rebuildShader->touch();
     SFMaterialNodeBase::onRemove( n );

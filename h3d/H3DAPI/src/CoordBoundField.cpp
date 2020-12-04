@@ -43,9 +43,9 @@ void CoordBoundField::update() {
   if( Coordinate *c = 
     dynamic_cast< Coordinate * >( coord ) ) {
     bound->fitAroundPoints( c->point->begin(), c->point->end() );
-  } else if ( CoordinateDouble *c = 
+  } else if ( CoordinateDouble *cd = 
     dynamic_cast< CoordinateDouble * >( coord ) ) {
-    bound->fitAroundPoints( c->point->begin(), c->point->end() );
+    bound->fitAroundPoints( cd->point->begin(), cd->point->end() );
   } else if ( coord == NULL ) {
     // do nothing
   } else {

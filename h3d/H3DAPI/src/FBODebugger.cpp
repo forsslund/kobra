@@ -83,12 +83,12 @@ FBODebugger::FBODebugger( Inst< SFNode            >  _metadata,
   X3DChildNode( _metadata ),
   fbo( _fbo ),
   buffer( _buffer ),
-  render_target_texture( new RenderTargetTexture ),
-  selected_texture(new SFTextreNode),
   transparency(_transparency),
   saveToUrl(_saveToUrl),
   saveSuccess(_saveSuccess),
-  toggleBlend( new ToggleBlend ){
+  render_target_texture( new RenderTargetTexture ),
+  toggleBlend( new ToggleBlend ),
+  selected_texture(new SFTextreNode) {
   type_name = "FBODebugger";
   database.initFields( this );
 

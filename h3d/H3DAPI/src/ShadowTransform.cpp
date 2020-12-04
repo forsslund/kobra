@@ -40,7 +40,6 @@ H3DNodeDatabase ShadowTransform::database( "ShadowTransform",
 
 namespace ShadowTransformInternals {
   FIELDDB_ELEMENT( ShadowTransform, shadowVolume, INPUT_OUTPUT )
-  FIELDDB_ELEMENT( ShadowTransform, transform, INPUT_OUTPUT )
 }
 
 ShadowTransform::ShadowTransform( Inst< SFNode>  _metadata,
@@ -53,6 +52,7 @@ ShadowTransform::ShadowTransform( Inst< SFNode>  _metadata,
   type_name = "ShadowTransform";
   database.initFields( this );
 
+  is_enabled_ts = enabled->getValue();
 }
 
 void H3D::ShadowTransform::update() {

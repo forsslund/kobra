@@ -33,8 +33,8 @@
 #include <H3DUtil/Exception.h>
 #include <H3D/Node.h>
 #include <H3DUtil/DynamicLibrary.h>
-#include <H3D/ResourceResolver.h>
-#include <H3D/URNResolver.h>
+#include <H3DUtil/ResourceResolver.h>
+#include <H3DUtil/URNResolver.h>
 #include <H3D/X3DUrlObject.h>
 #include <set>
 #include <queue>

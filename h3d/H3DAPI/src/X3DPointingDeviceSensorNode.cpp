@@ -65,8 +65,8 @@ X3DPointingDeviceSensorNode::X3DPointingDeviceSensorNode(
   isOver( _isOver ),
   new_value( false ),
   lowest_enabled( false ),
-  setIsEnabledField( new SetIsEnabled ),
-  is_enabled( true ) {
+  is_enabled( true ),
+  setIsEnabledField( new SetIsEnabled ) {
 
   type_name = "X3DPointingDeviceSensorNode";
   database.initFields( this );

@@ -70,7 +70,7 @@ PluginsDialog( parent ) {
   }
 }
 
-void H3DViewerPluginsDialog::OnInstalledPluginSelected( wxCommandEvent& event ) {
+void H3DViewerPluginsDialog::OnInstalledPluginSelected( wxCommandEvent& /*event*/ ) {
   wxRichTextAttr urlStyle;
   urlStyle.SetTextColour(*wxBLUE);
   urlStyle.SetFontUnderlined(true);
@@ -156,7 +156,7 @@ void H3DViewerPluginsDialog::OnInstalledPluginSelected( wxCommandEvent& event ) 
   Layout();
 }
 
-void H3DViewerPluginsDialog::OnAddPluginButton( wxCommandEvent& event ) {
+void H3DViewerPluginsDialog::OnAddPluginButton( wxCommandEvent& /*event*/ ) {
   std::auto_ptr< wxFileDialog > openFileDialog( new wxFileDialog ( this,
                                                               wxT("Open file"),
                                                               wxT(""),
@@ -185,7 +185,7 @@ void H3DViewerPluginsDialog::OnAddPluginButton( wxCommandEvent& event ) {
   }
 }
 
-void H3DViewerPluginsDialog::OnRemovePluginButton( wxCommandEvent& event ) {
+void H3DViewerPluginsDialog::OnRemovePluginButton( wxCommandEvent& /*event*/ ) {
   int selected_index = InstalledPluginsList->GetSelection();
   if( selected_index == wxNOT_FOUND ) return;
 
@@ -194,7 +194,7 @@ void H3DViewerPluginsDialog::OnRemovePluginButton( wxCommandEvent& event ) {
   removePlugin( selected_plugin );
 }
 
-void H3DViewerPluginsDialog::OnDisablePluginCheckbox( wxCommandEvent& event ) {
+void H3DViewerPluginsDialog::OnDisablePluginCheckbox( wxCommandEvent& /*event*/ ) {
   wxConfigBase *h3dConfig = wxConfigBase::Get();
   h3dConfig->SetPath( wxT("/Plugins") );
   bool checked = DisablePluginsCheckBox->IsChecked();

@@ -105,11 +105,11 @@ namespace H3D {
 
     /// Perform the OpenGL commands to render a texture coordinate given the 
     /// index of the texture coordinate.
-    virtual void render( int index ) {}
+    virtual void render( int /*index*/ ) {}
 
     /// Render the texture coordinate for given texture unit
-    virtual void renderForTextureUnit( int index,
-                                       unsigned int texture_unit ) {}
+    virtual void renderForTextureUnit( int /*index*/,
+                                       unsigned int /*texture_unit*/ ) {}
     
     /// Render the texture coordinate for the texture units between and
     /// including start_unit and end_unit.
@@ -128,7 +128,7 @@ namespace H3D {
     /// Returns the number of texture coordinates this node can render.
     /// -1 means that the node is a texture coordinate generator in
     /// which case nr available coords has no meaning.
-    virtual unsigned int nrAvailableTexCoords() { return -1; }
+    virtual unsigned int nrAvailableTexCoords() { return static_cast< unsigned int >(-1); }
 
     /// Perform the OpenGL commands to render all texture coordinates as 
     /// an arary.
@@ -232,14 +232,14 @@ namespace H3D {
     /// Returns true if the getTexCoord function is available for use.
     /// Some X3DTextureCoordinate nodes do not support getting a coordinate
     /// by an index and will return false(e.g. TextureCoordinateGenerator)
-    inline virtual bool supportsGetTexCoord( unsigned int texture_unit ) {
+    inline virtual bool supportsGetTexCoord( unsigned int /*texture_unit*/ ) {
       return false;
     }
-
+    
     /// Gets texture coordinate of the given index and texture unit.
     /// This function is only valid if supporteGetTexCoord returns true.
     /// TextureCoordinateGenerator e.g. does not support this function.
-    inline virtual Vec4f getTexCoord( int index, unsigned int texture_unit ) {
+    inline virtual Vec4f getTexCoord( int /*index*/, unsigned int /*texture_unit*/ ) {
       return Vec4f( 0, 0, 0, 1 );
     }
 

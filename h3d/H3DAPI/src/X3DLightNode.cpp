@@ -89,7 +89,10 @@ X3DLightNode::X3DLightNode(
   on              ( _on               ),
   shadows         ( _shadows          ),
   last_ti_ptr( 0 ),
-  act_global( false ) {
+  act_global( false ),
+  light_index( 0 ),
+  traverse_sg_counter( 0 ),
+  graphics_state_counter( 0 ) {
 
   type_name = "X3DLightNode";
   database.initFields( this );

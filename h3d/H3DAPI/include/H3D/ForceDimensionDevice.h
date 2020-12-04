@@ -32,6 +32,7 @@
 #include <H3D/H3DHapticsDevice.h>
 #include <H3D/MFString.h>
 #include <H3D/PeriodicUpdate.h>
+#include <H3D/SFVec3d.h>
 
 namespace H3D {
 
@@ -94,6 +95,21 @@ namespace H3D {
       virtual void onNewValue( const bool &v );
     };
 
+    /// SFReleasePosition specializes SFVec3d to go set the release
+    /// position of the contained haptics device.
+    class H3DAPI_API SFReleasePosition: public OnNewValueSField< SFVec3d > {
+    public:
+      /// Constructor
+      SFReleasePosition() : value_is_set( false ) {}
+
+      /// Just a flag used to check if the value was set before the
+      /// hapi_device pointer was set.
+      bool value_is_set;
+
+    protected:
+      virtual void onNewValue( const Vec3d &v );
+    };
+
     /// Constructor.
     ForceDimensionDevice( 
             Inst< SFVec3f            > _devicePosition         = 0,
@@ -131,8 +147,10 @@ namespace H3D {
             Inst< SFAutoCalibrate    > _autoCalibrate          = 0,
             Inst< SFBool             > _isAutoCalibrated       = 0,
             Inst< SFInt32            > _desiredComThreadRate   = 0,
-            Inst< SFFloat            > _gripperForce           = 0 );
-    
+            Inst< SFFloat            > _gripperForce           = 0,
+            Inst< SFBool             > _flipGripperValues      = 0,
+            Inst< SFReleasePosition  > _releaseDevicePosition  = 0 );
+
     /// Does all the initialization needed for the device before starting to
     /// use it.
     virtual ErrorCode initDevice();
@@ -194,8 +212,16 @@ namespace H3D {
     /// simulator
     /// - DHD_DEVICE_CUSTOM - Unknown devices.
     /// - -1, device not initialized
+    /// Any other number listed in the documentation for the installed version
+    /// of dhd.dll on the system.
+    /// This field is treated as a mix of an initializedOnly field and
+    /// an outputOnly field. If it is set at X3D level it will be used to
+    /// request a device of a specific type. After initialization of the
+    /// device it is only used to report the device and any further changes
+    /// to the field from outside this node will be ignored.
     ///
-    /// <b>Access type:</b> outputOnly \n
+    /// <b>Access type:</b> inputOutput \n
+    /// <b>Default type:</b> -1 \n
     auto_ptr< SFInt32 > deviceType;
 
     /// On some (custom) devices from force dimension there is no
@@ -279,6 +305,30 @@ namespace H3D {
     ///
     /// <b>Access type:</b> outputOnly \n
     auto_ptr< SFFloat > gripperForce;
+
+    /// If true then the gripper angle output is negated with respect to what
+    /// the underlying dhd api reports. Same thing happens for the gripper force.
+    /// Might be useful in some cases when there are two
+    /// devices of a different type that should control a similar feature.
+    /// with the gripper angles.
+    ///
+    /// <b>Access type:</b> inputOutput \n
+    /// <b>Default value:</b> false \n
+    auto_ptr< SFBool > flipGripperValues;
+
+    /// If this value is set, and HAPI was compiled with DRD support then
+    /// when the device is released the device will be moved to this position.
+    /// Note that the position is given in device space. If this field is not
+    /// set explicitly by the user then the device will not move to any position
+    /// when released.
+    ///
+    /// <b>Access type:</b> inputOutput \n
+    /// <b>Default value:</b> Vec3d( 0, 0, 0 ) \n
+    auto_ptr< SFReleasePosition > releaseDevicePosition;
+
+    /// Creates a ForceDimensionHapticsDevice in the hapi_device
+    /// with deviceType
+    virtual void initialize();
   };
 }
 

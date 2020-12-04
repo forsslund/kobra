@@ -115,17 +115,18 @@ namespace H3D {
         rotation_axis( _rotation_axis ),
         rotation_angle( _rotation_angle ),
         angular_speed( _angular_speed ),
+        new_particle( true ),
         time_lived( 0 ),
+        total_time_to_live(0),
         size( _size ),
+        type( LINE ),
         geometry( NULL ),
         distance_from_viewer( 0 ),
-        user_data ( NULL ),
-        new_particle ( true ),
-        type( LINE ){}
+        user_data ( NULL ) {}
       
       inline void updateParticle( const Matrix4f &_global_to_local,
                                   Vec3f vp_pos_local,
-                                  Vec3f vp_up_local,
+                                  Vec3f /*vp_up_local*/,
                                   Vec3f vp_look_at_local,
                                   H3DTime dt ) {
         global_to_local = _global_to_local;

@@ -1,3 +1,14 @@
+Changes for version 1.4.1:
+New fields:
+- PhysX3JointOptions::enabledCollision
+
+Deprecated features:
+- PhysX3JointOptions::constraintFlag is now PhysX3JointOptions::projectionFlag.
+
+Compatibility issues:
+- Inheriting from PhysX3JointOptions and adding new options will require
+  updating the values for the static bitmask variables.
+
 Changes for version 1.4.0:
 - Renamed many CMake cache variables and added functions to make it easier
   to setup H3D projects in similar fashions.
