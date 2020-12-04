@@ -1,4 +1,22 @@
 From  https://h3dapi.org:8090/H3DAPI/metarepos/H3DWithToolkitsWin/trunk/H3D
-revision 5222
+
+Revision 5326 imported 2020-12-03 (svn export aka copy+paste) followed by addition of:
+
+HAPI/build/CMakeLists.txt                
+    set( HAVE_HAPTIKFABRIKENAPI 1 )
+HAPI/build/HapiSourceFiles.txt           
+    "${HAPI_SOURCE_DIR}/../include/HAPI/HaptikfabrikenHapticsDevice.h"	
+    "HaptikfabrikenHapticsDevice.cpp"	
+H3DAPI/build/H3DAPISourceFiles.txt
+    "HaptikfabrikenDevice.cpp"
+    "${H3DAPI_SOURCE_DIR}/../include/H3D/HaptikfabrikenDevice.h"
+HAPI/include/HAPI.cmake
+    /// Undef if you do not have Haptikfabriken API(www.haptikfabriken.com) installed.
+    /// Required for the haptics devices from Haptikfabriken and WoodenHaptics.
+    #cmakedefine HAVE_HAPTIKFABRIKENAPI
+
+
+
+Previous revision 5222
 imported 2019-03-08 and applied patch from haptikfabrikenapi-0.1,
 and removed the External/ folder.

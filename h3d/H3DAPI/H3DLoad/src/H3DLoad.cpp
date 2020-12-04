@@ -494,8 +494,8 @@ int main(int argc, char* argv[]) {
   string gamemode = GET4( "H3D_GAMEMODE",
                           "graphical", "gamemode", (string)"" );
   
-  int width = GET_INT("graphical", "width", 640 );
-  int height = GET_INT("graphical", "height", 480 );
+  int width = GET_INT("graphical", "width", 1420 );
+  int height = GET_INT("graphical", "height", 1052 );
 
   bool fullscreen    = GET_BOOL("graphical", "fullscreen", false);
   if( char *buffer = getenv("H3D_FULLSCREEN") ) {
@@ -702,6 +702,8 @@ int main(int argc, char* argv[]) {
     glwindow->gameMode->setValue( gamemode );
     glwindow->width->setValue(width);
     glwindow->height->setValue(height);
+    glwindow->posX->setValue(0);
+    glwindow->posY->setValue(0);
     glwindow->useFullscreenAntiAliasing->setValue( antialiasing );
     scene->window->push_back( glwindow );
 
