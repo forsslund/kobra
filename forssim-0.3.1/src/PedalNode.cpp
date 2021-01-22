@@ -77,8 +77,22 @@ void PedalNode::traverseSG( H3D::TraverseInfo&){
 
 
         if (rcount > 0 && rcount==sizeof(struct hiddev_event)) {
-            state[(event.hid & 0xFF)-1] = event.value;
-            foundMessage = true;
+            if(event.hid == 589899){
+                // New protocol
+                if(i==0){
+                    state[0] = (event.value & 1);
+                    state[1] = (event.value & 2)>>1;
+                    state[2] = (event.value & 4)>>2;
+                    foundMessage = true;
+                }
+                else {
+                    i=100; // only 2 messages, the last being always 0
+                }
+            } else {
+                // Old protocol
+                state[(event.hid & 0xFF)-1] = event.value;
+                foundMessage = true;
+            }
         }
 
     }
