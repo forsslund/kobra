@@ -1,7 +1,6 @@
 !CMakeFiles.txt
 build/*
 H3DAPI/build-build-Desktop-Default
-H3DAPI/H3DLoad/build/*
 H3DAPI/H3DLoad/build-build-Desktop-Default
 H3DAPI/H3DViewer/src/H3DViewerConfig.h
 H3DAPI/build/*

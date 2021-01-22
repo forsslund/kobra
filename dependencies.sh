@@ -11,15 +11,12 @@ sudo apt install cmake gcc g++ libxerces-c-dev libftgl-dev libopenal1 libalut0
 
 # Download and install boost manually (to get version prior to 1.70)
 #https://sourceforge.net/projects/boost/files/boost/1.62.0/boost_1_62_0.tar.bz2/download
-
-# in /usr/local
-#  sudo tar -xjvf boost_1_62_0.tar.bz2 boost_1_62_0/
-#  cd boost_1_62_0/
-#
-#  sudo ./bootstrap.sh 
-#  sudo ./b2 address-model=64
-#  sudo ./b2 install
-
+wget http://kobrasimulator.com/boost_1_62_0.tar.bz2
+tar -xjvf boost_1_62_0.tar.bz2 boost_1_62_0/
+cd boost_1_62_0/
+./bootstrap.sh
+./b2 address-model=64
+sudo ./b2 install
 
 # For Ubuntu 18.04 LTS
 #sudo apt install libalut-dev libopenal-dev libglew-dev freeglut3 freeglut3-dev
@@ -32,9 +29,9 @@ sudo apt install cmake gcc g++ libxerces-c-dev libftgl-dev libopenal1 libalut0
 #sudo apt install libglw1-mesa libxxf86vm-dev ssh qt5-default qtcreator libusb-1.0-0-dev libboost-all-dev
 #sudo apt install cmake gcc g++ libxerces-c-dev libftgl-dev libopenal1 libalut0
 
-# For Haptikfabriken (and building it)
-sudo apt install libudev-dev libboost-all-dev libusb-1.0-0-dev
-sudo apt install qt5-qmake qt5-default gcc-multilib
+# For Old Haptikfabriken (and building it)
+#sudo apt install libudev-dev libboost-all-dev libusb-1.0-0-dev
+#sudo apt install qt5-qmake qt5-default gcc-multilib
 
 
 
