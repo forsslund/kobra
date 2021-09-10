@@ -95,7 +95,11 @@ void HaptikfabrikenHapticsDevice::updateDeviceValues( DeviceValues &dv,
   fsVec3d p = hfab->getPos();
 
   // Adjust offset to match Taiwan Kobra standard
-  p = p + fsVec3d(0.3415, -0.182, 0.0542);
+  //p = p + fsVec3d(0.3415, -0.182, 0.0542);
+  
+  // Adjust offset for desktop use with Kobra simulation cases ("chai" units)
+  p = p + fsVec3d(0.29, -0.03, 0.17);
+  
 
   fsRot r = hfab->getRot();
 
