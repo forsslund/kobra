@@ -3,6 +3,8 @@ auto lo
 iface lo inet loopback
 
 # On-board RJ45 to haptic device
+
+# Direct link to ipad
 auto enp4s0
 iface enp4s0 inet dhcp
 #address 10.42.0.1

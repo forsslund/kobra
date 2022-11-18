@@ -11,7 +11,7 @@
 #
 # By default this script does nothing.
 
-iptables -t nat -A POSTROUTING -o wlx2824ff1a0453 -j MASQUERADE
-iptables -A FOWRARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-iptables -A FORWARD -i wlx000f600c1c23 -o wlx2824ff1a0453 -j ACCEPT
+#iptables -t nat -A POSTROUTING -o wlx2824ff1a0453 -j MASQUERADE
+#iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+#iptables -A FORWARD -i wlx000f600c1c23 -o wlx2824ff1a0453 -j ACCEPT
 exit 0
