@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Exec=/usr/bin/nvidia-settings -a CurrentMetaMode="DVI-I-1: nvidia-auto-select +0+0, DP-0: nvidia-auto-select +0+0, DP-3: nvidia-auto-select +0+0"
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[en_US]=nvidia-settings 
+Name=\snvidia-settings --load-config-only &
+Comment[en_US]=
+Comment=

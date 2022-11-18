@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Exec=/home/kobra/wisdomlauncher/wisdomlauncher
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[en_US]=WisdomLauncher
+Name=WisdomLauncher
+Comment[en_US]=
+Comment=

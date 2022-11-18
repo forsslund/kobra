@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Exec=/usr/bin/ssh -i /home/kobra/jonaskey.pem -N -f -R 19999:localhost:22 ubuntu@taiwan00.kobrasimulator.com
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[en_US]=ssh reverse
+Name=ssh reverse
+Comment[en_US]=For remote access for maintanence
+Comment=For remote access for maintanence

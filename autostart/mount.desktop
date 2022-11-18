@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Exec=mount /home/kobra/stuff
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=false
+Name[en_US]=mount stuff
+Name=mount stuff
+Comment[en_US]=
+Comment=
