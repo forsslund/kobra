@@ -31,7 +31,7 @@
 #ifdef WIN32
 #define WINDOWS
 #endif
-#include "uhaptikfabriken.h"
+#include "uhaptikfabriken2.h"
 #include <sstream>
 
 using namespace HAPI;
@@ -55,6 +55,7 @@ HaptikfabrikenHapticsDevice::HaptikfabrikenHapticsDevice(unsigned int device_ind
   max_stiffness = 1500;
 
   std::cout << "HaptikfabrikenHapticsDevice::HaptikfabrikenHapticsDevice()\n";
+  std::cout << haptikfabriken::version << '\n';
 }
 
 HaptikfabrikenHapticsDevice::~HaptikfabrikenHapticsDevice() {

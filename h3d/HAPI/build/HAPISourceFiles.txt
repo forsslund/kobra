@@ -139,4 +139,6 @@ foreach( filename ${HAPI_SOURCE_FILES} )
   set( HAPI_SRCS ${HAPI_SRCS} "${HAPI_SOURCE_DIR}/../src/${filename}" )
 endforeach()
 
+# Polhem additional code
+set(HAPI_SRCS ${HAPI_SRCS} "/usr/local/include/kinematics.cpp" )
 
