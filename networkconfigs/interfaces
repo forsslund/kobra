@@ -2,11 +2,20 @@
 auto lo
 iface lo inet loopback
 
-# On-board RJ45 to haptic device
-auto enp4s0
-iface enp4s0 inet dhcp
+# White usb-ethernet dongle
+#auto enx00e04d6dff10
+##iface enx00e04d6dff10 inet dhcp
+#iface enx00e04d6dff10 inet static
 #address 10.42.0.1
 #netmask 255.255.255.0
+
+
+# Black usb-ethernet dongle
+auto enx7cc2c6455dad
+#iface enx7cc2c6455dad inet dhcp
+iface enx7cc2c6455dad inet static
+address 10.42.0.1
+netmask 255.255.255.0
 
 #auto enx00133b0c17c0
 #iface enx00133b0c17c0 inet dhcp
