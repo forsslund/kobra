@@ -1,6 +1,10 @@
 # kobra
 Software for the Kobra Surgery Simulator platform
 
+Note 2024-05-10
+If you cannot access the H3D svn repo (I couldn't) you can find the external/ files 
+needed to build in Windows here: https://haptikfabriken.com/external.zip 
+
 Update 2023-01-08
 Uses the new uhaptikfabriken2.h api, which computes kinematics on PC. 
 H3D requires the api to be installed (copied to) to /usr/local/include 
