@@ -2,7 +2,6 @@
 forssim-0.3.1/build/*
 forssim-0.3.1/build*
 h3d/external
-h3d/bin64
 h3d/lib64
 build-build*
 
